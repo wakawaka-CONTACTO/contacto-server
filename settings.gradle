@@ -1,0 +1,6 @@
+rootProject.name = 'chat_application'
+
+include ':core'
+include ':chat-service'
+include ':gateway-service'
+include ':user-service'
