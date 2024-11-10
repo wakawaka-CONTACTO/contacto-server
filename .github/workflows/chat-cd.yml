@@ -38,8 +38,8 @@ jobs:
 
       - name: Docker Image Build and Push
         run: |
-          docker build --build-arg SERVICE_NAME=chat-service -t chat-service-image .
-          docker push chat-service-image
+          docker build --build-arg SERVICE_NAME=chat-service -t ${{ secrets.DOCKER_REPOSITORY }}/chat-service-image .
+          docker push ${{ secrets.DOCKER_REPOSITORY }}/chat-service-image
 
       - name: Deploy Chat Service via SSH
         uses: appleboy/ssh-action@master
