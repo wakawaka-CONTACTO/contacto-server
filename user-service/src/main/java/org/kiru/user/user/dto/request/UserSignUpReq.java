@@ -2,7 +2,8 @@ package org.kiru.user.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import org.kiru.core.user.domain.LoginType;
+import lombok.ToString;
+import org.kiru.core.user.user.domain.LoginType;
 
 
 public record UserSignUpReq(
@@ -10,7 +11,6 @@ public record UserSignUpReq(
         String name,
         @NotNull
         LoginType loginType,
-        @NotNull
         String socialId,
         @NotNull
         @Email
@@ -20,6 +20,8 @@ public record UserSignUpReq(
         @NotNull
         String instagramId,
         @NotNull
-        String webUrl
+        String webUrl,
+        @NotNull
+        String password
 ) {
 }

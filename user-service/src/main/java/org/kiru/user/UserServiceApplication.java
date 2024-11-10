@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableFeignClients
-@EntityScan(basePackages = "org.kiru.core")
+@EntityScan(basePackages = "org.kiru.core.user")
 @EnableJpaAuditing
 public class UserServiceApplication {
     public static void main(String[] args) {

@@ -2,10 +2,9 @@ package org.kiru.user.user.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.kiru.core.userPurpose.entity.UserPurpose;
+import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.user.dto.event.UserCreateEvent;
 import org.kiru.user.user.repository.UserPurposeRepository;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
