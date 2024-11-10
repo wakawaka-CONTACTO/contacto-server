@@ -8,29 +8,43 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import java.util.Base64;
 import javax.crypto.SecretKey;
+import lombok.RequiredArgsConstructor;
+import org.kiru.core.user.user.entity.UserJpaEntity;
+import org.kiru.gateway.common.UserGateWayRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtils {
-    private final String JWT_SCRET = "nowsoptnowsoptnownownononwonwownwownownwowno";
+    @Value("${jwt.secret}")
+    private String JWT_SCRET;
+    private final UserGateWayRepository userGateWayRepository;
 
-    public JwtValidationType validateToken(String token) {
+    public JwtValidResponse validateToken(String token) {
         try {
             final Claims claims = getBody(token);
-            return JwtValidationType.VALID_JWT;
+            Long userId = getUserIdFromToken(token);
+            String email = getEmailFromToken(token);
+            UserJpaEntity user = userGateWayRepository.findByIdAndEmail(userId, email)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            return JwtValidResponse.of(user);
         } catch (MalformedJwtException ex) {
-            return JwtValidationType.INVALID_JWT_TOKEN;
+            return JwtValidResponse.of(JwtValidationType.INVALID_JWT_TOKEN);
         } catch (ExpiredJwtException ex) {
-            return JwtValidationType.EXPIRED_JWT_TOKEN;
+            return JwtValidResponse.of(JwtValidationType.EXPIRED_JWT_TOKEN);
         } catch (UnsupportedJwtException ex) {
-            return JwtValidationType.UNSUPPORTED_JWT_TOKEN;
+            return JwtValidResponse.of(JwtValidationType.UNSUPPORTED_JWT_TOKEN);
         } catch (IllegalArgumentException ex) {
-            return JwtValidationType.EMPTY_JWT;
+            return JwtValidResponse.of(JwtValidationType.EMPTY_JWT);
         }
     }
 
-    public String getUserIdFromToken(final String token){
-        return getBody(token).getSubject();
+    public Long getUserIdFromToken(final String token){
+        return Long.parseLong(getBody(token).getSubject());
+    }
+    public String getEmailFromToken(String token) {
+        return getBody(token).get("email", String.class);
     }
 
     private Claims getBody(final String token) {

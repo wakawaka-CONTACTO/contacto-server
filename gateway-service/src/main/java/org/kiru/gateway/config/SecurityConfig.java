@@ -11,7 +11,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 
 @Component
-public class CorsConfig {
+public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity security) {
         return security
@@ -36,4 +36,5 @@ public class CorsConfig {
         configuration.setMaxAge(3600L);
         return configuration;
     }
+
 }
