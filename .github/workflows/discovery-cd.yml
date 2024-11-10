@@ -21,14 +21,14 @@ jobs:
 
       - name: Create application.yml
         run: |
-          mkdir -p discovery/src/main/resources && cd $_
-          touch ./application.yml
-          echo "${{ secrets.DISCOVERY_APPLICATION }}" > ./application.yml
-          cat ./application.yml
+          mkdir -p discovery/src/main/resources
+          echo "${{ secrets.DISCOVERY_APPLICATION }}" > discovery/src/main/resources/application.yml
+          cat discovery/src/main/resources/application.yml
+
       - name: Build Discovery Service
         run: |
-          cd ~/
           ./gradlew :discovery:build -x test
+        # 최상위 디렉토리에서 실행되므로 `cd` 명령이 필요 없습니다.
 
       - name: Docker Login
         uses: docker/login-action@v2.2.0
