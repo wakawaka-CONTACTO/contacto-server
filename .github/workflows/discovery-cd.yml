@@ -27,6 +27,7 @@ jobs:
           cat ./application.yml
       - name: Build Discovery Service
         run: |
+          cd ~/
           ./gradlew :discovery:build -x test
 
       - name: Docker Login
