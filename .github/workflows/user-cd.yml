@@ -38,8 +38,8 @@ jobs:
 
       - name: Docker Image Build and Push
         run: |
-          docker build --build-arg SERVICE_NAME=user-service -t user-service-image .
-          docker push user-service-image
+          docker build --build-arg SERVICE_NAME=user-service -t ${{ secrets.DOCKER_REPOSITORY }}/user-service-image .
+          docker push ${{ secrets.DOCKER_REPOSITORY }}/user-service-image
 
       - name: Deploy User Service via SSH
         uses: appleboy/ssh-action@master
