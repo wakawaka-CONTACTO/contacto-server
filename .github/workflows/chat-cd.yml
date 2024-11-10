@@ -21,10 +21,10 @@ jobs:
 
       - name: Create application.yml
         run: |
-          mkdir -p chat-service/src/main/resources && cd $_
-          touch ./application.yml
-          echo "${{ secrets.CHAT_APPLICATION }}" > ./application.yml
-          cat ./application.yml
+          mkdir -p chat-service/src/main/resources
+          touch chat-service/src/main/resources/application.yml
+          echo "${{ secrets.CHAT_APPLICATION }}" > chat-service/src/main/resources/application.yml
+          cat chat-service/src/main/resources/application.yml
 
       - name: Build Chat Service
         run: |
