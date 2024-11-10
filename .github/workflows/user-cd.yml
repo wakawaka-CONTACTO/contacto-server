@@ -1,0 +1,53 @@
+name: User Service CICD
+
+on:
+  push:
+    branches: ["dev"]
+    paths:
+      - 'user-service/**'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Create application.yml
+        run: |
+          mkdir -p user-service/src/main/resources && cd $_
+          touch ./application.yml
+          echo "${{ secrets.USER_APPLICATION }}" > ./application.yml
+          cat ./application.yml
+
+      - name: Build User Service
+        run: |
+          ./gradlew :user-service:build -x test
+
+      - name: Docker Login
+        uses: docker/login-action@v2.2.0
+        with:
+          username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+          password: ${{ secrets.DOCKER_LOGIN_ACCESSTOKEN }}
+
+      - name: Docker Image Build and Push
+        run: |
+          docker build --build-arg SERVICE_NAME=user-service -t user-service-image .
+          docker push user-service-image
+
+      - name: Deploy User Service via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          script: |
+            cd ~
+            ./deploy_user_service.sh
+            docker image prune -f
