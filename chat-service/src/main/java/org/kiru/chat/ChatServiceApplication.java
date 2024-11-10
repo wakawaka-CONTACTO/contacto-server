@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EntityScan(basePackages = "org.kiru.core")
+@EntityScan(basePackages = "org.kiru.core.chat")
 @EnableJpaAuditing
 public class ChatServiceApplication {
     public static void main(String[] args) {

@@ -9,7 +9,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 @Component
 public class UserIdArgumentResolver implements HandlerMethodArgumentResolver {
-
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         boolean isParamHasUserIdAnnotation = parameter.hasParameterAnnotation(UserId.class);

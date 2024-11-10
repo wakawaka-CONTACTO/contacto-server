@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.kiru.core.chatroom.domain.ChatRoomType;
+import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 
 @Getter
 @Setter

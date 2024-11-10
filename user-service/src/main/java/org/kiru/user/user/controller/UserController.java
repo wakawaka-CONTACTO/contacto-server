@@ -2,8 +2,8 @@ package org.kiru.user.user.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.kiru.core.chatroom.domain.ChatRoom;
-import org.kiru.core.user.domain.User;
+import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.service.UserService;
 import org.springframework.http.ResponseEntity;

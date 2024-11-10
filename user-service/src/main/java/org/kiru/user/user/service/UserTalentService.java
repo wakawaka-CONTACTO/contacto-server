@@ -3,7 +3,7 @@ package org.kiru.user.user.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.kiru.core.talent.entity.UserTalent;
+import org.kiru.core.user.talent.entity.UserTalent;
 import org.kiru.user.user.dto.event.UserCreateEvent;
 import org.kiru.user.user.repository.UserTalentRepository;
 import org.springframework.stereotype.Service;

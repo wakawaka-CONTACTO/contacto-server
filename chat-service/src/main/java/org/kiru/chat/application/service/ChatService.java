@@ -12,8 +12,8 @@ import org.kiru.chat.application.port.out.GetAllMessageByRoomQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.chat.application.port.out.SaveMessagePort;
-import org.kiru.core.chatroom.domain.ChatRoom;
-import org.kiru.core.message.domain.Message;
+import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.chat.message.domain.Message;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.kiru.core.userPortfolioImg.domain.UserPortfolio;
 
 @Getter
 @Builder

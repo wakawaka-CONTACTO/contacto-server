@@ -2,7 +2,7 @@ package org.kiru.user.portfolio.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.kiru.core.user.domain.User;
+import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
 import org.kiru.user.portfolio.service.PortfolioService;

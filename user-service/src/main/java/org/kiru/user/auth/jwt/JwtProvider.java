@@ -14,9 +14,9 @@ public class JwtProvider {
     private final JwtGenerator jwtGenerator;
     private final RefreshTokenGenerator refreshTokenGenerator;
 
-    public Token issueToken(final long userId) {
+    public Token issueToken(final long userId, final String email) {
         return Token.of(
-                jwtGenerator.generateAccessToken(userId),
+                jwtGenerator.generateAccessToken(userId, email), // email 추가
                 refreshTokenGenerator.generateRefreshToken(userId)
         );
     }
@@ -29,5 +29,10 @@ public class JwtProvider {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(String.valueOf(FailureCode.TOKEN_SUBJECT_NOT_NUMERIC_STRING));
         }
+    }
+
+    public String getEmailFromToken(String token) {
+        Jws<Claims> jws = jwtGenerator.parseToken(token);
+        return jws.getBody().get("email", String.class);
     }
 }

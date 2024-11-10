@@ -1,7 +1,7 @@
 package org.kiru.user.portfolio.repository;
 
 import java.util.List;
-import org.kiru.core.userPortfolioImg.entity.UserPortfolioImg;
+import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

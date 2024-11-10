@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import org.kiru.core.refreshtoken.RefreshToken;
+import org.kiru.core.user.refreshtoken.RefreshToken;
 import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +24,6 @@ public class RefreshTokenGenerator {
         random.nextBytes(tokenBytes);
         // 바이트 배열을 Base64 인코딩하여 문자열로 변환
         String token = Base64.getEncoder().encodeToString(tokenBytes);
-
         LocalDateTime expireAt = LocalDateTime.now().plusWeeks(4);
         RefreshToken newRefreshToken = RefreshToken.create(token, userId, expireAt);
         refreshTokenRepository.save(newRefreshToken);

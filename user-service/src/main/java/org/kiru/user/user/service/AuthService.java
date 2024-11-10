@@ -1,15 +1,14 @@
 package org.kiru.user.user.service;
 
-
-
+import ch.qos.logback.classic.spi.IThrowableProxy;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kiru.core.refreshtoken.RefreshToken;
-import org.kiru.core.user.domain.LoginType;
-import org.kiru.core.user.entity.UserJpaEntity;
+import org.kiru.core.user.refreshtoken.RefreshToken;
+import org.kiru.core.user.user.domain.LoginType;
+import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
-import org.kiru.core.user.domain.User;
+import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.jwt.JwtProvider;
 import org.kiru.user.auth.jwt.Token;
 import org.kiru.user.exception.EntityNotFoundException;
@@ -23,10 +22,10 @@ import org.kiru.user.user.dto.request.UserTalentsReq;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -37,41 +36,57 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-//    회원가입
+    private final PasswordEncoder passwordEncoder;
+
+    // 회원가입
     @Transactional
-    public UserJwtInfoRes signUp(UserSignUpReq userSignUpReq, List<MultipartFile> images, List<UserPurposesReq> purposes, List<UserTalentsReq> talents) {
-        User newUser = User.builder()
+    public UserJwtInfoRes signUp(UserSignUpReq userSignUpReq, List<MultipartFile> images,
+                                 List<UserPurposesReq> purposes, List<UserTalentsReq> talents) {
+        User.UserBuilder newUserBuilder = User.builder()
                 .description(userSignUpReq.description())
                 .email(userSignUpReq.email())
                 .instagramId(userSignUpReq.instagramId())
                 .loginType(userSignUpReq.loginType())
                 .username(userSignUpReq.name())
                 .socialId(userSignUpReq.socialId())
-                .webUrl(userSignUpReq.webUrl())
-                .build();
+                .webUrl(userSignUpReq.webUrl());
+        if (userSignUpReq.loginType() == LoginType.LOCAL) {
+            newUserBuilder.password(encodePassword(userSignUpReq.password()));
+        }
+        User newUser = newUserBuilder.build();
         UserJpaEntity user = userRepository.save(UserJpaEntity.of(newUser));
-        Token issuedToken = issueToken(user.getId());
+        Token issuedToken = issueToken(user.getId(), user.getEmail());
         applicationEventPublisher.publishEvent(
-                UserCreateEvent.builder().userId(user.getId()).images(images).purposes(purposes).talents(talents).build());
+                UserCreateEvent.builder()
+                        .userId(user.getId())
+                        .images(images)
+                        .purposes(purposes)
+                        .talents(talents)
+                        .build()
+        );
         return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
     }
-// 로그인
-    @Transactional
-    public UserJwtInfoRes signIn(final String token, final UserSignInReq userSignInReq) {
-        Long userId = jwtProvider.getUserIdFromSubject(token);
-        Long foundUserId = getUserByIdAndLoginType(userSignInReq.loginType(), userId).getId();
-        deleteRefreshToken(foundUserId);
-        Token issuedToken = issueToken(foundUserId);
-        return UserJwtInfoRes.of(foundUserId, issuedToken.accessToken(), issuedToken.refreshToken());
-    }
 
+
+    // 로그인
+    @Transactional
+    public UserJwtInfoRes signIn(final UserSignInReq userSignInReq) {
+        UserJpaEntity user = userRepository.findByEmail(userSignInReq.email()).orElseThrow(
+                () -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+        matchesPassword(userSignInReq.password(), user.getPassword());
+        deleteRefreshToken(user.getId());
+        Token issuedToken = issueToken(user.getId(), user.getEmail());
+        return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
+    }
 
     @Transactional
     public UserJwtInfoRes reissue(final String refreshToken) {
         RefreshToken foundRefreshToken = getRefreshTokenByToken(refreshToken);
         Long userId = foundRefreshToken.getUserId();
         deleteRefreshToken(userId);
-        Token newToken = issueToken(userId);
+        UserJpaEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+        Token newToken = issueToken(userId, user.getEmail());
         return UserJwtInfoRes.of(userId, newToken.accessToken(), newToken.refreshToken());
     }
 
@@ -84,23 +99,30 @@ public class AuthService {
             throw new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE);
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new UnauthorizedException((FailureCode.UNAUTHORIZED));
+            throw new UnauthorizedException(FailureCode.UNAUTHORIZED);
         }
     }
 
-    //토큰 발급
-    private Token issueToken(final Long userId) {
-        return jwtProvider.issueToken(userId);
+    // 토큰 발급 (userId와 email 함께 전달)
+    private Token issueToken(final Long userId, final String email) {
+        return jwtProvider.issueToken(userId, email);
     }
 
-    //리프레시 토큰 삭제
+    // 리프레시 토큰 삭제
     private void deleteRefreshToken(final Long userId) {
         refreshTokenRepository.deleteRefreshTokenByUserId(userId);
     }
 
-    private UserJpaEntity getUserByIdAndLoginType(final LoginType loginType, final Long userId) {
-        return userRepository.findByIdAndSocialId(userId, loginType.toString())
-                .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND)
-                );
+    public String encodePassword(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
+    }
+
+    // 비밀번호 비교 로직
+    public boolean matchesPassword(String rawPassword, String encodedPassword) {
+        boolean check = passwordEncoder.matches(rawPassword, encodedPassword);
+        if(check){
+            return true;
+        }
+        throw new UnauthorizedException(FailureCode.UNAUTHORIZED);
     }
 }
