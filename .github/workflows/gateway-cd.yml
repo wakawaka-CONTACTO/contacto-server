@@ -37,8 +37,8 @@ jobs:
 
       - name: Docker Image Build and Push
         run: |
-          docker build --build-arg SERVICE_NAME=gateway-service -t gateway-service-image .
-          docker push gateway-service-image
+          docker build --build-arg SERVICE_NAME=gateway-service -t ${{ secrets.DOCKER_REPOSITORY }}/gateway-service-image .
+          docker push ${{ secrets.DOCKER_REPOSITORY }}/gateway-service-image
 
       - name: Deploy Gateway Service via SSH
         uses: appleboy/ssh-action@master
