@@ -21,10 +21,10 @@ jobs:
 
       - name: Create application.yml
         run: |
-          mkdir -p gateway-service/src/main/resources && cd $_
-          touch ./application.yml
-          echo "${{ secrets.GATEWAY_APPLICATION }}" > ./application.yml
-          cat ./application.yml
+          mkdir -p gateway-service/src/main/resources
+          touch gateway-service/src/main/resources/application.yml
+          echo "${{ secrets.GATEWAY_APPLICATION }}" > gateway-service/src/main/resources/application.yml
+          cat gateway-service/src/main/resources/application.yml
       - name: Build Gateway Service
         run: |
           ./gradlew :gateway-service:build -x test
