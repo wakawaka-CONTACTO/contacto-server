@@ -19,17 +19,12 @@ public class MailService {
     private final RedisTemplate<String, String> redisTemplateForOne ;
     private static final String senderEmail = "rlarlgnszx0319@gmail.com";
 
-    // 랜덤으로 숫자 생성
+    // 랜덤으로 6자리 숫자 생성
     public String createNumber() {
         Random random = new Random();
         StringBuilder key = new StringBuilder();
-        for (int i = 0; i < 8; i++) { // 인증 코드 8자리
-            int index = random.nextInt(3); // 0~2까지 랜덤, 랜덤값으로 switch문 실행
-            switch (index) {
-                case 0 -> key.append((char) (random.nextInt(26) + 97)); // 소문자
-                case 1 -> key.append((char) (random.nextInt(26) + 65)); // 대문자
-                case 2 -> key.append(random.nextInt(10)); // 숫자
-            }
+        for (int i = 0; i < 6; i++) {
+            key.append(random.nextInt(10));
         }
         return key.toString();
     }
