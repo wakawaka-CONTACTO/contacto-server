@@ -1,6 +1,5 @@
 package org.kiru.user.auth.jwt;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
@@ -25,13 +24,14 @@ import org.springframework.stereotype.Component;
 public class JwtGenerator {
     private final JwtProperties jwtProperties;
 
-    public String generateAccessToken(final long userId) {
+    public String generateAccessToken(final long userId, final String email){
         final Date now = new Date();
         final Date expireDate = generateExpirationDate(now);
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setSubject(String.valueOf(userId))
+                .claim("email", email) // email 정보를 Claim에 추가
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
