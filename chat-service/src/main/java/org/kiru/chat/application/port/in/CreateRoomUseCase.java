@@ -1,7 +1,7 @@
 package org.kiru.chat.application.port.in;
 
 import org.kiru.chat.adapter.in.web.CreateChatRoomRequest;
-import org.kiru.core.chatroom.domain.ChatRoom;
+import org.kiru.core.chat.chatroom.domain.ChatRoom;
 
 public interface CreateRoomUseCase {
 
