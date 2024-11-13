@@ -1,5 +1,6 @@
 package org.kiru.chat.config.websocket;
 
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -17,6 +18,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chat-websocket").setAllowedOriginPatterns("*");  // 또는 특정 도메인을 지정
+        registry.addEndpoint("/chat-websocket").setAllowedOriginPatterns("*").withSockJS();  // 또는 특정 도메인을 지정
     }
 }
