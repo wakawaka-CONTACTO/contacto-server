@@ -1,27 +1,26 @@
 package org.kiru.user.user.dto.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.ToString;
 import org.kiru.core.user.user.domain.LoginType;
 
 
 public record UserSignUpReq(
-        @NotNull
+        @NotBlank(message = "이름은 필수 입력 항목입니다.")
         String name,
-        @NotNull
         LoginType loginType,
         String socialId,
-        @NotNull
-        @Email
+        @NotBlank(message = "이메일은 필수 입력 항목입니다.")
+        @Email(message = "올바른 이메일 형식이 아닙니다.")
         String email,
-        @NotNull
+        @NotBlank(message = "설명은 필수 입력 항목입니다.")
         String description,
-        @NotNull
+        @NotBlank(message = "인스타그램 아이디는 필수 입력 항목입니다.")
         String instagramId,
-        @NotNull
+        @NotBlank(message = "웹 URL은 필수 입력 항목입니다.")
         String webUrl,
-        @NotNull
+        @NotNull(message = "비밀번호는 필수 입력 항목입니다.")
         String password
 ) {
 }
