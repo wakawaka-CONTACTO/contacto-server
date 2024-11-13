@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserTalentRepository extends JpaRepository<UserTalent, Long> {
     List<UserTalent> findAllByUserId(Long userId);
+
+    void deleteAllByUserId(Long userId);
 }

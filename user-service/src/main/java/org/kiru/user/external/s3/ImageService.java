@@ -61,10 +61,25 @@ public class ImageService {
             return UserPortfolio.builder().portfolioId(portfolioId).portfolioImages(sortedImageUrls).userId(userId).build();
         }
     }
+
+    @Transactional
+    public UserPortfolioImg updateImage(final MultipartFile image, final Long userId, final UserPortfolioImg userPortfolioImg) {
+        try {
+            String imagePath = s3Service.uploadImage(path, image);
+            String imageUrl = cachePath + imagePath;
+            UserPortfolioImg newImage = UserPortfolioImg.of(userId, userPortfolioImg.getPortfolioId(),cachePath + imagePath, userPortfolioImg.getSequence());
+            userPortfolioImg.portfolioImageUrl(imageUrl);
+            userPortfolioRepository.save(newImage);
+            return newImage;
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new BadRequestException(FailureCode.BAD_REQUEST);
+        }
+    }
+
     private Long generatePortfolioId() {
         return UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
     }
-
 
     public String getImageUrl(final MultipartFile image) {
         if (image == null || image.isEmpty()) {

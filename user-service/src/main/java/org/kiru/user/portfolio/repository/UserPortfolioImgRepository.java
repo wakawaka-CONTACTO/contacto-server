@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserPortfolioImgRepository extends JpaRepository<UserPortfolioImg, Long> {
     List<UserPortfolioImg> findByUserId(Long userId);
+    List<UserPortfolioImg> findAllByUserIdIn(List<Long> userIds);
 }
