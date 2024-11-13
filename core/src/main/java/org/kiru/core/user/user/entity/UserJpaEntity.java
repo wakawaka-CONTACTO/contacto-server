@@ -67,4 +67,25 @@ public class UserJpaEntity {
                 .password(user.getPassword())
                 .build();
     }
+
+    public void updateDetails(User user) {
+        if (user.getUsername() != null) {
+            this.username = user.getUsername();
+        }
+        if (user.getEmail() != null) {
+            this.email = user.getEmail();
+        }
+        if (user.getDescription() != null) {
+            this.description = user.getDescription();
+        }
+        if (user.getInstagramId() != null) {
+            this.instagramId = user.getInstagramId();
+        }
+        if (user.getWebUrl() != null) {
+            this.webUrl = user.getWebUrl();
+        }
+        if (user.getPassword() != null) {
+            this.password = user.getPassword();
+        }
+    }
 }

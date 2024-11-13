@@ -37,7 +37,7 @@ public class User {
 
     private UserPortfolio userPortfolio;
 
-    private List<PurposeType> userPurposes;
+    private List<Integer> userPurposes;
 
     private List<UserTalent> userTalents;
 
@@ -45,7 +45,7 @@ public class User {
         this.userPortfolio = userPortfolio;
     }
     public void userPurposes(List<PurposeType> userPurposes){
-        this.userPurposes = userPurposes;
+        this.userPurposes = userPurposes.stream().map(PurposeType::getIndex).toList();
     }
     public void userTalents(List<UserTalent> userTalents){
         this.userTalents = userTalents;

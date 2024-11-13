@@ -45,4 +45,8 @@ public class UserPortfolioImg {
                 .sequence(sequence)
                 .build();
     }
+
+    public void portfolioImageUrl(String portfolioImageUrl) {
+        this.portfolioImageUrl = portfolioImageUrl;
+    }
 }
