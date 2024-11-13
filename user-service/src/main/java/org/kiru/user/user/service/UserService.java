@@ -64,8 +64,10 @@ public class UserService {
                 .map(UserPurpose::getPurposeType).toList();
         List<UserTalent> userTalents = userTalentRepository.findAllByUserId(userId);
         List<UserPortfolioImg> userPortfolioImgs = userPortfolioRepository.findAllByUserId(userId);
-        Long portfolioId = userPortfolioImgs.getFirst().getId();
-        userPortfolioImgs.sort(Comparator.comparing(UserPortfolioImg::getSequence));
+        Long portfolioId = userPortfolioImgs.isEmpty() ? null : userPortfolioImgs.getFirst().getId();
+        if(portfolioId!=null) {
+            userPortfolioImgs.sort(Comparator.comparing(UserPortfolioImg::getSequence));
+        }
         UserPortfolio userPortfolio = UserPortfolio.builder().portfolioId(portfolioId)
                 .portfolioImages(userPortfolioImgs.stream().map(UserPortfolioImg::getPortfolioImageUrl).toList())
                 .userId(userId).build();

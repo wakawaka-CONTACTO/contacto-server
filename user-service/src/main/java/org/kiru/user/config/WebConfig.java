@@ -17,9 +17,4 @@ public class WebConfig implements WebMvcConfigurer {
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(userIdArgumentResolver);
     }
-
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new IntegerBinder());
-    }
 }
