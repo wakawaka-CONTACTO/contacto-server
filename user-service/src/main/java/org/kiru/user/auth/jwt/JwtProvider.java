@@ -17,7 +17,7 @@ public class JwtProvider {
     public Token issueToken(final long userId, final String email) {
         return Token.of(
                 jwtGenerator.generateAccessToken(userId, email), // email 추가
-                refreshTokenGenerator.generateRefreshToken(userId)
+                refreshTokenGenerator.generateRefreshToken(userId,email)
         );
     }
 
