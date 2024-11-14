@@ -12,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
     private final UserIdArgumentResolver userIdArgumentResolver;
+    private final StringToIntegerListConverter stringToIntegerListConverter;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -21,5 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new IntegerBinder());
+        registry.addConverter(stringToIntegerListConverter);
     }
 }

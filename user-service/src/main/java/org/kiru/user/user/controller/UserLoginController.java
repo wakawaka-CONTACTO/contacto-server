@@ -28,17 +28,19 @@ import org.springframework.web.multipart.MultipartFile;
 @Validated
 public class UserLoginController {
     private final AuthService authService;
-@PostMapping(value = "/signup", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
-        MediaType.APPLICATION_JSON_VALUE}, produces = MediaType.APPLICATION_JSON_VALUE)
-public ResponseEntity<UserJwtInfoRes> signUp(
-        @RequestPart("userSignUpReq") @Valid final UserSignUpReq userSignUpReq,
-        @Valid @Size(max = 10) @RequestPart("portfolioImgs") final List<MultipartFile> images,
-        @Valid @NotEmpty @RequestPart("purpose") final List<UserPurposesReq> purposes,
-        @Valid @NotEmpty @RequestPart("talent") final List<UserTalentsReq> talents
-) {
-    UserJwtInfoRes userSignUpRes = authService.signUp(userSignUpReq, images, purposes, talents);
-    return ResponseEntity.status(HttpStatus.CREATED).body(userSignUpRes);
-}
+
+    @PostMapping(value = "/signup", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
+            MediaType.APPLICATION_JSON_VALUE}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserJwtInfoRes> signUp(
+            @RequestPart("userSignUpReq") @Valid final UserSignUpReq userSignUpReq,
+            @Valid @Size(max = 10) @RequestPart("portfolioImgs") final List<MultipartFile> images,
+            @Valid @NotEmpty @RequestPart("purpose") final List<UserPurposesReq> purposes,
+            @Valid @NotEmpty @RequestPart("talent") final List<UserTalentsReq> talents
+    ) {
+        UserJwtInfoRes userSignUpRes = authService.signUp(userSignUpReq, images, purposes, talents);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userSignUpRes);
+    }
+
     //로그인
     @PostMapping("/signin")
     public ResponseEntity<UserJwtInfoRes> signIn(

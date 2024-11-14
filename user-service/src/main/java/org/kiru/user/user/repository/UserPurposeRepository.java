@@ -6,7 +6,9 @@ import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface UserPurposeRepository extends JpaRepository<UserPurpose, Long> {
     List<UserPurpose> findAllByUserId(Long userId);
 

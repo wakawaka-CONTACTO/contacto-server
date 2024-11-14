@@ -1,7 +1,9 @@
 package org.kiru.user.user.repository;
 
 import java.util.Optional;
+import org.hibernate.annotations.Cache;
 import org.kiru.core.user.user.entity.UserJpaEntity;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

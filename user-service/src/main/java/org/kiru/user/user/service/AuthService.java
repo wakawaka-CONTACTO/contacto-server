@@ -1,10 +1,8 @@
 package org.kiru.user.user.service;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kiru.core.user.refreshtoken.RefreshToken;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
@@ -80,30 +78,15 @@ public class AuthService {
     }
 
     @Transactional
-    public UserJwtInfoRes reissue(final String refreshToken) {
-        RefreshToken foundRefreshToken = getRefreshTokenByToken(refreshToken);
-        Long userId = foundRefreshToken.getUserId();
-        deleteRefreshToken(userId);
+    public UserJwtInfoRes reissue(final Long userId) {
+        refreshTokenRepository.deleteByUserId(userId)
+                .orElseThrow(() -> new UnauthorizedException(FailureCode.UNAUTHORIZED));
         UserJpaEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
         Token newToken = issueToken(userId, user.getEmail());
         return UserJwtInfoRes.of(userId, newToken.accessToken(), newToken.refreshToken());
     }
 
-    private RefreshToken getRefreshTokenByToken(final String refreshToken) {
-        try {
-            return refreshTokenRepository.findRefreshTokenByToken(refreshToken)
-                    .orElseThrow(() -> new UnauthorizedException(FailureCode.UNAUTHORIZED));
-        } catch (IllegalArgumentException e) {
-            log.error(e.getMessage());
-            throw new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new UnauthorizedException(FailureCode.UNAUTHORIZED);
-        }
-    }
-
-    // 토큰 발급 (userId와 email 함께 전달)
     private Token issueToken(final Long userId, final String email) {
         return jwtProvider.issueToken(userId, email);
     }
