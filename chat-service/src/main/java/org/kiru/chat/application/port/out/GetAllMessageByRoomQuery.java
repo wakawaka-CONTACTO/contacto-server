@@ -5,5 +5,4 @@ import org.kiru.core.chat.message.domain.Message;
 
 public interface GetAllMessageByRoomQuery {
     List<Message> findAllByChatRoomId(Long chatRoomId);
-
 }

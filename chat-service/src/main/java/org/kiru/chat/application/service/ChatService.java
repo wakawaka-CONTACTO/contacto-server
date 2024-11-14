@@ -25,7 +25,6 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     private final SaveMessagePort saveMessagePort;
     private final GetAllMessageByRoomQuery getAllMessageByRoomQuery;
 
-
     public ChatRoom createRoom(CreateChatRoomRequest createChatRoomRequest) {
             ChatRoom chatRoom = ChatRoom.of(createChatRoomRequest.getTitle(), createChatRoomRequest.getChatRoomType());
             return saveChatRoomPort.save(chatRoom, createChatRoomRequest.getUserId(), createChatRoomRequest.getUserId2());
