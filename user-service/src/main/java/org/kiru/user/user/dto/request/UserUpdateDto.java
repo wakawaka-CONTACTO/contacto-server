@@ -1,5 +1,8 @@
 package org.kiru.user.user.dto.request;
 
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.NumberDeserializers.IntegerDeserializer;
 import jakarta.validation.constraints.Email;
 import java.util.HashMap;
 import java.util.List;
