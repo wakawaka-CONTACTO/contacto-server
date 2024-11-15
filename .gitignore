@@ -265,8 +265,10 @@ bin/
 *.iml
 *.ipr
 out/
+!**/src/main/**/out/
 !**/src/test/**/out/
-
+!**/src/main/**/in/
+!**/src/test/**/in/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -283,9 +285,7 @@ out/
 .idea/
 
 ### Yml ###
-dateroad-api/src/main/resources/application.yml
-dateroad-api/src/main/resources/*.sql
-dateroad-api/src/test/resources/application.yml
+
 
 ### File ###
 **/static/*.p8
