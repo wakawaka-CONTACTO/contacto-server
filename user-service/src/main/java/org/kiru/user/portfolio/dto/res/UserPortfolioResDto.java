@@ -1,9 +1,12 @@
 package org.kiru.user.portfolio.dto.res;
 
+import com.querydsl.core.annotations.QueryProjection;
+import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Getter
@@ -23,5 +26,20 @@ public class UserPortfolioResDto{
                         .portfolioId(portfolioId)
                         .username(username)
                         .build();
+        }
+
+        @QueryProjection
+        public UserPortfolioResDto(Long userId, String username, Long portfolioId, String portfolioImageUrls) {
+                this.userId = userId;
+                this.username = username;
+                this.portfolioId = portfolioId;
+                this.portfolioImages = Arrays.asList(portfolioImageUrls.split(","));
+        }
+
+        public UserPortfolioResDto(Long userId, String username, Long portfolioId, List<String> portfolioImageUrls) {
+                this.userId = userId;
+                this.username = username;
+                this.portfolioId = portfolioId;
+                this.portfolioImages = portfolioImageUrls;
         }
 }
