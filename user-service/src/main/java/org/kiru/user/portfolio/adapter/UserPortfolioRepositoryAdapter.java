@@ -23,7 +23,6 @@ public class UserPortfolioRepositoryAdapter implements GetUserPortfoliosQuery {
     @Override
     @Transactional(readOnly = true)
     public List<UserPortfolioResDto> findAllPortfoliosByUserIds(List<Long> userIds) {
-        log.error(userIds.toString());
 
         QUserPortfolioImg userPortfolioImg = QUserPortfolioImg.userPortfolioImg;
         QUserJpaEntity userJpaEntity = QUserJpaEntity.userJpaEntity;
