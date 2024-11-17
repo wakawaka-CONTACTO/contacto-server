@@ -1,4 +1,4 @@
-package org.kiru.chat.adapter.in.web;
+package org.kiru.chat.adapter.in.web.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
