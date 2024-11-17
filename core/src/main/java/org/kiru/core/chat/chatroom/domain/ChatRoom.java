@@ -1,25 +1,30 @@
 package org.kiru.core.chat.chatroom.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
 import org.kiru.core.chat.message.domain.Message;
+import java.util.HashSet;
 
 @Getter
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChatRoom {
     @NotNull
     private Long id;
 
     @NotNull
+    @Setter
     private String title;
 
     @Nullable
@@ -30,9 +35,10 @@ public class ChatRoom {
     private ChatRoomType type;
 
     @Nullable
-    private final List<Long> participants;
+    private final Set<Long> participants; // Set으로 변경
 
-    private final String chatRoomThumbnail;
+    @Setter
+    private String chatRoomThumbnail;
 
     @Setter
     private int unreadMessageCount;
@@ -45,10 +51,16 @@ public class ChatRoom {
     }
 
     public boolean addParticipant(final Long userId) {
-        if (this.participants != null && this.type == ChatRoomType.PRIVATE && !this.participants.contains(userId)) {
+        if (this.participants != null && this.type == ChatRoomType.PRIVATE) {
             return this.participants.add(userId);
         }
         return false;
+    }
+
+    public void addParticipants(final List<Long> userIds) {
+        if (this.participants != null && this.type == ChatRoomType.PRIVATE) {
+            this.participants.addAll(userIds);
+        }
     }
 
     public static ChatRoom of(String title, ChatRoomType type) {
@@ -56,7 +68,7 @@ public class ChatRoom {
                 .title(title)
                 .type(type)
                 .messages(new ArrayList<>())
-                .participants(new ArrayList<>())
+                .participants(new HashSet<>())
                 .build();
     }
 
@@ -66,7 +78,7 @@ public class ChatRoom {
                 .title(chatRoomJpa.getTitle())
                 .type(chatRoomJpa.getType())
                 .messages(new ArrayList<>())
-                .participants(new ArrayList<>())
+                .participants(new HashSet<>())
                 .build();
     }
 }

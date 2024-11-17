@@ -25,8 +25,9 @@ public class Message {
     private Long chatRoomId;
 
     private LocalDateTime createdAt;
+
     @Setter
-    private boolean readStatus; // 읽음 상태 추가
+    private Boolean readStatus; // 읽음 상태 추가
 
     public void chatRoom(Long chatRoomId){
         this.chatRoomId = chatRoomId;

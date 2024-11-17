@@ -20,4 +20,20 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
     List<Object[]> findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessage(@Param("userId") Long userId);
     @Query("SELECT u.userId FROM UserJoinChatRoom u WHERE u.chatRoomId = :chatRoomId AND u.userId <> :senderId")
     List<Long> findOtherParticipantIds(Long chatRoomId, Long senderId);
+
+    @Query("SELECT u.userId FROM UserJoinChatRoom u WHERE u.chatRoomId = :chatRoomId")
+    List<Long> findParticipantIdsByChatRoomId(@Param("chatRoomId") Long chatRoomId);
+
+    @Query("SELECT cr, " +
+            "COUNT(DISTINCT m.id) AS unreadMessageCount, " +
+            "lm.content AS latestMessageContent, " +
+            "STRING_AGG(CAST(uj.userId AS string), ',') AS participants " +
+            "FROM ChatRoomJpaEntity cr " +
+            "JOIN UserJoinChatRoom uj ON cr.id = uj.chatRoomId " +
+            "LEFT JOIN MessageJpaEntity m ON cr.id = m.chatRoomId AND m.readStatus = false AND m.senderId <> :userId " +
+            "LEFT JOIN MessageJpaEntity lm ON cr.id = lm.chatRoomId AND lm.createdAt = (" +
+            "SELECT MAX(lm2.createdAt) FROM MessageJpaEntity lm2 WHERE lm2.chatRoomId = cr.id) " +
+            "WHERE uj.chatRoomId IN (SELECT uj2.chatRoomId FROM UserJoinChatRoom uj2 WHERE uj2.userId = :userId) " +
+            "GROUP BY cr.id, lm.content")
+    List<Object[]> findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(Long userId);
 }

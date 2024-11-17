@@ -4,7 +4,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
 import org.kiru.chat.adapter.in.web.res.CreateChatRoomResponse;
-import org.kiru.chat.adapter.out.persistence.GetOtherParticipantQuery;
 import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
@@ -34,7 +33,7 @@ public class ChatRoomController {
     private final GetChatRoomUseCase getChatRoomUseCase;
     private final AddParticipantUseCase addParticipantUseCase;
     private final WebSocketUserService webSocketUserService;
-    private final GetOtherParticipantQuery getOtherParticipantQuery;
+
     @PostMapping("/rooms")
     public CreateChatRoomResponse createRoom(@UserId Long userId, @RequestBody CreateChatRoomRequest createChatRoomRequest) {
             return new CreateChatRoomResponse(createRoomUseCase.createRoom(createChatRoomRequest).getId());
@@ -47,7 +46,7 @@ public class ChatRoomController {
 
     @GetMapping("/rooms/{roomId}")
     public ChatRoom getRoom(@PathVariable Long roomId, @UserId Long userId) {
-        return getChatRoomUseCase.findRoomById(roomId,userId);
+        return getChatRoomUseCase.findRoomById(roomId, userId);
     }
 
     @MessageMapping("/chat.send/{roomId}")

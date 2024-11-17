@@ -45,7 +45,7 @@ public class MessageJpaEntity extends BaseTimeEntity {
                 .content(message.getContent())
                 .senderId(message.getSenderId())
                 .content(message.getContent())
-                .readStatus(message.isReadStatus()) // 읽음 상태 추가
+                .readStatus(message.getReadStatus()) // 읽음 상태 추가
                 .build();
     }
 
