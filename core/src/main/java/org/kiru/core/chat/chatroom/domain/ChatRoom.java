@@ -8,6 +8,7 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
 import org.kiru.core.chat.message.domain.Message;
 
@@ -31,12 +32,20 @@ public class ChatRoom {
     @Nullable
     private final List<Long> participants;
 
+    private final String chatRoomThumbnail;
+
+    @Setter
+    private int unreadMessageCount;
+
+    @Setter
+    private String latestMessageContent;
+
     public void addMessage(final List<Message> message) {
         Objects.requireNonNull(this.messages).addAll(message);
     }
 
     public boolean addParticipant(final Long userId) {
-        if (this.participants != null && this.type == ChatRoomType.GROUP && !this.participants.contains(userId)) {
+        if (this.participants != null && this.type == ChatRoomType.PRIVATE && !this.participants.contains(userId)) {
             return this.participants.add(userId);
         }
         return false;

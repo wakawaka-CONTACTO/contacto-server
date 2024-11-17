@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.kiru.core.chat.common.BaseTimeEntity;
 import org.kiru.core.chat.message.domain.Message;
 
@@ -34,12 +35,17 @@ public class MessageJpaEntity extends BaseTimeEntity {
     @JoinColumn(name = "chat_room_id")
     private Long chatRoomId;
 
+    @Setter
+    @Column(name = "read_status")
+    private boolean readStatus;
+
     public static MessageJpaEntity of(Message message) {
         return MessageJpaEntity.builder()
                 .chatRoomId(message.getChatRoomId())
                 .content(message.getContent())
                 .senderId(message.getSenderId())
                 .content(message.getContent())
+                .readStatus(message.isReadStatus()) // 읽음 상태 추가
                 .build();
     }
 
@@ -50,6 +56,7 @@ public class MessageJpaEntity extends BaseTimeEntity {
                 .senderId(messageJpaEntity.getSenderId())
                 .content(messageJpaEntity.getContent())
                 .createdAt(messageJpaEntity.getCreatedAt())
+                .readStatus(messageJpaEntity.isReadStatus()) // 읽음 상태 추가
                 .build();
     }
 }

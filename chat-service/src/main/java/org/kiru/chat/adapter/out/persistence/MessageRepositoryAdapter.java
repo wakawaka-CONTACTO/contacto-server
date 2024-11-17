@@ -7,6 +7,7 @@ import org.kiru.chat.application.port.out.SaveMessagePort;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.chat.message.entity.MessageJpaEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,8 +22,14 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetAllMessage
     }
 
     @Override
-    public List<Message> findAllByChatRoomId(Long chatRoomId) {
+    @Transactional
+    public List<Message> findAllByChatRoomId(Long chatRoomId, Long userId) {
         return messageRepository.findAllByChatRoomIdOrderByCreatedAt(chatRoomId).stream()
-                .map(MessageJpaEntity::fromEntity).toList();
+                .map(messageJpaEntity -> {
+                    if (!messageJpaEntity.getSenderId().equals(userId)) {
+                        messageJpaEntity.setReadStatus(true);
+                    }
+                    return MessageJpaEntity.fromEntity(messageJpaEntity);
+                }).toList();
     }
 }
