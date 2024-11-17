@@ -1,7 +1,6 @@
 package org.kiru.chat.adapter.out.persistence;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
@@ -14,15 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
-public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoomPort {
+public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoomPort, GetOtherParticipantQuery {
     private final ChatRoomRepository chatRoomRepository;
     private final UserJoinChatRoomRepository userJoinChatRoomRepository;
+
     @Override
     @Transactional
-    public ChatRoom save(ChatRoom chatRoom,Long userId, Long userId2) {
+    public ChatRoom save(ChatRoom chatRoom, Long userId, Long userId2) {
         ChatRoomJpaEntity entity = ChatRoomJpaEntity.of(chatRoom);
         ChatRoomJpaEntity chatRoomJpa = chatRoomRepository.save(entity);
-        UserJoinChatRoom userfirst = UserJoinChatRoom.builder()
+        UserJoinChatRoom userFirst = UserJoinChatRoom.builder()
                 .chatRoomId(chatRoomJpa.getId())
                 .userId(userId)
                 .build();
@@ -30,7 +30,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
                 .chatRoomId(chatRoomJpa.getId())
                 .userId(userId2)
                 .build();
-        userJoinChatRoomRepository.saveAll(List.of(userfirst, userSecond));
+        userJoinChatRoomRepository.saveAll(List.of(userFirst, userSecond));
         return ChatRoom.fromEntity(chatRoomJpa);
     }
 
@@ -43,7 +43,21 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
 
     @Override
     public List<ChatRoom> findRoomsByUserId(Long userId) {
-        return userJoinChatRoomRepository.findChatRoomsByUserId(userId).stream()
-                .map(ChatRoom::fromEntity).toList();
+        List<Object[]> results = userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessage(userId);
+        return results.stream().map(result -> {
+            ChatRoomJpaEntity chatRoomJpa = (ChatRoomJpaEntity) result[0];
+            int unreadMessageCount = ((Number) result[1]).intValue();
+            String latestMessageContent = (String) result[2];
+            ChatRoom chatRoom = ChatRoom.fromEntity(chatRoomJpa);
+            chatRoom.setUnreadMessageCount(unreadMessageCount);
+            chatRoom.setLatestMessageContent(latestMessageContent);
+            return chatRoom;
+        }).toList();
+    }
+
+    @Override
+    public Long getOtherParticipantId(Long roomId, Long senderId) {
+        List<Long> otherParticipantIds = userJoinChatRoomRepository.findOtherParticipantIds(roomId, senderId);
+        return otherParticipantIds.isEmpty() ? null : otherParticipantIds.get(0);
     }
 }

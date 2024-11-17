@@ -2,10 +2,14 @@ package org.kiru.chat.adapter.in.web;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
+import org.kiru.chat.adapter.in.web.res.CreateChatRoomResponse;
+import org.kiru.chat.adapter.out.persistence.GetOtherParticipantQuery;
 import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
 import org.kiru.chat.application.port.in.SendMessageUseCase;
+import org.kiru.chat.application.service.WebSocketUserService;
 import org.kiru.chat.config.argumentresolve.UserId;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
@@ -29,9 +33,10 @@ public class ChatRoomController {
     private final CreateRoomUseCase createRoomUseCase;
     private final GetChatRoomUseCase getChatRoomUseCase;
     private final AddParticipantUseCase addParticipantUseCase;
-
+    private final WebSocketUserService webSocketUserService;
+    private final GetOtherParticipantQuery getOtherParticipantQuery;
     @PostMapping("/rooms")
-    public CreateChatRoomResponse createRoom(@UserId Long userId,@RequestBody CreateChatRoomRequest createChatRoomRequest) {
+    public CreateChatRoomResponse createRoom(@UserId Long userId, @RequestBody CreateChatRoomRequest createChatRoomRequest) {
             return new CreateChatRoomResponse(createRoomUseCase.createRoom(createChatRoomRequest).getId());
     }
 
@@ -48,6 +53,8 @@ public class ChatRoomController {
     @MessageMapping("/chat.send/{roomId}")
     @SendTo("/topic/{roomId}")
     public Message sendMessage(@DestinationVariable Long roomId, @Payload Message message) {
+        Long receiverId = message.getSendedId();
+        message.setReadStatus(webSocketUserService.isUserConnected(receiverId.toString())); // 상대 유저가 접속 중이면 읽음 상태로 설정
         return sendMessageUseCase.sendMessage(roomId, message);
     }
 

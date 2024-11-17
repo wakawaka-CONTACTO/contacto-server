@@ -2,8 +2,10 @@ package org.kiru.chat.application.service;
 
 
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import org.kiru.chat.adapter.in.web.CreateChatRoomRequest;
+import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
+import org.kiru.chat.adapter.out.persistence.GetOtherParticipantQuery;
 import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
@@ -24,6 +26,7 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     private final SaveChatRoomPort saveChatRoomPort;
     private final SaveMessagePort saveMessagePort;
     private final GetAllMessageByRoomQuery getAllMessageByRoomQuery;
+    private final GetOtherParticipantQuery getOtherParticipantQuery;
 
     public ChatRoom createRoom(CreateChatRoomRequest createChatRoomRequest) {
             ChatRoom chatRoom = ChatRoom.of(createChatRoomRequest.getTitle(), createChatRoomRequest.getChatRoomType());
@@ -33,8 +36,10 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     public ChatRoom findRoomById(Long roomId, Long userId) {
         ChatRoom chatRoom = getChatRoomQuery.findById(roomId).orElseThrow(
                 RuntimeException::new);
-        List<Message> messages = getAllMessageByRoomQuery.findAllByChatRoomId(roomId);
+        List<Message> messages = getAllMessageByRoomQuery.findAllByChatRoomId(roomId,userId);
         chatRoom.addMessage(messages);
+        Long otherUserId = getOtherParticipantQuery.getOtherParticipantId(roomId, userId);
+        chatRoom.addParticipant(otherUserId);
         return chatRoom;
     }
 
@@ -48,7 +53,7 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
         ChatRoom chatRoom = getChatRoomQuery.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found"));
         message.chatRoom(roomId);
-        chatRoom.getMessages().add(message);
+        Objects.requireNonNull(chatRoom.getMessages()).add(message);
         saveMessagePort.save(message);
         return message;
     }

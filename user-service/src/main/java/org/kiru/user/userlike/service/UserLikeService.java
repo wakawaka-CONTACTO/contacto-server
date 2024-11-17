@@ -31,7 +31,7 @@ public class UserLikeService {
                         () -> getMatchedUserPortfolioQuery.findByUserIds(List.of(userId, likedUserId)), executor);
                 CompletableFuture<CreateChatRoomResponse> chatRoomIdFuture = CompletableFuture.supplyAsync(() ->
                                 chatRoomCreateApiClient.createRoom(userId,
-                                        CreateChatRoomRequest.of("title", ChatRoomType.PRIVATE, userId, likedUserId)),
+                                        CreateChatRoomRequest.of("CONTACTO MANAGER", ChatRoomType.PRIVATE, userId, likedUserId)),
                         executor);
                 CompletableFuture<Void> allFutures = CompletableFuture.allOf(portfolioFuture, chatRoomIdFuture);
                 allFutures.join();
