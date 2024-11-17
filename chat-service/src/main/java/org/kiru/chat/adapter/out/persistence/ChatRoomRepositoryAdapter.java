@@ -1,7 +1,9 @@
 package org.kiru.chat.adapter.out.persistence;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
@@ -43,12 +45,17 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
 
     @Override
     public List<ChatRoom> findRoomsByUserId(Long userId) {
-        List<Object[]> results = userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessage(userId);
+        List<Object[]> results = userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(userId);
         return results.stream().map(result -> {
             ChatRoomJpaEntity chatRoomJpa = (ChatRoomJpaEntity) result[0];
+            ChatRoom chatRoom = ChatRoom.fromEntity(chatRoomJpa);
             int unreadMessageCount = ((Number) result[1]).intValue();
             String latestMessageContent = (String) result[2];
-            ChatRoom chatRoom = ChatRoom.fromEntity(chatRoomJpa);
+            List<Long> participants = Arrays.stream(((String) result[3]).split(","))
+                    .map(Long::parseLong)
+                    .filter(participantId -> !participantId.equals(userId))
+                    .toList();
+            chatRoom.addParticipants(participants);
             chatRoom.setUnreadMessageCount(unreadMessageCount);
             chatRoom.setLatestMessageContent(latestMessageContent);
             return chatRoom;
@@ -58,6 +65,6 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
     @Override
     public Long getOtherParticipantId(Long roomId, Long senderId) {
         List<Long> otherParticipantIds = userJoinChatRoomRepository.findOtherParticipantIds(roomId, senderId);
-        return otherParticipantIds.isEmpty() ? null : otherParticipantIds.get(0);
+        return otherParticipantIds.isEmpty() ? null : otherParticipantIds.getFirst();
     }
 }

@@ -1,5 +1,6 @@
 package org.kiru.user.user.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
@@ -23,4 +24,11 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
             "JOIN UserJpaEntity u ON upi.userId = u.id " +
             "WHERE upi.userId IN :userIds")
     List<UserPortfolioResDto> findAllPortfoliosByUserIds(List<Long> userIds);
+
+    List<UserPortfolioImg> findAllByUserIdIn(List<Long> allParticipantIds);
+
+    @Query("SELECT upi FROM UserPortfolioImg upi " +
+            "WHERE upi.userId IN :userIds " +
+            "AND upi.sequence = (SELECT MIN(upi2.sequence) FROM UserPortfolioImg upi2 WHERE upi2.userId = upi.userId)")
+    List<UserPortfolioImg> findAllByUserIdInWithMinSequence(List<Long> userIds);
 }
