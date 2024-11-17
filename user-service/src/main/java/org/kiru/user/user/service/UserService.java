@@ -1,9 +1,12 @@
 package org.kiru.user.user.service;
+
 import static java.util.stream.Collectors.*;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -49,12 +52,30 @@ public class UserService implements GetUserMainPageUseCase {
     }
 
     public List<ChatRoom> getUserChatRooms(Long userId) {
-        return chatApiClient.getUserChatRooms(userId);
+        List<ChatRoom> chatRooms = chatApiClient.getUserChatRooms(userId);
+        List<Long> allParticipantIds = getAllParticipantIds(chatRooms);
+
+        Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(allParticipantIds);
+        Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(allParticipantIds);
+
+        for (ChatRoom chatRoom : chatRooms) {
+            setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
+            setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
+        }
+        return chatRooms;
     }
 
-    public ChatRoom getUserChatRoom(Long roomId, Long userId) {
-        return chatApiClient.getRoom(roomId, userId);
-    }
+public ChatRoom getUserChatRoom(Long roomId, Long userId) {
+    ChatRoom chatRoom = chatApiClient.getRoom(roomId, userId);
+    List<Long> participantIds = chatRoom.getParticipants().stream()
+            .filter(participantId -> !participantId.equals(userId))
+            .toList();
+    Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(participantIds);
+    Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(participantIds);
+    setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
+    setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
+    return chatRoom;
+}
 
     private User getUserDetails(User user) {
         Long userId = user.getId();
@@ -89,9 +110,12 @@ public class UserService implements GetUserMainPageUseCase {
                 () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
         );
         updateUserDetails(existingUser, userUpdateDto);
-        CompletableFuture<List<UserPurpose>> purposesFuture = CompletableFuture.supplyAsync(() -> userUpdateUseCase.updateUserPurposes(userId, userUpdateDto));
-        CompletableFuture<List<UserTalent>> talentsFuture = CompletableFuture.supplyAsync(() -> userUpdateUseCase.updateUserTalents(userId, userUpdateDto));
-        CompletableFuture<List<UserPortfolioImg>> portfolioImgsFuture = CompletableFuture.supplyAsync(() -> userUpdateUseCase.updateUserPortfolioImages(userId, userUpdateDto));
+        CompletableFuture<List<UserPurpose>> purposesFuture = CompletableFuture.supplyAsync(
+                () -> userUpdateUseCase.updateUserPurposes(userId, userUpdateDto));
+        CompletableFuture<List<UserTalent>> talentsFuture = CompletableFuture.supplyAsync(
+                () -> userUpdateUseCase.updateUserTalents(userId, userUpdateDto));
+        CompletableFuture<List<UserPortfolioImg>> portfolioImgsFuture = CompletableFuture.supplyAsync(
+                () -> userUpdateUseCase.updateUserPortfolioImages(userId, userUpdateDto));
         CompletableFuture.allOf(purposesFuture, talentsFuture, portfolioImgsFuture).join();
         User updatedUser = User.of(userQueryWithCache.saveUser(existingUser));
         updatedUser.userPurposes(purposesFuture.join().stream().map(UserPurpose::getPurposeType).toList());
@@ -112,5 +136,48 @@ public class UserService implements GetUserMainPageUseCase {
                         .webUrl(userUpdateDto.getWebUrl())
                         .build()
         );
+    }
+
+    private List<Long> getAllParticipantIds(List<ChatRoom> chatRooms) {
+        return chatRooms.stream()
+                .flatMap(chatRoom -> chatRoom.getParticipants().stream())
+                .distinct()
+                .toList();
+    }
+
+    private Map<Long, UserPortfolioImg> getUserPortfolioImgMap(List<Long> allParticipantIds) {
+        List<UserPortfolioImg> userPortfolioImgs = userPortfolioRepository.findAllByUserIdInWithMinSequence(
+                allParticipantIds);
+        return userPortfolioImgs.stream()
+                .collect(Collectors.toMap(UserPortfolioImg::getUserId, img -> img));
+    }
+
+    private Map<Long, String> getUserIdToUsernameMap(List<Long> allParticipantIds) {
+        List<Object[]> userIdAndUsernames = userRepository.findUsernamesByIds(allParticipantIds);
+        return userIdAndUsernames.stream()
+                .collect(Collectors.toMap(
+                        userIdAndUsername -> Long.parseLong(userIdAndUsername[0].toString()),
+                        userIdAndUsername -> (String) userIdAndUsername[1]
+                ));
+    }
+
+    private void setChatRoomThumbnail(ChatRoom chatRoom, Map<Long, UserPortfolioImg> userPortfolioImgMap) {
+        Optional<UserPortfolioImg> thumbnail = chatRoom.getParticipants().stream()
+                .map(userPortfolioImgMap::get)
+                .filter(Objects::nonNull)
+                .min(Comparator.comparingInt(UserPortfolioImg::getSequence));
+        thumbnail.ifPresent(userPortfolioImg -> chatRoom.setChatRoomThumbnail(userPortfolioImg.getPortfolioImageUrl()));
+    }
+
+    private void setChatRoomTitle(ChatRoom chatRoom, Long userId, Map<Long, String> userIdToUsernameMap) {
+        assert chatRoom.getParticipants() != null;
+        List<String> otherUsernames = chatRoom.getParticipants().stream()
+                .filter(participantId -> !participantId.equals(userId))
+                .map(userIdToUsernameMap::get)
+                .filter(Objects::nonNull)
+                .toList();
+        if (!otherUsernames.isEmpty()) {
+            chatRoom.setTitle(otherUsernames.getFirst());
+        }
     }
 }

@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
+import org.kiru.user.user.dto.response.ChatRoomListResponse;
+import org.kiru.user.user.dto.response.ChatRoomResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,14 +26,14 @@ public class UserController {
     }
 
     @GetMapping("/me/chatroom")
-    public ResponseEntity<List<ChatRoom>> getUserChatRooms(@UserId Long userId){
+    public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@UserId Long userId){
         List<ChatRoom> chatRooms = userService.getUserChatRooms(userId);
-        return ResponseEntity.ok(chatRooms);
+        return ResponseEntity.ok(chatRooms.stream().map(ChatRoomListResponse::of).toList());
     }
 
     @GetMapping("/me/chatroom/{roomId}")
-    public ResponseEntity<ChatRoom> getUserChatRoom(@PathVariable Long roomId, @UserId Long userId) {
+    public ResponseEntity<ChatRoomResponse> getUserChatRoom(@PathVariable Long roomId, @UserId Long userId) {
         ChatRoom chatRooms = userService.getUserChatRoom(roomId,userId);
-        return ResponseEntity.ok(chatRooms);
+        return ResponseEntity.ok(ChatRoomResponse.of(chatRooms));
     }
 }
