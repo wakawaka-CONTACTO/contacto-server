@@ -44,7 +44,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                 }
                             }
                         }
-
                         if (!attributes.containsKey("userId")) {
                             throw new IllegalArgumentException("userId query parameter is missing");
                         }

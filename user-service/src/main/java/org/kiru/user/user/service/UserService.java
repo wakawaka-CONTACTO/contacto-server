@@ -1,7 +1,5 @@
 package org.kiru.user.user.service;
 
-import static java.util.stream.Collectors.*;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +122,6 @@ public ChatRoom getUserChatRoom(Long roomId, Long userId) {
         return updatedUser;
     }
 
-    @Transactional
     public void updateUserDetails(UserJpaEntity existingUser, UserUpdateDto userUpdateDto) {
         existingUser.updateDetails(
                 User.builder()

@@ -36,13 +36,17 @@ public class PortfolioService {
 
         // Flatten the grouped results into a list of UserPortfolioResDto
         List<UserPortfolioResDto> result = new ArrayList<>();
-        groupedPortfolios.forEach((userIdKey, portfolioMap) -> portfolioMap.forEach((portfolioIdKey, portfolioList) -> {
-            String username = portfolioList.getFirst().getUsername();
-            List<String> images = portfolioList.stream()
-                    .flatMap(p -> p.getPortfolioImages().stream())
-                    .toList();
-            result.add(new UserPortfolioResDto(userIdKey, username, portfolioIdKey, images));
-        }));
+        groupedPortfolios.forEach((userIdKey, portfolioMap) -> {
+            if (!userIdKey.equals(userId)) {
+                portfolioMap.forEach((portfolioIdKey, portfolioList) -> {
+                    String username = portfolioList.getFirst().getUsername();
+                    List<String> images = portfolioList.stream()
+                            .flatMap(p -> p.getPortfolioImages().stream())
+                            .toList();
+                    result.add(new UserPortfolioResDto(userIdKey, username, portfolioIdKey, images));
+                });
+            }
+        });
         return result;
     }
 
@@ -54,7 +58,6 @@ public class PortfolioService {
         List<Long> popularIds = userLikeRepository.findAllUserIdOrderByLikedUserIdCountDesc();
         matchingUserIds.addAll(likedUserIds);
         matchingUserIds.addAll(popularIds);
-        log.error(matchingUserIds.toString());
         return matchingUserIds.stream().distinct().toList();
     }
 }
