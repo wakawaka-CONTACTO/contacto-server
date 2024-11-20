@@ -1,6 +1,8 @@
 package org.kiru.user.user.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.user.user.domain.User;
@@ -24,6 +26,7 @@ public class UserController {
         User user = userService.getUserFromIdToMainPage(userId);
         return ResponseEntity.ok(user);
     }
+
 
     @GetMapping("/me/chatroom")
     public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@UserId Long userId){
