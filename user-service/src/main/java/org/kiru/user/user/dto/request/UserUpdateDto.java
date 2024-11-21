@@ -1,8 +1,6 @@
 package org.kiru.user.user.dto.request;
 
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.NumberDeserializers.IntegerDeserializer;
+
 import jakarta.validation.constraints.Email;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.kiru.core.user.talent.domain.Talent.TalentType;
 
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -27,5 +24,5 @@ public class UserUpdateDto {
     private String password;
     private List<Integer> userPurposes;
     private List<TalentType> userTalents;
-    private Map<Integer, MultipartFile> portfolioImages = new HashMap<>();
+    private Map<Integer, Object> portfolioImages = new HashMap<>();
 }

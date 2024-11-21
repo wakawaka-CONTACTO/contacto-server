@@ -1,10 +1,14 @@
 package org.kiru.user.user.adapter;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.talent.entity.UserTalent;
 import org.kiru.core.user.user.entity.UserJpaEntity;
+import org.kiru.core.user.userPortfolioImg.domain.UserPortfolio;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
@@ -33,6 +37,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
     private final UserTalentRepository userTalentRepository;
     private final UserPortfolioRepository userPortfolioRepository;
     private final ImageService imageService;
+
     @Override
     @Cacheable(value = "user", key = "#userId", unless = "#result == null")
     public UserJpaEntity getUser(Long userId) {
@@ -50,7 +55,8 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
     public List<UserPurpose> updateUserPurposes(Long userId, UserUpdateDto userUpdateDto) {
         userPurposeRepository.deleteAllByUserId(userId);
         List<UserPurpose> updatedPurposes = userUpdateDto.getUserPurposes().stream()
-                .map(purposeType -> UserPurpose.builder().userId(userId).purposeType(PurposeType.fromIndex(purposeType)).build())
+                .map(purposeType -> UserPurpose.builder().userId(userId).purposeType(PurposeType.fromIndex(purposeType))
+                        .build())
                 .toList();
         return userPurposeRepository.saveAll(updatedPurposes);
     }
@@ -67,18 +73,41 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
 
     @Override
     @Transactional
-    public List<UserPortfolioImg> updateUserPortfolioImages(Long userId, UserUpdateDto userUpdateDto) {
-        Map<Integer, MultipartFile> changedPortfolioImages = userUpdateDto.getPortfolioImages();
+    public List<UserPortfolioImg> updateUserPortfolioImages(final Long userId, UserUpdateDto userUpdateDto) {
+        Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolioImages();
         List<UserPortfolioImg> existingPortfolioImgs = userPortfolioRepository.findAllByUserId(userId);
+        Long portfolioId = existingPortfolioImgs.getFirst().getPortfolioId();
+        // 기존의 existingPortfolioImgs 삭제
+        userPortfolioRepository.deleteAll(existingPortfolioImgs);
+        // MultipartFile과 String 분리
+        Map<Integer, MultipartFile> multipartImages = new HashMap<>();
+        Map<Integer, String> stringImages = new HashMap<>();
         if (changedPortfolioImages != null) {
-            existingPortfolioImgs.forEach(img -> {
-                MultipartFile updatedImg = changedPortfolioImages.get(img.getSequence());
-                if (updatedImg != null) {
-                    imageService.updateImage(updatedImg, userId, img);
+            for (Map.Entry<Integer, Object> entry : changedPortfolioImages.entrySet()) {
+                Integer sequence = entry.getKey();
+                Object updatedImg = entry.getValue();
+                if (updatedImg instanceof MultipartFile) {
+                    multipartImages.put(sequence, (MultipartFile) updatedImg);
+                } else if (updatedImg instanceof String) {
+                    stringImages.put(sequence, (String) updatedImg);
                 }
-            });
-            return userPortfolioRepository.saveAll(existingPortfolioImgs);
+            }
         }
-        return existingPortfolioImgs;
+
+        // MultipartFile 저장
+        List<UserPortfolioImg> updatedPortfolioImgs = new ArrayList<>();
+        if (!multipartImages.isEmpty()) {
+            updatedPortfolioImgs.addAll(imageService.saveImagesWithSequence(multipartImages, userId, portfolioId));
+        }
+
+        // String 저장
+        for (Map.Entry<Integer, String> entry : stringImages.entrySet()) {
+            Integer sequence = entry.getKey();
+            String imageUrl = entry.getValue();
+            UserPortfolioImg newImg = UserPortfolioImg.of(userId, portfolioId, imageUrl, sequence);
+            updatedPortfolioImgs.add(newImg);
+        }
+        updatedPortfolioImgs.sort(Comparator.comparing(UserPortfolioImg::getSequence));
+        return userPortfolioRepository.saveAll(updatedPortfolioImgs);
     }
 }
