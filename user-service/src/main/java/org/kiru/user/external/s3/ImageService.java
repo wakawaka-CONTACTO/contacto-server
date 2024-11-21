@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -53,17 +54,16 @@ public class ImageService {
                     }, executor))
                     .toList();
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-            List<UserPortfolioImg> sortedImages = new ArrayList<>(savedImages);
-            sortedImages.sort(Comparator.comparing(UserPortfolioImg::getSequence));
-            userPortfolioRepository.saveAll(sortedImages);
+            List<UserPortfolioImg> sortedImages = saveSortedImages(savedImages, portfolioId, userId);
             List<String> sortedImageUrls = sortedImages.stream().map(UserPortfolioImg::getPortfolioImageUrl)
                     .toList();
+            userPortfolioRepository.saveAll(sortedImages);
             return UserPortfolio.builder().portfolioId(portfolioId).portfolioImages(sortedImageUrls).userId(userId).build();
         }
     }
 
     @Transactional
-    public UserPortfolioImg updateImage(final MultipartFile image, final Long userId, final UserPortfolioImg userPortfolioImg) {
+    public UserPortfolioImg upLoadImage(final MultipartFile image, final Long userId, final UserPortfolioImg userPortfolioImg) {
         try {
             String imagePath = s3Service.uploadImage(path, image);
             String imageUrl = cachePath + imagePath;
@@ -74,6 +74,26 @@ public class ImageService {
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new BadRequestException(FailureCode.BAD_REQUEST);
+        }
+    }
+
+    @Transactional
+    public List<UserPortfolioImg> saveImagesWithSequence(final Map<Integer, MultipartFile> images, final Long userId, final Long portfolioId) {
+        Queue<UserPortfolioImg> savedImages = new ConcurrentLinkedQueue<>();
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            List<CompletableFuture<Void>> futures = images.entrySet().stream()
+                    .map(entry -> CompletableFuture.runAsync(() -> {
+                        try {
+                            String imagePath = s3Service.uploadImage(path, entry.getValue());
+                            UserPortfolioImg newImage = UserPortfolioImg.of(userId, portfolioId, cachePath + imagePath, entry.getKey());
+                            savedImages.add(newImage);
+                        } catch (IOException e) {
+                            throw new CompletionException(new BadRequestException(FailureCode.BAD_REQUEST));
+                        }
+                    }, executor))
+                    .toList();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            return saveSortedImages(savedImages, portfolioId, userId);
         }
     }
 
@@ -91,5 +111,11 @@ public class ImageService {
             log.error(e.getMessage());
             throw new BadRequestException(FailureCode.WRONG_IMAGE_URL);
         }
+    }
+
+    private List<UserPortfolioImg> saveSortedImages(Queue<UserPortfolioImg> savedImages, Long portfolioId, Long userId) {
+        List<UserPortfolioImg> sortedImages = new ArrayList<>(savedImages);
+        sortedImages.sort(Comparator.comparing(UserPortfolioImg::getSequence));
+        return sortedImages;
     }
 }
