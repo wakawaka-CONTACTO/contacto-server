@@ -1,7 +1,6 @@
 package org.kiru.user.auth.mail.controller;
 
 import jakarta.mail.MessagingException;
-import java.io.UnsupportedEncodingException;
 import lombok.RequiredArgsConstructor;
 import org.kiru.user.auth.mail.dto.MailCheckDto;
 import org.kiru.user.auth.mail.dto.MailSendDto;
@@ -19,14 +18,12 @@ public class MailController {
     private final MailService mailService;
 
     @PostMapping("/emailsend") // 이 부분은 각자 바꿔주시면 됩니다.
-    public String emailCheck(@RequestBody MailSendDto mailSendDTO) throws UnsupportedEncodingException, MessagingException {
-        String authCode = mailService.sendSimpleMessage(mailSendDTO.getEmail());
-        return authCode; // Response body에 값을 반환
+    public String emailCheck(@RequestBody MailSendDto mailSendDTO) throws MessagingException {
+        return mailService.sendSimpleMessage(mailSendDTO.getEmail()); // Response body에 값을 반환
     }
 
     @PostMapping("/emailcheck") // 이 부분은 각자 바꿔주시면 됩니다.
-    public Boolean emailCheck(@RequestBody MailCheckDto mailCheckDto) throws UnsupportedEncodingException, MessagingException {
-        boolean check  = mailService.checkMessage(mailCheckDto);
-        return check;
+    public Boolean emailCheck(@RequestBody MailCheckDto mailCheckDto) {
+        return mailService.checkMessage(mailCheckDto);
     }
 }

@@ -44,7 +44,7 @@ public class UserLikeAdapter implements SendLikeOrDislikeUseCase, GetMatchedUser
         // 2. 현재 `userId -> likedUserId` 관계 조회 또는 생성
         UserLike userLike = userLikeRepository.findByUserIdAndLikedUserId(userId, likedUserId)
                 .orElseGet(() -> UserLike.of(userId, likedUserId, status, false));
-
+        userLike.likeStatus(status);
         // 3. 상대방이 나를 이미 `LIKE`했다면 상호 매칭으로 설정
         if (oppositeLike != null && status == LikeStatus.LIKE) {
             userLike.isMatched(true);

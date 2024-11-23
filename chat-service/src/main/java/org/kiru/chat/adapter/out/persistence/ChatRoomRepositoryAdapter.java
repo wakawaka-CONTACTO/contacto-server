@@ -5,17 +5,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
+import org.kiru.core.chat.userchatroom.entity.QUserJoinChatRoom;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
+import org.springframework.data.web.config.EnableSpringDataWebSupport.QuerydslActivator;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
-public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoomPort, GetOtherParticipantQuery {
+public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoomPort, GetOtherParticipantQuery ,
+        GetAlreadyLikedUserIdsQuery {
     private final ChatRoomRepository chatRoomRepository;
     private final UserJoinChatRoomRepository userJoinChatRoomRepository;
 
@@ -66,5 +70,10 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
     public Long getOtherParticipantId(Long roomId, Long senderId) {
         List<Long> otherParticipantIds = userJoinChatRoomRepository.findOtherParticipantIds(roomId, senderId);
         return otherParticipantIds.isEmpty() ? null : otherParticipantIds.getFirst();
+    }
+
+    @Override
+    public List<Long> getAlreadyLikedUserIds(Long userId) {
+        return userJoinChatRoomRepository.findAlreadyLikedUserIds(userId);
     }
 }

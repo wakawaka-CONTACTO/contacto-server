@@ -8,9 +8,11 @@ import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
 import org.kiru.chat.adapter.out.persistence.GetOtherParticipantQuery;
 import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
+import org.kiru.chat.application.port.in.GetAlreadyLikedUserIdsUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
 import org.kiru.chat.application.port.in.SendMessageUseCase;
 import org.kiru.chat.application.port.out.GetAllMessageByRoomQuery;
+import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.chat.application.port.out.SaveMessagePort;
@@ -21,12 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetChatRoomUseCase , AddParticipantUseCase {
+public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetChatRoomUseCase , AddParticipantUseCase ,
+        GetAlreadyLikedUserIdsUseCase{
     private final GetChatRoomQuery getChatRoomQuery;
     private final SaveChatRoomPort saveChatRoomPort;
     private final SaveMessagePort saveMessagePort;
     private final GetAllMessageByRoomQuery getAllMessageByRoomQuery;
     private final GetOtherParticipantQuery getOtherParticipantQuery;
+    private final GetAlreadyLikedUserIdsQuery getAlreadyLikedUserIdsQuery;
 
     public ChatRoom createRoom(CreateChatRoomRequest createChatRoomRequest) {
             ChatRoom chatRoom = ChatRoom.of(createChatRoomRequest.getTitle(), createChatRoomRequest.getChatRoomType());
@@ -63,5 +67,10 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
         ChatRoom chatRoom = getChatRoomQuery.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found"));
         return chatRoom.addParticipant(userId);
+    }
+
+    @Override
+    public List<Long> getAlreadyLikedUserIds(Long userId) {
+        return getAlreadyLikedUserIdsQuery.getAlreadyLikedUserIds(userId);
     }
 }

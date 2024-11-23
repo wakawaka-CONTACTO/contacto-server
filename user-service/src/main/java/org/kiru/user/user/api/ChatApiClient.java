@@ -24,4 +24,7 @@ public interface ChatApiClient {
     @PostMapping("/api/v1/chat/rooms")
     CreateChatRoomResponse createRoom(@RequestHeader("X-User-Id") Long userId,
                                       @RequestBody CreateChatRoomRequest createChatRoomRequest);
+
+    @GetMapping("/api/v1/chat/me/rooms")
+    List<Long> getAlreadyLikedUserIds(@RequestHeader("X-User-Id") Long userId);
 }
