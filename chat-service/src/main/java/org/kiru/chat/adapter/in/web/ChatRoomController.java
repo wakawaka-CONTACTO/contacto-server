@@ -6,6 +6,7 @@ import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
 import org.kiru.chat.adapter.in.web.res.CreateChatRoomResponse;
 import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
+import org.kiru.chat.application.port.in.GetAlreadyLikedUserIdsUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
 import org.kiru.chat.application.port.in.SendMessageUseCase;
 import org.kiru.chat.application.service.WebSocketUserService;
@@ -33,6 +34,8 @@ public class ChatRoomController {
     private final GetChatRoomUseCase getChatRoomUseCase;
     private final AddParticipantUseCase addParticipantUseCase;
     private final WebSocketUserService webSocketUserService;
+    private final GetAlreadyLikedUserIdsUseCase getAlreadyUserIdsUseCase;
+
 
     @PostMapping("/rooms")
     public CreateChatRoomResponse createRoom(@UserId Long userId, @RequestBody CreateChatRoomRequest createChatRoomRequest) {
@@ -61,5 +64,10 @@ public class ChatRoomController {
     public ResponseEntity<String> addParticipant(@PathVariable Long roomId, @UserId Long userId) {
         boolean added = addParticipantUseCase.addParticipant(roomId, userId);
         return added ? ResponseEntity.ok("Participant added") : ResponseEntity.badRequest().body("Failed to add participant");
+    }
+
+    @GetMapping("/me/rooms")
+    public List<Long> getAlreadyLikedUserIds(@UserId Long userId) {
+        return getAlreadyUserIdsUseCase.getAlreadyLikedUserIds(userId);
     }
 }

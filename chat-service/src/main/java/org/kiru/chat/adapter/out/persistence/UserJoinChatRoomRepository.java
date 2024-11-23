@@ -36,4 +36,10 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
             "WHERE uj.chatRoomId IN (SELECT uj2.chatRoomId FROM UserJoinChatRoom uj2 WHERE uj2.userId = :userId) " +
             "GROUP BY cr.id, lm.content")
     List<Object[]> findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(Long userId);
+
+    // userjoinChatroom에서 userId로 검색해서 스스로 join한 뒤 roomId가 일치하는 다른 userId를 가져온다.
+    @Query("SELECT u.userId FROM UserJoinChatRoom u " +
+            "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId " +
+            "WHERE uj.userId = :userId AND u.userId <> :userId")
+    List<Long> findAlreadyLikedUserIds(Long userId);
 }

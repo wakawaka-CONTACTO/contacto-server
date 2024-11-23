@@ -48,4 +48,8 @@ public class UserLike extends BaseTimeEntity {
                 .likeStatus(likeStatus)
                 .build();
     }
+
+    public void likeStatus(LikeStatus likeStatus) {
+        this.likeStatus = likeStatus;
+    }
 }

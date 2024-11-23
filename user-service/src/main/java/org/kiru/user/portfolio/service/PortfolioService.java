@@ -10,6 +10,7 @@ import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
 import org.kiru.user.portfolio.repository.UserPortfolioImgRepository;
 import org.kiru.user.portfolio.service.out.GetUserPortfoliosQuery;
+import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.userlike.repository.UserLikeRepository;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,11 @@ public class PortfolioService {
     private final UserPurposeRepository userPurposeRepository;
     private final GetUserPortfoliosQuery getUserPortfoliosQuery;
     private final UserLikeRepository userLikeRepository;
+    private final ChatApiClient chatApiClient;
 
     @Transactional(readOnly = true)
     public List<UserPortfolioResDto> getUserPortfolios(Long userId) {
         List<Long> distinctUserIds = getDistinctUserIds(userId);
-        log.error(distinctUserIds.toString());
         List<UserPortfolioResDto> portfolios = getUserPortfoliosQuery.findAllPortfoliosByUserIds(distinctUserIds);
         // Group by userId, username, and portfolioId
         Map<Long, Map<Long, List<UserPortfolioResDto>>> groupedPortfolios = portfolios.stream()
@@ -51,13 +52,20 @@ public class PortfolioService {
     }
 
     private List<Long> getDistinctUserIds(Long userId) {
-        List<Long> matchingUserIds = userPurposeRepository.findUserIdsByPurposeTypes(
+
+        List<Long> matchingUserIds = userPurposeRepository.findUserIdsByPurposeTypesOrderByCount(
                 userPurposeRepository.findAllByUserId(userId).stream()
                         .map(UserPurpose::getPurposeType).toList());
+
         List<Long> likedUserIds = userLikeRepository.findAllByLikedUserId(userId);
+
         List<Long> popularIds = userLikeRepository.findAllUserIdOrderByLikedUserIdCountDesc();
+
+        List<Long> alreadyLikedUserIds = chatApiClient.getAlreadyLikedUserIds(userId);
+
         matchingUserIds.addAll(likedUserIds);
         matchingUserIds.addAll(popularIds);
+        matchingUserIds.removeAll(alreadyLikedUserIds);
         return matchingUserIds.stream().distinct().toList();
     }
 }
