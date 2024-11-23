@@ -13,10 +13,12 @@ import org.kiru.user.exception.EntityNotFoundException;
 import org.kiru.user.exception.UnauthorizedException;
 import org.kiru.user.exception.code.FailureCode;
 import org.kiru.user.user.dto.event.UserCreateEvent;
+import org.kiru.user.user.dto.request.SignHelpDto;
 import org.kiru.user.user.dto.request.UserPurposesReq;
 import org.kiru.user.user.dto.request.UserSignInReq;
 import org.kiru.user.user.dto.request.UserSignUpReq;
 import org.kiru.user.user.dto.request.UserTalentsReq;
+import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -108,4 +110,46 @@ public class AuthService {
         }
         throw new UnauthorizedException(FailureCode.UNAUTHORIZED);
     }
+
+    public SignHelpDtoRes signHelp(SignHelpDto signHelpDto) {
+        String email = userRepository.findByUsername(signHelpDto.userName())
+                .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+        String maskedEmail = maskEmail(email);
+        return new SignHelpDtoRes(maskedEmail);
+    }
+
+    private String maskEmail(String email) {
+        int atIndex = email.indexOf("@");
+        if (atIndex == -1 || atIndex == 0) {
+            throw new IllegalArgumentException("Invalid email address");
+        }
+        String localPart = email.substring(0, atIndex);
+        StringBuilder maskedLocalPart = new StringBuilder();
+        int localLength = localPart.length();
+        if (localLength <= 2) {
+            maskedLocalPart.append(localPart.charAt(0)).append("*");
+        } else {
+            maskedLocalPart.append(localPart.charAt(0))
+                    .append(localPart.charAt(1))
+                    .append("*".repeat(localLength - 4))
+                    .append(localPart.charAt(localLength - 2))
+                    .append(localPart.charAt(localLength - 1));
+        }
+        String domainPart = email.substring(atIndex + 1);
+        String[] domainParts = domainPart.split("\\.");
+        StringBuilder maskedDomainPart = new StringBuilder();
+
+        if (domainParts.length >= 2) {
+            String domainName = domainParts[0];
+            maskedDomainPart.append(domainName.charAt(0)) // 첫 글자 표시
+                    .append("*".repeat(domainName.length() - 2)) // 중간 글자 마스킹
+                    .append(domainName.charAt(domainName.length() - 1))
+                    .append(".");
+            maskedDomainPart.append("***");
+        } else {
+            throw new IllegalArgumentException("Invalid domain format");
+        }
+        return maskedLocalPart + "@" + maskedDomainPart;
+    }
+
 }
