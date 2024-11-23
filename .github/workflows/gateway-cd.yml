@@ -48,5 +48,5 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           script: |
             cd ~
-            ./deploy_user_service.sh
+            ./deploy_gateway_service.sh
             docker image prune -f
