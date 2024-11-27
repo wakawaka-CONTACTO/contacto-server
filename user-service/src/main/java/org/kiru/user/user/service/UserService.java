@@ -21,6 +21,7 @@ import org.kiru.user.exception.EntityNotFoundException;
 import org.kiru.user.exception.code.FailureCode;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.dto.request.UserUpdateDto;
+import org.kiru.user.user.dto.request.UserUpdatePwdDto;
 import org.kiru.user.user.repository.UserPortfolioRepository;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
@@ -110,6 +111,8 @@ public ChatRoom getUserChatRoom(Long roomId, Long userId) {
         updateUserDetails(existingUser, userUpdateDto);
         CompletableFuture<List<UserPurpose>> purposesFuture = CompletableFuture.supplyAsync(
                 () -> userUpdateUseCase.updateUserPurposes(userId, userUpdateDto));
+
+
         CompletableFuture<List<UserTalent>> talentsFuture = CompletableFuture.supplyAsync(
                 () -> userUpdateUseCase.updateUserTalents(userId, userUpdateDto));
         CompletableFuture<List<UserPortfolioImg>> portfolioImgsFuture = CompletableFuture.supplyAsync(
@@ -176,5 +179,12 @@ public ChatRoom getUserChatRoom(Long roomId, Long userId) {
         if (!otherUsernames.isEmpty()) {
             chatRoom.setTitle(otherUsernames.getFirst());
         }
+    }
+
+    public User updateUserPwd(Long userId, UserUpdatePwdDto userUpdatePwdDto) {
+        UserJpaEntity existingUser = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
+        );
+        return userUpdateUseCase.updateUserPwd(existingUser,userUpdatePwdDto);
     }
 }

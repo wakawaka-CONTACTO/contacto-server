@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.domain.User;
 import org.springframework.stereotype.Component;
@@ -52,6 +53,7 @@ public class UserJpaEntity {
     private String webUrl;
 
     @Column(name = "password", nullable = true)
+    @Setter
     private String password;
 
     public static UserJpaEntity of(User user) {
