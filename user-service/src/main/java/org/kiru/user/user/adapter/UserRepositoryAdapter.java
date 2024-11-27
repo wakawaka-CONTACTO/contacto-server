@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.talent.entity.UserTalent;
+import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserJpaEntity;
-import org.kiru.core.user.userPortfolioImg.domain.UserPortfolio;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
@@ -16,6 +16,7 @@ import org.kiru.user.exception.EntityNotFoundException;
 import org.kiru.user.exception.code.FailureCode;
 import org.kiru.user.external.s3.ImageService;
 import org.kiru.user.user.dto.request.UserUpdateDto;
+import org.kiru.user.user.dto.request.UserUpdatePwdDto;
 import org.kiru.user.user.repository.UserPortfolioRepository;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
@@ -24,6 +25,7 @@ import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.kiru.user.user.service.out.UserUpdateUseCase;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +39,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
     private final UserTalentRepository userTalentRepository;
     private final UserPortfolioRepository userPortfolioRepository;
     private final ImageService imageService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Cacheable(value = "user", key = "#userId", unless = "#result == null")
@@ -109,5 +112,12 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
         }
         updatedPortfolioImgs.sort(Comparator.comparing(UserPortfolioImg::getSequence));
         return userPortfolioRepository.saveAll(updatedPortfolioImgs);
+    }
+
+    @Override
+    public User updateUserPwd(UserJpaEntity existingUser, UserUpdatePwdDto userUpdatePwdDto) {
+        existingUser.setPassword(
+                passwordEncoder.encode(userUpdatePwdDto.password()));
+        return User.of(existingUser);
     }
 }
