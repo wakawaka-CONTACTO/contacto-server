@@ -31,8 +31,8 @@ public class UserUpdateController {
     }
 
     @PatchMapping(value = "/me/pwd")
-    public ResponseEntity<Void> updateUserPwd(@UserId Long userId, @RequestBody UserUpdatePwdDto userUpdatePwdDto) {
-        userService.updateUserPwd(userId, userUpdatePwdDto);
+    public ResponseEntity<Void> updateUserPwd(@RequestBody UserUpdatePwdDto userUpdatePwdDto) {
+        userService.updateUserPwd(userUpdatePwdDto);
         return ResponseEntity.ok().build();
     }
 }
