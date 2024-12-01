@@ -1,5 +1,6 @@
 package org.kiru.user.user.controller;
 
+import feign.Param;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -38,5 +40,11 @@ public class UserController {
     public ResponseEntity<ChatRoomResponse> getUserChatRoom(@PathVariable Long roomId, @UserId Long userId) {
         ChatRoom chatRooms = userService.getUserChatRoom(roomId,userId);
         return ResponseEntity.ok(ChatRoomResponse.of(chatRooms));
+    }
+
+    @GetMapping("/me/email")
+    public ResponseEntity<Void> getUser(@RequestParam("email") String email){
+        userService.findExistUserByEmail(email);
+        return ResponseEntity.ok().build();
     }
 }

@@ -181,10 +181,16 @@ public ChatRoom getUserChatRoom(Long roomId, Long userId) {
         }
     }
 
-    public User updateUserPwd(Long userId, UserUpdatePwdDto userUpdatePwdDto) {
-        UserJpaEntity existingUser = userRepository.findById(userId).orElseThrow(
+    public User updateUserPwd(UserUpdatePwdDto userUpdatePwdDto) {
+        UserJpaEntity existingUser = userRepository.findByEmail(userUpdatePwdDto.email()).orElseThrow(
                 () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
         );
         return userUpdateUseCase.updateUserPwd(existingUser,userUpdatePwdDto);
+    }
+
+    public void findExistUserByEmail(String email) {
+        userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
+        );
     }
 }
