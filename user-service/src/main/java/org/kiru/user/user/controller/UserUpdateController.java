@@ -5,6 +5,7 @@ import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
+import org.kiru.user.user.dto.response.UpdatePwdResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -31,8 +32,8 @@ public class UserUpdateController {
     }
 
     @PatchMapping(value = "/me/pwd")
-    public ResponseEntity<Void> updateUserPwd(@RequestBody UserUpdatePwdDto userUpdatePwdDto) {
-        userService.updateUserPwd(userUpdatePwdDto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UpdatePwdResponse> updateUserPwd(@RequestBody UserUpdatePwdDto userUpdatePwdDto) {
+        Boolean isSuccess = userService.updateUserPwd(userUpdatePwdDto);
+        return ResponseEntity.ok(new UpdatePwdResponse(isSuccess));
     }
 }
