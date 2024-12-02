@@ -4,10 +4,8 @@ import java.time.LocalDateTime;
 import org.kiru.core.user.user.domain.User;
 
 public record AdminMatchedUserResponse(
+        Long userId,
         String name,
-        LocalDateTime localDateTime
+        LocalDateTime matchedAt
 ) {
-    public static AdminMatchedUserResponse of(User user) {
-        return new AdminMatchedUserResponse(user.getUsername(), user.creat);
-    }
 }

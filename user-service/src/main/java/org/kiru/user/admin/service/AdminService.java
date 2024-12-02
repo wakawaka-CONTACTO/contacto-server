@@ -2,11 +2,13 @@ package org.kiru.user.admin.service;
 
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.kiru.user.admin.dto.AdminMatchedUserResponse;
 import org.kiru.user.admin.dto.AdminUserDto;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
+import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.out.AdminUserQuery;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.repository.UserRepository;
@@ -33,13 +35,21 @@ public class AdminService {
         return AdminUserDto.of(user, connectedUserIds.contains(user.id()));
     }
 
-    public List<AdminMatchedUserResponse> getUsersByIds(List<Long> userIds) {
-        return  userRepository.findSimpleUserByIds(userIds).stream()
-                .map(user -> AdminMatchedUserResponse.of(user))
+    public List<AdminMatchedUserResponse> getMatchedUsers(Long userId) {
+        List<MatchedUserResponse> chatApiClientMatchedUsers = chatApiClient.getMatchedUsers(userId);
+        List<Long> userIds = chatApiClientMatchedUsers.stream()
+                .map(MatchedUserResponse::userId)
                 .collect(Collectors.toList());
-    }
-
-    public List<AdminMatchedUserResponse> getAlreadyLikedUserIds(Long userId) {
-        return chatApiClient.getMactedUsers(userId);
+        List<Object[]> userNames = userRepository.findUsernamesByIds(userIds);
+        return chatApiClientMatchedUsers.stream()
+                .map(matchedUser -> {
+                    String name = userNames.stream()
+                            .filter(user -> user[0].equals(matchedUser.userId()))
+                            .map(user -> (String) user[1])
+                            .findFirst()
+                            .orElse(null);
+                    return new AdminMatchedUserResponse(matchedUser.userId(), name, matchedUser.matchedAt());
+                })
+                .toList();
     }
 }

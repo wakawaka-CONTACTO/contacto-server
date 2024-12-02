@@ -44,7 +44,7 @@ public class AdminController {
 
     @GetMapping("/users/{userId}/matched")
     public ResponseEntity<List<AdminMatchedUserResponse>> getMatchedUsers(@PathVariable Long userId) {
-        List<MatchedUserResponse> userIds = adminService.getAlreadyLikedUserIds(userId);
-        return  adminService.getUsersByIds(userIds);
+        List<AdminMatchedUserResponse> matchedUsers = adminService.getMatchedUsers(userId);
+        return  ResponseEntity.ok(matchedUsers);
     }
 }

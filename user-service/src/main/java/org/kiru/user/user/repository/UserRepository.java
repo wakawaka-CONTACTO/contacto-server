@@ -9,6 +9,7 @@ import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.user.admin.dto.AdminMatchedUserResponse;
 import org.kiru.user.admin.dto.AdminUserDto;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
+import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,8 +50,8 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             "WHERE u.username = :name")
     UserDto findSimpleUserByName(String name);
 
-    @Query("SELECT u.username, u. " +
+    @Query("SELECT u.id, u.username " +
             "FROM UserJpaEntity u " +
             "WHERE u.id IN :userIds")
-    List<AdminMatchedUserResponse> findSimpleUserByIds(List<Long> userIds);
+    List<Object> findSimpleUserByIds(List<Long> userIds);
 }
