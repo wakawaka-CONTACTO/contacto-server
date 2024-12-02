@@ -12,6 +12,7 @@ import org.kiru.user.user.dto.response.ChatRoomListResponse;
 import org.kiru.user.user.dto.response.ChatRoomResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +30,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-
     @GetMapping("/me/chatroom")
     public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@UserId Long userId){
         List<ChatRoom> chatRooms = userService.getUserChatRooms(userId);
@@ -45,6 +45,12 @@ public class UserController {
     @GetMapping("/me/email")
     public ResponseEntity<Void> getUser(@RequestParam("email") String email){
         userService.findExistUserByEmail(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteUser(@UserId Long userId){
+        userService.deleteUser(userId);
         return ResponseEntity.ok().build();
     }
 }

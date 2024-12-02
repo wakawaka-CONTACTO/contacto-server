@@ -14,8 +14,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Where;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.domain.User;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.stereotype.Component;
 
 @Entity
@@ -24,6 +28,8 @@ import org.springframework.stereotype.Component;
 @Builder
 @Getter
 @Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class UserJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,12 +55,17 @@ public class UserJpaEntity {
     @Column(name = "instagram_id",nullable = false)
     private String instagramId;
 
-    @Column(name = "web_url",nullable = false)
+    @Column(name = "web_url")
     private String webUrl;
 
     @Column(name = "password", nullable = true)
     @Setter
     private String password;
+
+    @Column(name = "deleted")
+    @Builder.Default
+    private Boolean deleted = false;
+
 
     public static UserJpaEntity of(User user) {
         return UserJpaEntity.builder()

@@ -181,6 +181,7 @@ public ChatRoom getUserChatRoom(Long roomId, Long userId) {
         }
     }
 
+    @Transactional
     public User updateUserPwd(UserUpdatePwdDto userUpdatePwdDto) {
         UserJpaEntity existingUser = userRepository.findByEmail(userUpdatePwdDto.email()).orElseThrow(
                 () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
@@ -192,5 +193,10 @@ public ChatRoom getUserChatRoom(Long roomId, Long userId) {
         userRepository.findByEmail(email).orElseThrow(
                 () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
         );
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        userRepository.deleteById(userId);
     }
 }
