@@ -114,7 +114,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
         return userPortfolioRepository.saveAll(updatedPortfolioImgs);
     }
 
-    @Override
+    @Transactional
     public User updateUserPwd(UserJpaEntity existingUser, UserUpdatePwdDto userUpdatePwdDto) {
         existingUser.setPassword(
                 passwordEncoder.encode(userUpdatePwdDto.password()));
