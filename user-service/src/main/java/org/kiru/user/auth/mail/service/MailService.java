@@ -56,7 +56,7 @@ public class MailService {
         return number;
     }
 
-    public boolean checkMessage(MailCheckDto mailCheckDto) {
+    public Boolean checkMessage(MailCheckDto mailCheckDto) {
         String savedNumber = redisTemplateForOne.opsForValue().get(mailCheckDto.getEmail());
         if (savedNumber != null && savedNumber.equals(mailCheckDto.getAuthCode())) {
             return true;
