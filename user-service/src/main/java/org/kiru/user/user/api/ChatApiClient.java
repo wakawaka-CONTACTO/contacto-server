@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.swing.text.html.Option;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.user.admin.dto.AdminMatchedUserResponse;
 import org.kiru.user.userlike.api.CreateChatRoomRequest;
 import org.kiru.user.userlike.api.CreateChatRoomResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -27,4 +28,10 @@ public interface ChatApiClient {
 
     @GetMapping("/api/v1/chat/me/rooms")
     List<Long> getAlreadyLikedUserIds(@RequestHeader("X-User-Id") Long userId);
+
+    @GetMapping("/api/v1/chat/connect-user")
+    List<Long> getConnectedUserIds();
+
+    @GetMapping("/api/v1/chat/me/matched")
+    List<AdminMatchedUserResponse> getMactedUsers(@RequestHeader("X-User-Id") Long userId);
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
@@ -75,5 +76,10 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
     @Override
     public List<Long> getAlreadyLikedUserIds(Long userId) {
         return userJoinChatRoomRepository.findAlreadyLikedUserIds(userId);
+    }
+
+    @Override
+    public List<AdminUserResponse> getMatchedUsers(Long userId) {
+        return userJoinChatRoomRepository.getMatchedUser(userId);
     }
 }

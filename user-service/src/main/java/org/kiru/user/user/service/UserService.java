@@ -17,6 +17,7 @@ import org.kiru.core.user.userPortfolioImg.domain.UserPortfolio;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
+import org.kiru.user.admin.dto.AdminMatchedUserResponse;
 import org.kiru.user.exception.EntityNotFoundException;
 import org.kiru.user.exception.code.FailureCode;
 import org.kiru.user.user.api.ChatApiClient;
@@ -198,5 +199,9 @@ public ChatRoom getUserChatRoom(Long roomId, Long userId) {
     @Transactional
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
+    }
+
+    public List<Long> getAlreadyLikedUserIds(Long userId) {
+        return chatApiClient.getAlreadyLikedUserIds(userId);
     }
 }

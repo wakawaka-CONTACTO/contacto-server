@@ -3,6 +3,7 @@ package org.kiru.chat.adapter.in.web;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
+import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.chat.adapter.in.web.res.CreateChatRoomResponse;
 import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
@@ -36,7 +37,6 @@ public class ChatRoomController {
     private final WebSocketUserService webSocketUserService;
     private final GetAlreadyLikedUserIdsUseCase getAlreadyUserIdsUseCase;
 
-
     @PostMapping("/rooms")
     public CreateChatRoomResponse createRoom(@UserId Long userId, @RequestBody CreateChatRoomRequest createChatRoomRequest) {
             return new CreateChatRoomResponse(createRoomUseCase.createRoom(createChatRoomRequest).getId());
@@ -69,5 +69,15 @@ public class ChatRoomController {
     @GetMapping("/me/rooms")
     public List<Long> getAlreadyLikedUserIds(@UserId Long userId) {
         return getAlreadyUserIdsUseCase.getAlreadyLikedUserIds(userId);
+    }
+
+    @GetMapping("/connect-user")
+    public List<Long> getAllConnectedUser() {
+        return webSocketUserService.getConnectedUserIds();
+    }
+
+    @GetMapping("/me/matched")
+    public List<AdminUserResponse> getMatchedUsers(@UserId Long userId) {
+        return getAlreadyUserIdsUseCase.getMatchedUsers(userId);
     }
 }
