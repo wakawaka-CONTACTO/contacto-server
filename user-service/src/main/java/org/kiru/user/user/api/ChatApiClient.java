@@ -1,5 +1,6 @@
 package org.kiru.user.user.api;
 
+import feign.Param;
 import java.util.List;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.user.admin.dto.MatchedUserResponse;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "chat-service")
 public interface ChatApiClient {
@@ -32,4 +34,7 @@ public interface ChatApiClient {
 
     @GetMapping("/api/v1/chat/me/matched")
     List<MatchedUserResponse> getMatchedUsers(@RequestHeader("X-User-Id") Long userId);
+
+    @GetMapping("/api/v1/chat/rooms/{roomId}")
+    ChatRoom adminGetChatRoom(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId, @RequestParam("changeStatus") Boolean changeStatus);
 }

@@ -1,10 +1,12 @@
 package org.kiru.user.admin.service;
 
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.dto.AdminMatchedUserResponse;
 import org.kiru.user.admin.dto.AdminUserDto;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
@@ -29,19 +31,19 @@ public class AdminService {
         return users.map(user -> AdminUserDto.of(user, connectedUserIds.contains(user.id())));
     }
 
-    public AdminUserDto findUserByName(String name) {
-        UserDto user = adminUserQuery.findUserByName(name);
+    public List<AdminUserDto> findUserByName(String name) {
+        List<UserDto> user = adminUserQuery.findUserByName(name);
         List<Long> connectedUserIds = chatApiClient.getConnectedUserIds();
-        return AdminUserDto.of(user, connectedUserIds.contains(user.id()));
+        return user.stream().map(u -> AdminUserDto.of(u, connectedUserIds.contains(u.id()))).toList();
     }
 
     public List<AdminMatchedUserResponse> getMatchedUsers(Long userId) {
         List<MatchedUserResponse> chatApiClientMatchedUsers = chatApiClient.getMatchedUsers(userId);
         List<Long> userIds = chatApiClientMatchedUsers.stream()
                 .map(MatchedUserResponse::userId)
-                .collect(Collectors.toList());
+                .toList();
         List<Object[]> userNames = userRepository.findUsernamesByIds(userIds);
-        return chatApiClientMatchedUsers.stream()
+        List<AdminMatchedUserResponse> adminMatchedUserResponses =  chatApiClientMatchedUsers.stream()
                 .map(matchedUser -> {
                     String name = userNames.stream()
                             .filter(user -> user[0].equals(matchedUser.userId()))
@@ -51,5 +53,24 @@ public class AdminService {
                     return new AdminMatchedUserResponse(matchedUser.userId(), name, matchedUser.matchedAt());
                 })
                 .toList();
+        return adminMatchedUserResponses.stream()
+                .collect(Collectors.toMap(AdminMatchedUserResponse::userId, response -> response, (existing, replacement) -> existing))
+                .values().stream()
+                .sorted(Comparator.comparing(AdminMatchedUserResponse::matchedAt).reversed())
+                .toList();
+    }
+
+    public ChatRoom getRoom(Long roomId, Long userId) {
+        return chatApiClient.adminGetChatRoom(roomId, userId, true);
+    }
+
+    public List<AdminLikeUserDto> getUserLikes(Pageable pageable, Long userId) {
+        Page<AdminLikeUserDto> page = adminUserQuery.findUserLikes(pageable, userId);
+        return page.getContent();
+    }
+
+    public List<AdminLikeUserDto> getUserLiked(Pageable pageable, Long userId) {
+        Page<AdminLikeUserDto> page = adminUserQuery.findUserLiked(pageable, userId);
+        return page.getContent();
     }
 }

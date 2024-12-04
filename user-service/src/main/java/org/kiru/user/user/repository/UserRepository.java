@@ -38,17 +38,17 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             "WHERE u.username = :username")
     Optional<String> findUserNameByUsername(String username);
 
-    @Query("SELECT u.id, u.username, p.portfolioImageUrl " +
+    @Query("SELECT new org.kiru.user.admin.dto.AdminUserDto$UserDto(u.id, u.username, p.portfolioImageUrl) " +
             "FROM UserJpaEntity u " +
             "INNER JOIN UserPortfolioImg p ON u.id = p.userId " +
             "WHERE p.sequence = 1")
     Page<UserDto> findSimpleUsers(Pageable pageable);
 
-    @Query("SELECT u.id, u.username, p.portfolioImageUrl " +
+    @Query("SELECT new org.kiru.user.admin.dto.AdminUserDto$UserDto(u.id, u.username, p.portfolioImageUrl) " +
             "FROM UserJpaEntity u " +
             "INNER JOIN UserPortfolioImg p ON u.id = p.userId " +
-            "WHERE u.username = :name")
-    UserDto findSimpleUserByName(String name);
+            "WHERE u.username LIKE %:name%")
+    List<UserDto> findSimpleUserByName(String name);
 
     @Query("SELECT u.id, u.username " +
             "FROM UserJpaEntity u " +
