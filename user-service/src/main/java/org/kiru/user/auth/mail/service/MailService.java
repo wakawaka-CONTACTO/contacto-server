@@ -50,7 +50,7 @@ public class MailService {
             javaMailSender.send(message); // 메일 발송
             redisTemplateForOne.opsForValue().set(sendEmail, number);
         } catch (MailException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.getMessage());
             throw new IllegalArgumentException("메일 발송 중 오류가 발생했습니다.");
         }
         return number;

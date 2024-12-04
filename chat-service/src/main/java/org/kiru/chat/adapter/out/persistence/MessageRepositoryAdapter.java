@@ -23,10 +23,10 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetAllMessage
 
     @Override
     @Transactional
-    public List<Message> findAllByChatRoomId(Long chatRoomId, Long userId) {
+    public List<Message> findAllByChatRoomId(Long chatRoomId, Long userId,Boolean isUserAdmin) {
         return messageRepository.findAllByChatRoomIdOrderByCreatedAt(chatRoomId).stream()
                 .map(messageJpaEntity -> {
-                    if (!messageJpaEntity.getSenderId().equals(userId)) {
+                    if (!messageJpaEntity.getSenderId().equals(userId) && isUserAdmin.equals(false)) {
                         messageJpaEntity.setReadStatus(true);
                     }
                     return MessageJpaEntity.fromEntity(messageJpaEntity);

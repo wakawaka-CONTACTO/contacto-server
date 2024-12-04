@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
+import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.chat.adapter.out.persistence.GetOtherParticipantQuery;
 import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
@@ -37,10 +38,10 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
             return saveChatRoomPort.save(chatRoom, createChatRoomRequest.getUserId(), createChatRoomRequest.getUserId2());
     }
 
-    public ChatRoom findRoomById(Long roomId, Long userId) {
+    public ChatRoom findRoomById(Long roomId, Long userId, Boolean isUserAdmin) {
         ChatRoom chatRoom = getChatRoomQuery.findById(roomId).orElseThrow(
                 RuntimeException::new);
-        List<Message> messages = getAllMessageByRoomQuery.findAllByChatRoomId(roomId,userId);
+        List<Message> messages = getAllMessageByRoomQuery.findAllByChatRoomId(roomId,userId,isUserAdmin);
         chatRoom.addMessage(messages);
         Long otherUserId = getOtherParticipantQuery.getOtherParticipantId(roomId, userId);
         chatRoom.addParticipant(otherUserId);
@@ -72,5 +73,10 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     @Override
     public List<Long> getAlreadyLikedUserIds(Long userId) {
         return getAlreadyLikedUserIdsQuery.getAlreadyLikedUserIds(userId);
+    }
+
+    @Override
+    public List<AdminUserResponse> getMatchedUsers(Long userId) {
+        return getAlreadyLikedUserIdsQuery.getMatchedUsers(userId);
     }
 }

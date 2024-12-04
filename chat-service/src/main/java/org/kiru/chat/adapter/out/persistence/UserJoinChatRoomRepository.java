@@ -1,6 +1,7 @@
 package org.kiru.chat.adapter.out.persistence;
 
 import java.util.List;
+import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,9 +38,15 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
             "GROUP BY cr.id, lm.content")
     List<Object[]> findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(Long userId);
 
-    // userjoinChatroom에서 userId로 검색해서 스스로 join한 뒤 roomId가 일치하는 다른 userId를 가져온다.
     @Query("SELECT u.userId FROM UserJoinChatRoom u " +
             "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId " +
             "WHERE uj.userId = :userId AND u.userId <> :userId")
     List<Long> findAlreadyLikedUserIds(Long userId);
+
+
+    @Query("SELECT new org.kiru.chat.adapter.in.web.res.AdminUserResponse(u.userId, cr.createdAt) FROM UserJoinChatRoom u " +
+            "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId " +
+            "INNER JOIN ChatRoomJpaEntity cr ON u.chatRoomId = cr.id " +
+            "WHERE uj.userId = :userId AND u.userId <> :userId")
+    List<AdminUserResponse> getMatchedUser(Long userId);
 }
