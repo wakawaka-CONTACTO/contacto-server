@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -48,8 +49,8 @@ public class ChatRoomController {
     }
 
     @GetMapping("/rooms/{roomId}")
-    public ChatRoom getRoom(@PathVariable Long roomId, @UserId Long userId) {
-        return getChatRoomUseCase.findRoomById(roomId, userId);
+    public ChatRoom getRoom(@PathVariable Long roomId, @UserId Long userId, @RequestParam(required = false,  defaultValue = "false") Boolean changeStatus) {
+        return getChatRoomUseCase.findRoomById(roomId, userId,changeStatus);
     }
 
     @MessageMapping("/chat.send/{roomId}")

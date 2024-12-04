@@ -38,10 +38,10 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
             return saveChatRoomPort.save(chatRoom, createChatRoomRequest.getUserId(), createChatRoomRequest.getUserId2());
     }
 
-    public ChatRoom findRoomById(Long roomId, Long userId) {
+    public ChatRoom findRoomById(Long roomId, Long userId, Boolean isUserAdmin) {
         ChatRoom chatRoom = getChatRoomQuery.findById(roomId).orElseThrow(
                 RuntimeException::new);
-        List<Message> messages = getAllMessageByRoomQuery.findAllByChatRoomId(roomId,userId);
+        List<Message> messages = getAllMessageByRoomQuery.findAllByChatRoomId(roomId,userId,isUserAdmin);
         chatRoom.addMessage(messages);
         Long otherUserId = getOtherParticipantQuery.getOtherParticipantId(roomId, userId);
         chatRoom.addParticipant(otherUserId);

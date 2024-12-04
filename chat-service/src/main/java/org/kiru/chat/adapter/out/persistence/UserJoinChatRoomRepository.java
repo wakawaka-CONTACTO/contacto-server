@@ -44,7 +44,7 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
     List<Long> findAlreadyLikedUserIds(Long userId);
 
 
-    @Query("SELECT u.userId, cr.createdAt FROM UserJoinChatRoom u " +
+    @Query("SELECT new org.kiru.chat.adapter.in.web.res.AdminUserResponse(u.userId, cr.createdAt) FROM UserJoinChatRoom u " +
             "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId " +
             "INNER JOIN ChatRoomJpaEntity cr ON u.chatRoomId = cr.id " +
             "WHERE uj.userId = :userId AND u.userId <> :userId")
