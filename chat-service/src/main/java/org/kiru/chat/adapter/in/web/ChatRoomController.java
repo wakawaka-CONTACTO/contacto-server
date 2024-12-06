@@ -9,11 +9,14 @@ import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
 import org.kiru.chat.application.port.in.GetAlreadyLikedUserIdsUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
+import org.kiru.chat.application.port.in.GetMessageUseCase;
 import org.kiru.chat.application.port.in.SendMessageUseCase;
 import org.kiru.chat.application.service.WebSocketUserService;
 import org.kiru.chat.config.argumentresolve.UserId;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -37,10 +40,12 @@ public class ChatRoomController {
     private final AddParticipantUseCase addParticipantUseCase;
     private final WebSocketUserService webSocketUserService;
     private final GetAlreadyLikedUserIdsUseCase getAlreadyUserIdsUseCase;
+    private final GetMessageUseCase getMessageUseCase;
 
     @PostMapping("/rooms")
-    public CreateChatRoomResponse createRoom(@UserId Long userId, @RequestBody CreateChatRoomRequest createChatRoomRequest) {
-            return new CreateChatRoomResponse(createRoomUseCase.createRoom(createChatRoomRequest).getId());
+    public CreateChatRoomResponse createRoom(@UserId Long userId,
+                                             @RequestBody CreateChatRoomRequest createChatRoomRequest) {
+        return new CreateChatRoomResponse(createRoomUseCase.createRoom(createChatRoomRequest).getId());
     }
 
     @GetMapping("/rooms")
@@ -49,8 +54,9 @@ public class ChatRoomController {
     }
 
     @GetMapping("/rooms/{roomId}")
-    public ChatRoom getRoom(@PathVariable Long roomId, @UserId Long userId, @RequestParam(required = false,  defaultValue = "false") Boolean changeStatus) {
-        return getChatRoomUseCase.findRoomById(roomId, userId,changeStatus);
+    public ChatRoom getRoom(@PathVariable Long roomId, @UserId Long userId,
+                            @RequestParam(required = false, defaultValue = "false") Boolean changeStatus) {
+        return getChatRoomUseCase.findRoomById(roomId, userId, changeStatus);
     }
 
     @MessageMapping("/chat.send/{roomId}")
@@ -64,7 +70,8 @@ public class ChatRoomController {
     @PostMapping("/rooms/{roomId}/participants")
     public ResponseEntity<String> addParticipant(@PathVariable Long roomId, @UserId Long userId) {
         boolean added = addParticipantUseCase.addParticipant(roomId, userId);
-        return added ? ResponseEntity.ok("Participant added") : ResponseEntity.badRequest().body("Failed to add participant");
+        return added ? ResponseEntity.ok("Participant added")
+                : ResponseEntity.badRequest().body("Failed to add participant");
     }
 
     @GetMapping("/me/rooms")
@@ -80,5 +87,16 @@ public class ChatRoomController {
     @GetMapping("/me/matched")
     public List<AdminUserResponse> getMatchedUsers(@UserId Long userId) {
         return getAlreadyUserIdsUseCase.getMatchedUsers(userId);
+    }
+
+    @GetMapping("/cs/rooms")
+    public ChatRoom getMatchedUsers(@RequestParam Long adminId, @RequestParam Long userId) {
+        return getChatRoomUseCase.getOrCreateRoomUseCase(userId, adminId);
+    }
+
+    @GetMapping("/rooms/{roomId}/messages")
+    public Slice<Message> getMessageByRoomId(@PathVariable Long roomId, @UserId Long userId,
+                                             @RequestParam Boolean admin, Pageable pageable) {
+        return getMessageUseCase.getMessages(roomId, userId, admin, pageable);
     }
 }

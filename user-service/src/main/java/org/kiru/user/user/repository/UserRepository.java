@@ -1,16 +1,9 @@
 package org.kiru.user.user.repository;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.hibernate.annotations.Cache;
-import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserJpaEntity;
-import org.kiru.user.admin.dto.AdminMatchedUserResponse;
-import org.kiru.user.admin.dto.AdminUserDto;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
-import org.kiru.user.admin.dto.MatchedUserResponse;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

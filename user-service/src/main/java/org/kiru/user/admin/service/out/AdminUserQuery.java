@@ -14,4 +14,8 @@ public interface AdminUserQuery {
     Page<AdminLikeUserDto> findUserLikes(Pageable pageable, Long userId);
 
     Page<AdminLikeUserDto> findUserLiked(Pageable pageable, Long userId);
+
+    Page<AdminLikeUserDto> findUserLikesByName(Pageable pageable, Long userId, String name);
+
+    Page<AdminLikeUserDto> findUserLikedByName(Pageable pageable, Long userId, String name);
 }
