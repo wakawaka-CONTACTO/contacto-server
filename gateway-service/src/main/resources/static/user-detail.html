@@ -330,7 +330,7 @@
         }
         .tab-button.active {
             background-color: white;
-            border-bottom: 1px solid white;
+            border-bottom: 3px solid #007bff;
             font-weight: bold;
         }
         .tab-content {
@@ -490,26 +490,26 @@
             margin-left: auto;
         }
         .message.sent .message-content {
-            background-color: #007bff;
-            color: white;
+            background-color: #E3F2FD;
+            color: #2c3e50;
             border-top-right-radius: 5px;
         }
         .message.received {
             margin-right: auto;
         }
         .message.received .message-content {
-            background-color: #e9ecef;
-            color: #333;
+            background-color: #F3E5F5;
+            color: #2c3e50;
             border-top-left-radius: 5px;
         }
         .message-time {
             font-size: 12px;
-            color: #666;
+            color: #546E7A;
             margin-top: 5px;
             text-align: right;
         }
         .message.sent .message-time {
-            color: #666;
+            color: #546E7A;
         }
         .message-status {
             font-size: 12px;
@@ -525,7 +525,7 @@
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.8em;
-            background-color: #ff4b4b;
+            background-color: #FFB7B2;
             color: white;
         }
         .like-badge.mutual {
@@ -571,6 +571,54 @@
         .like-item .like-date {
             font-size: 0.8em;
             color: #666;
+        }
+        .likes-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 200px);
+            max-width: 100%;
+            overflow: hidden; /* 넘치는 부분 숨기기 */
+        }
+        
+        .like-section {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-width: 0; /* flex 자식 요소의 최소 너비 설정 */
+        }
+        
+        .like-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%; /* 전체 너비 차지 */
+        }
+        
+        .like-search input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            min-width: 0; /* 입력창이 줄어들 수 있도록 */
+        }
+        
+        .like-search button {
+            padding: 8px 15px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
         }
         .modal {
             display: none;
@@ -870,11 +918,11 @@
             margin-bottom: 0.8rem;
             animation: slideIn 0.5s ease-out;
         }
-        
+
         .info-item:last-child {
             margin-bottom: 0;
         }
-        
+
         .info-item strong {
             color: #34495e;
             font-size: 1rem;
@@ -893,7 +941,539 @@
             gap: 1.5rem;
             margin-top: 1rem;
         }
+
+        /* CS 채팅방 스타일 */
+        .chat-room-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .chat-room-header {
+            padding: 16px 20px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-room-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #343a40;
+            font-weight: 600;
+        }
+
+        .messages-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: #ffffff;
+        }
+
+        .messages-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-list::-webkit-scrollbar-track {
+            background: #f1f3f5;
+        }
+
+        .messages-list::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 3px;
+        }
+
+        /* 채팅 탭 스타일 */
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 100px);
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .chat-rooms-list {
+            width: 350px;
+            border-right: 1px solid #eee;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-room {
+            display: flex;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-room:hover {
+            background: #f8f9fa;
+        }
+
+        .chat-room.active {
+            background: #e3f2fd;
+        }
+
+        .chat-room-thumbnail {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .chat-room-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-room-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .unread-badge {
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .chat-room-message {
+            margin: 0;
+            font-size: 14px;
+            color: #7f8c8d;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-room-participants {
+            margin: 4px 0 0;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .chat-messages {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        .messages-header {
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .messages-header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .messages-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .search-bar button {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .search-bar button:hover {
+            background: #0056b3;
+        }
+
+        .search-navigation {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-button {
+            padding: 4px 8px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .search-count {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .messages-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            margin: 8px 0;
+            clear: both;
+        }
+
+        .message.sent {
+            float: right;
+        }
+
+        .message.received {
+            float: left;
+        }
+
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 4px;
+        }
+
+        .message.sent .message-content {
+            background: #e3f2fd;
+            color: #2c3e50;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #95a5a6;
+            text-align: right;
+        }
+
+        .message-status {
+            margin-left: 4px;
+            color: #007bff;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .no-chats {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 20px;
+            color: #dc3545;
+        }
+
+        /* CS 채팅 입력 부분 스타일 */
+        .message-input-container {
+            padding: 16px;
+            background-color: #ffffff;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 24px;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #A5D6A7;
+            box-shadow: 0 0 0 3px rgba(165, 214, 167, 0.2);
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 20px;
+            background-color: #A5D6A7;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .send-button:hover {
+            background-color: #81C784;
+            transform: translateY(-1px);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button i {
+            font-size: 1.1rem;
+        }
+
+        /* Like 섹션 스타일 */
+        .like-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .like-section h2 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #E3F2FD;
+        }
+
+        .like-search {
+            margin-bottom: 20px;
+            width: 100%;
+            display: flex;
+            gap: 12px;
+            background-color: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .like-search input {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .like-search input:focus {
+            outline: none;
+            border-color: #90CAF9;
+            box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.2);
+        }
+
+        .like-search button {
+            padding: 12px 24px;
+            background: #90CAF9;
+            color: #2c3e50;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .like-search button:hover {
+            background-color: #64B5F6;
+            transform: translateY(-1px);
+        }
+
+        .like-search button:active {
+            transform: translateY(0);
+        }
+
+        .like-search button i {
+            font-size: 1.1rem;
+        }
+
+        .likes-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 200px);
+        }
+
+        .like-section {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .like-section h2 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .like-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .like-search input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .like-search button {
+            padding: 8px 15px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .like-search button:hover {
+            background-color: #357abd;
+        }
+
+        .like-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .like-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .like-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .like-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .like-info {
+            flex: 1;
+        }
+
+        .like-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .like-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .no-likes {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 20px;
+            color: #dc3545;
+            font-size: 14px;
+        }
+
+        .nav-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        #likeMeLoadMore, #iLikeLoadMore {
+            display: none;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -925,20 +1505,28 @@
         </div>
 
         <div id="like" class="tab-content">
-            <div class="search-bar">
-                <input type="text" id="likeSearch" placeholder="Search liked users...">
-                <button onclick="searchLikes()">Search</button>
-            </div>
-            <div class="like-section">
-                <h2>Liked by</h2>
-                <div class="like-grid" id="likeMeList">
-                    <!-- 나를 좋아하는 사람 목록 -->
+            <div class="likes-container">
+                <div class="like-section">
+                    <h2>They Like</h2>
+                    <div class="like-search">
+                        <input type="text" id="likeMeSearch" placeholder="Search people who liked you">
+                        <button id="likeMeSearchButton">Search</button>
+                    </div>
+                    <div class="like-list" id="likeMeList">
+                        <!-- They Like 목록이 여기에 표시됩니다 -->
+                    </div>
+                    <button id="likeMeLoadMore" class="nav-button" onclick="loadMoreLikes('likeMe')">더보기</button>
                 </div>
-            </div>
-            <div class="like-section">
-                <h2>Liked</h2>
-                <div class="like-grid" id="iLikeList">
-                    <!-- 내가 좋아하는 사람 목록 -->
+                <div class="like-section">
+                    <h2>I Like</h2>
+                    <div class="like-search">
+                        <input type="text" id="iLikeSearch" placeholder="Search people you liked">
+                        <button id="iLikeSearchButton">Search</button>
+                    </div>
+                    <div class="like-list" id="iLikeList">
+                        <!-- I Like 목록이 여기에 표시됩니다 -->
+                    </div>
+                    <button id="iLikeLoadMore" class="nav-button" onclick="loadMoreLikes('iLike')">더보기</button>
                 </div>
             </div>
         </div>
@@ -947,8 +1535,7 @@
             <div class="chat-container">
                 <div class="chat-rooms-list">
                     <div class="search-bar">
-                        <input type="text" id="chatRoomSearch" placeholder="Search chat rooms...">
-                        <button onclick="searchChatRooms()">Search</button>
+                        <input type="text" id="chatRoomSearch" placeholder="채팅방 검색..." oninput="searchChatRooms()">
                     </div>
                     <div id="chatRoomsList">
                         <!-- 채팅방 목록이 여기에 추가됩니다 -->
@@ -957,18 +1544,14 @@
                 <div class="chat-messages" id="chatMessages">
                     <div class="messages-header">
                         <div class="messages-header-content">
-                            <h3 id="selectedRoomTitle">Select a chat room</h3>
+                            <h3 id="selectedRoomTitle">채팅방을 선택해주세요</h3>
                             <div class="search-bar">
-                                <div style="position: relative; flex: 1;">
-                                    <input type="text" id="messageSearch" placeholder="Search messages...">
-                                    <div id="searchResults" class="search-results" style="display: none;"></div>
-                                </div>
+                                <input type="text" id="messageSearch" placeholder="메시지 검색..." oninput="searchMessages()">
                                 <div class="search-navigation">
                                     <button class="nav-button" id="prevResult" disabled onclick="navigateSearchResults(-1)">↑</button>
                                     <span class="search-count" id="searchCount"></span>
                                     <button class="nav-button" id="nextResult" disabled onclick="navigateSearchResults(1)">↓</button>
                                 </div>
-                                <button onclick="searchMessages()">Search</button>
                             </div>
                         </div>
                     </div>
@@ -987,7 +1570,21 @@
 
         <div id="cs" class="tab-content">
             <div id="csList">
-                <!-- CS 목록이 여기에 추가됩니다 -->
+                <div class="chat-room-container">
+                    <div class="chat-room-header">
+                        <h3>CS 채팅방</h3>
+                    </div>
+                    <div id="cs-messages" class="messages-list">
+                        <!-- CS 채팅 메시지가 여기에 추가됩니다 -->
+                    </div>
+                    <div class="message-input-container">
+                        <input type="text" class="message-input" id="csMessageInput" placeholder="메시지를 입력하세요...">
+                        <button class="send-button" onclick="sendCSMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                            전송
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1016,6 +1613,15 @@
     let portfolioImages = [];
     let currentChatRoom = null;
 
+    // Global variables for pagination and search
+    let likeMeCurrentPage = 0;
+    let iLikeCurrentPage = 0;
+    let likeMeHasMore = true;
+    let iLikeHasMore = true;
+    const PAGE_SIZE = 9;
+    let currentLikeMeSearch = '';
+    let currentILikeSearch = '';
+
     window.onload = async () => {
         if (!userId) {
             alert('사용자 ID가 필요합니다.');
@@ -1030,7 +1636,9 @@
             loadCS()
         ]);
     };
-
+    function loadMoreLikes(type) {
+        loadLikes(type, true);
+    }
     function showTab(tabName) {
         // 모든 탭 컨텐츠와 버튼 비활성화
         document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1043,6 +1651,13 @@
         // 선택된 탭 활성화
         document.getElementById(tabName).classList.add('active');
         document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+
+        // CS 탭 선택 시 기존 연결 해제
+        if (tabName === 'cs' && stompClient) {
+            stompClient.disconnect();
+            stompClient = null;
+            loadCS();
+        }
     }
 
     async function loadUserDetail() {
@@ -1252,41 +1867,224 @@
         }).join('') || '<div class="p-3">매칭된 사용자가 없습니다.</div>';
     }
 
-    async function loadLikes() {
+    let currentLikePage = 0;
+    let isLastLikePage = false;
+
+    async function loadLikes(type = null, loadMore = false) {
         try {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/users/admin/users/${userId}/likes?page=0&size=100`, {
-                headers: {
-                    'Authorization': token
+            // 더보기가 아닌 경우 페이지 초기화
+            if (!loadMore) {
+                if (type === 'likeMe' || type === null) {
+                    likeMeCurrentPage = 0;
+                    likeMeHasMore = true;
                 }
-            });
-            const data = await response.json();
+                if (type === 'iLike' || type === null) {
+                    iLikeCurrentPage = 0;
+                    iLikeHasMore = true;
+                }
+            }
 
-            // 나를 좋아하는 사람 목록
-            const likeMeList = document.getElementById('likeMeList');
-            likeMeList.innerHTML = data.likeMe.map(user => `
-                    <div class="like-item" onclick="showUserDetail(${user.userId})">
-                        <img src="${user.portfolioImageUrl || 'default-profile.png'}" alt="프로필">
-                        <h3>${user.name || '이름 없음'}</h3>
-                        <div class="like-date">${new Date(user.likedAt).toLocaleString()}</div>
-                    </div>
-                `).join('') || '<p>나를 좋아하는 사람이 없습니다.</p>';
+            // likeMe 데이터 로드
+            if ((type === 'likeMe' || type === null) && likeMeHasMore) {
+                let url = `${CONFIG.API_BASE_URL}/api/v1/users/admin/users/${userId}/likes?page=${likeMeCurrentPage}&size=20`;
+                
+                // 검색어가 있는 경우 URL에 추가
+                if (currentLikeMeSearch) {
+                    url += `&name=${encodeURIComponent(currentLikeMeSearch)}`;
+                }
 
-            // 내가 좋아하는 사람 목록
-            const iLikeList = document.getElementById('iLikeList');
-            iLikeList.innerHTML = data.iLike.map(user => `
-                    <div class="like-item" onclick="showUserDetail(${user.userId})">
-                        <img src="${user.portfolioImageUrl || 'default-profile.png'}" alt="프로필">
-                        <h3>${user.name || '이름 없음'}</h3>
-                        <div class="like-date">${new Date(user.likedAt).toLocaleString()}</div>
-                    </div>
-                `).join('') || '<p>좋아하는 사람이 없습니다.</p>';
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load likes');
+                }
+
+                const data = await response.json();
+                const likeMeList = document.getElementById('likeMeList');
+                const likeMeLoadMore = document.getElementById('likeMeLoadMore');
+
+                if (!likeMeList) {
+                    console.error('Required elements not found');
+                    return;
+                }
+
+                // They Like 목록 처리
+                if (data.likeMe && data.likeMe.length > 0) {
+                    const likeMeHTML = data.likeMe.map(like => {
+                        const likeDate = new Date(like.likedAt).toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        return `
+                            <div class="like-item" onclick="showUserDetail('${like.userId}')">
+                                <img src="${like.portfolioImageUrl || 'default-profile.png'}" alt="Profile">
+                                <div class="like-info">
+                                    <div class="like-name">${like.name || 'No Name'}</div>
+                                    <div class="like-date">${likeDate}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    if (loadMore) {
+                        likeMeList.innerHTML += likeMeHTML;
+                    } else {
+                        likeMeList.innerHTML = likeMeHTML;
+                    }
+
+                    // 더 보기 버튼 표시/숨김 처리
+                    likeMeHasMore = data.likeMe.length === 20;
+                    if (likeMeLoadMore) {
+                        likeMeLoadMore.style.display = likeMeHasMore ? 'block' : 'none';
+                    }
+                    
+                    if (likeMeHasMore) {
+                        likeMeCurrentPage++;
+                    }
+                } else {
+                    if (!loadMore) {
+                        likeMeList.innerHTML = '<div class="no-likes">검색 결과가 없습니다.</div>';
+                    }
+                    if (likeMeLoadMore) {
+                        likeMeLoadMore.style.display = 'none';
+                    }
+                    likeMeHasMore = false;
+                }
+            }
+
+            // iLike 데이터 로드
+            if ((type === 'iLike' || type === null) && iLikeHasMore) {
+                let url = `${CONFIG.API_BASE_URL}/api/v1/users/admin/users/${userId}/likes?page=${iLikeCurrentPage}&size=20`;
+                if (currentILikeSearch) {
+                    url += `&name=${encodeURIComponent(currentILikeSearch)}`;
+                }
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load likes');
+                }
+
+                const data = await response.json();
+                const iLikeList = document.getElementById('iLikeList');
+                const iLikeLoadMore = document.getElementById('iLikeLoadMore');
+
+                if (!iLikeList) {
+                    console.error('Required elements not found');
+                    return;
+                }
+
+                // I Like 목록 처리
+                if (data.iLike && data.iLike.length > 0) {
+                    const iLikeHTML = data.iLike.map(like => {
+                        const likeDate = new Date(like.likedAt).toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        return `
+                            <div class="like-item" onclick="showUserDetail('${like.userId}')">
+                                <img src="${like.portfolioImageUrl || 'default-profile.png'}" alt="Profile">
+                                <div class="like-info">
+                                    <div class="like-name">${like.name || 'No Name'}</div>
+                                    <div class="like-date">${likeDate}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    if (loadMore) {
+                        iLikeList.innerHTML += iLikeHTML;
+                    } else {
+                        iLikeList.innerHTML = iLikeHTML;
+                    }
+
+                    // 더 보기 버튼 표시/숨김 처리
+                    iLikeHasMore = data.iLike.length === 20;
+                    if (iLikeLoadMore) {
+                        iLikeLoadMore.style.display = iLikeHasMore ? 'block' : 'none';
+                    }
+                    
+                    if (iLikeHasMore) {
+                        iLikeCurrentPage++;
+                    }
+                } else {
+                    if (!loadMore) {
+                        iLikeList.innerHTML = '<div class="no-likes">검색 결과가 없습니다.</div>';
+                    }
+                    if (iLikeLoadMore) {
+                        iLikeLoadMore.style.display = 'none';
+                    }
+                    iLikeHasMore = false;
+                }
+            }
         } catch (error) {
             console.error('Error loading likes:', error);
-            document.getElementById('likeMeList').innerHTML = '<p>좋아요 목록을 불러오는데 실패했습니다.</p>';
-            document.getElementById('iLikeList').innerHTML = '<p>좋아요 목록을 불러오는데 실패했습니다.</p>';
+            const likeMeList = document.getElementById('likeMeList');
+            const iLikeList = document.getElementById('iLikeList');
+            
+            if (likeMeList) {
+                likeMeList.innerHTML = '<div class="error-message">Failed to load likes</div>';
+            }
+            if (iLikeList) {
+                iLikeList.innerHTML = '<div class="error-message">Failed to load likes</div>';
+            }
         }
     }
-
+    
+    function searchLikes(type) {
+        if (type === 'likeMe') {
+            currentLikeMeSearch = document.getElementById('likeMeSearch').value.trim();
+            likeMeCurrentPage = 0;
+            likeMeHasMore = true;
+        } else {
+            currentILikeSearch = document.getElementById('iLikeSearch').value.trim();
+            iLikeCurrentPage = 0;
+            iLikeHasMore = true;
+        }
+        loadLikes(type);
+    }
+    
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', initializeLikeSearch);
+    function initializeLikeSearch() {
+        const likeMeSearchInput = document.getElementById('likeMeSearch');
+        const likeMeSearchButton = document.getElementById('likeMeSearchButton');
+        const iLikeSearchInput = document.getElementById('iLikeSearch');
+        const iLikeSearchButton = document.getElementById('iLikeSearchButton');
+    
+        if (likeMeSearchInput && likeMeSearchButton) {
+            likeMeSearchButton.onclick = () => searchLikes('likeMe');
+            
+            // 엔터 키 이벤트 추가
+            likeMeSearchInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    searchLikes('likeMe');
+                }
+            });
+        }
+    
+        if (iLikeSearchInput && iLikeSearchButton) {
+            iLikeSearchButton.onclick = () => searchLikes('iLike');
+            
+            // 엔터 키 이벤트 추가
+            iLikeSearchInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    searchLikes('iLike');
+                }
+            });
+        }
+    }
+    
     async function loadChats() {
         try {
             const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/users/admin/chatroom?userId=${userId}`, {
@@ -1305,6 +2103,12 @@
 
     async function loadChatRoom(roomId) {
         try {
+            // 선택된 채팅방 강조
+            document.querySelectorAll('.chat-room').forEach(room => {
+                room.classList.remove('active');
+            });
+            document.querySelector(`[data-room-id="${roomId}"]`)?.classList.add('active');
+
             const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/users/admin/rooms/${roomId}`, {
                 headers: {
                     'Authorization': token
@@ -1321,12 +2125,6 @@
             // URL에서 현재 사용자 ID 가져오기
             const urlParams = new URLSearchParams(window.location.search);
             const currentUserId = parseInt(urlParams.get('userId'));
-
-            // 선택된 채팅방 강조
-            document.querySelectorAll('.chat-room').forEach(room => {
-                room.classList.remove('active');
-            });
-            document.querySelector(`[data-room-id="${roomId}"]`)?.classList.add('active');
 
             // 채팅방 제목 업데이트
             document.getElementById('selectedRoomTitle').textContent = chatRoom.title;
@@ -1394,27 +2192,159 @@
             `).join('') || '<p>채팅방이 없습니다.</p>';
     }
 
+    let stompClient = null;
+    let currentCsRoomId = null;
+
     async function loadCS() {
         try {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/users/admin/users/${userId}/cs`, {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/users/admin/cs?userId=${userId}`, {
                 headers: {
                     'Authorization': token
                 }
             });
-            const data = await response.json();
 
+            if (!response.ok) {
+                throw new Error('Failed to load CS chat room');
+            }
+
+            const chatRoom = await response.json();
             const csList = document.getElementById('csList');
-            csList.innerHTML = data.map(cs => `
-                    <div class="chat-item">
-                        <div>
-                            <h3>문의 #${cs.id}</h3>
-                            <p>${cs.title || '제목 없음'}</p>
-                            <small>상태: ${cs.status} | 생성일: ${new Date(cs.createdAt).toLocaleString()}</small>
+
+            if (chatRoom && chatRoom.id) {
+                currentCsRoomId = chatRoom.id;
+
+                let messageContent = '';
+                if (chatRoom.messages && chatRoom.messages.length > 0) {
+                    messageContent = chatRoom.messages.map(message => {
+                        const isMyMessage = message.senderId.toString() === localStorage.getItem('userId');
+                        const time = new Date(message.createdAt).toLocaleString('ko-KR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        return `
+                            <div class="message ${isMyMessage ? 'sent' : 'received'}">
+                                <div class="message-content">
+                                    ${message.content}
+                                </div>
+                                <div class="message-time">
+                                    ${time}
+                                    <span class="message-status">✓</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                csList.innerHTML = `
+                    <div class="chat-room-container">
+                        <div class="chat-room-header">
+                            <h3>${chatRoom.title}</h3>
+                        </div>
+                        <div id="cs-messages" class="messages-list">
+                            ${messageContent || '<p class="no-messages">아직 메시지가 없습니다.</p>'}
+                        </div>
+                        <div class="message-input-container">
+                            <input type="text" class="message-input" id="csMessageInput" placeholder="메시지를 입력하세요...">
+                            <button class="send-button" onclick="sendCSMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                                전송
+                            </button>
                         </div>
                     </div>
-                `).join('');
+                `;
+
+                // WebSocket 연결
+                const socket = new SockJS(`http://localhost:8081/chat-websocket?userId=${userId}&accessToken=${token.replace('Bearer ', '')}`);
+                stompClient = Stomp.over(socket);
+
+                const headers = {
+                    "Authorization": token
+                };
+
+                stompClient.connect(
+                    headers,
+                    () => {
+                        console.log('WebSocket 연결 성공');
+                        stompClient.subscribe(`/topic/${chatRoom.id}`, (message) => {
+                            showCsMessage(JSON.parse(message.body));
+                        });
+                    },
+                    (error) => {
+                        console.error('WebSocket 연결 실패:', error);
+                        alert('채팅 연결에 실패했습니다. 페이지를 새로고침해주세요.');
+                    }
+                );
+
+                // Enter 키 이벤트 리스너 추가
+                document.getElementById('csMessageInput').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendCSMessage();
+                    }
+                });
+            } else {
+                csList.innerHTML = '<p>CS 채팅방을 찾을 수 없습니다.</p>';
+            }
         } catch (error) {
             console.error('Error loading CS:', error);
+            alert('CS 채팅방을 불러오는데 실패했습니다.');
+        }
+    }
+
+    function showCsMessage(message) {
+        const messagesContainer = document.getElementById('cs-messages');
+        const isMyMessage = message.senderId.toString() === localStorage.getItem('userId');
+        const time = new Date().toLocaleString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${isMyMessage ? 'sent' : 'received'}`;
+        messageElement.innerHTML = `
+            <div class="message-content">
+                ${message.content}
+            </div>
+            <div class="message-time">
+                ${time}
+                <span class="message-status">✓</span>
+            </div>
+        `;
+
+        messagesContainer.appendChild(messageElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    async function sendCSMessage() {
+        const messageInput = document.getElementById('csMessageInput');
+        const content = messageInput.value.trim();
+
+        if (!content || !currentCsRoomId || !stompClient) {
+            console.log('메시지 전송 실패:', { content, currentCsRoomId, hasStompClient: !!stompClient });
+            return;
+        }
+
+        try {
+            const currentTime = new Date().toISOString();
+            const senderId = localStorage.getItem('userId');
+            const messageData = {
+                id: Date.now().toString(),
+                content: content,
+                senderId: senderId,
+                sendedId: userId.toString(), // 상담 받는 사용자의 ID
+                chatRoomId: currentCsRoomId,
+                createdAt: currentTime
+            };
+
+            stompClient.send(
+                `/app/chat.send/${currentCsRoomId}`,
+                { "Authorization": token },
+                JSON.stringify(messageData)
+            );
+
+            messageInput.value = '';
+        } catch (error) {
+            console.error('메시지 전송 중 오류:', error);
+            alert('메시지 전송에 실패했습니다.');
         }
     }
 
@@ -1469,24 +2399,17 @@
     }
 
     // 좋아요 검색
-    function searchLikes() {
-        const searchTerm = document.getElementById('likeSearch').value.toLowerCase();
-        const likeMeItems = document.querySelectorAll('#likeMeList .like-item');
-        const iLikeItems = document.querySelectorAll('#iLikeList .like-item');
-
-        const filterItems = (items) => {
-            items.forEach(item => {
-                const name = item.querySelector('h3').textContent.toLowerCase();
-                if (name.includes(searchTerm)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        };
-
-        filterItems(likeMeItems);
-        filterItems(iLikeItems);
+    function searchLikes(type) {
+        if (type === 'likeMe') {
+            currentLikeMeSearch = document.getElementById('likeMeSearch').value.trim();
+            likeMeCurrentPage = 0;
+            likeMeHasMore = true;
+        } else {
+            currentILikeSearch = document.getElementById('iLikeSearch').value.trim();
+            iLikeCurrentPage = 0;
+            iLikeHasMore = true;
+        }
+        loadLikes(type);
     }
 
     // 채팅방 검색
@@ -1514,132 +2437,56 @@
 
     // 메시지 검색
     function searchMessages() {
-        if (!currentChatRoom) return;
-
         const searchTerm = document.getElementById('messageSearch').value.toLowerCase();
-        if (!searchTerm) return;
+        if (searchTerm.length < 2) return;
 
-        const messages = document.querySelectorAll('.message');
+        const messages = document.querySelectorAll('#messagesList .message-content');
         searchResults = [];
+        currentSearchIndex = -1;
 
-        // 검색 결과 초기화
-        messages.forEach(message => {
-            message.classList.remove('highlighted');
-            const content = message.querySelector('.message-content');
-            const originalText = content.textContent;
-            // 검색어 하이라이트 적용
-            const regex = new RegExp(searchTerm, 'gi');
-            content.innerHTML = originalText.replace(regex, match =>
-                `<span class="search-highlight">${match}</span>`
-            );
+        messages.forEach((message, index) => {
+            const content = message.textContent.toLowerCase();
+            if (content.includes(searchTerm)) {
+                searchResults.push(index);
+            }
         });
 
-        // 검색 결과 수집 (역순으로 - 최신 메시지부터)
-        for (let i = messages.length - 1; i >= 0; i--) {
-            const message = messages[i];
-            const content = message.querySelector('.message-content').textContent.toLowerCase();
-            if (content.includes(searchTerm)) {
-                searchResults.push({
-                    element: message,
-                    content: message.querySelector('.message-content').innerHTML,
-                    time: message.querySelector('.message-time').textContent
-                });
-            }
+        updateSearchNavigation();
+        if (searchResults.length > 0) {
+            navigateSearchResults(1);
         }
-
-        updateSearchResultsUI();
     }
 
-    function updateSearchResultsUI() {
-        const searchResultsDiv = document.getElementById('searchResults');
+    function updateSearchNavigation() {
         const searchCount = document.getElementById('searchCount');
         const prevButton = document.getElementById('prevResult');
         const nextButton = document.getElementById('nextResult');
 
-        if (searchResults.length > 0) {
-            // 검색 결과 표시
-            searchResultsDiv.style.display = 'block';
-            searchResultsDiv.innerHTML = searchResults.map((result, index) => `
-                    <div class="search-result-item" onclick="jumpToMessage(${index})">
-                        <div class="search-result-content">${result.content}</div>
-                        <div class="search-result-time">${result.time}</div>
-                    </div>
-                `).join('');
+        searchCount.textContent = searchResults.length > 0 
+            ? `${currentSearchIndex + 1}/${searchResults.length}`
+            : '0/0';
 
-            // 네비게이션 버튼 활성화
-            searchCount.textContent = `${searchResults.length}개 결과`;
-            prevButton.disabled = true;
-            nextButton.disabled = false;
-            currentSearchIndex = -1;
-
-            // 첫 번째 결과로 이동
-            jumpToMessage(0);
-        } else {
-            searchResultsDiv.style.display = 'none';
-            searchCount.textContent = '결과 없음';
-            prevButton.disabled = true;
-            nextButton.disabled = true;
-        }
-    }
-
-    function jumpToMessage(index) {
-        if (index < 0 || index >= searchResults.length) return;
-
-        // 이전 하이라이트 제거
-        if (currentSearchIndex !== -1) {
-            searchResults[currentSearchIndex].element.classList.remove('highlighted');
-        }
-
-        currentSearchIndex = index;
-        const result = searchResults[index];
-
-        // 새로운 메시지 하이라이트
-        result.element.classList.add('highlighted');
-
-        // 메시지로 스크롤
-        result.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // 네비게이션 버튼 상태 업데이트
-        document.getElementById('prevResult').disabled = index === 0;
-        document.getElementById('nextResult').disabled = index === searchResults.length - 1;
-        document.getElementById('searchCount').textContent = `${index + 1}/${searchResults.length}`;
-
-        // 검색 결과 목록 닫기
-        document.getElementById('searchResults').style.display = 'none';
+        prevButton.disabled = currentSearchIndex <= 0;
+        nextButton.disabled = currentSearchIndex >= searchResults.length - 1;
     }
 
     function navigateSearchResults(direction) {
-        const newIndex = currentSearchIndex + direction;
-        if (newIndex >= 0 && newIndex < searchResults.length) {
-            jumpToMessage(newIndex);
-        }
+        if (searchResults.length === 0) return;
+
+        currentSearchIndex = Math.min(
+            Math.max(currentSearchIndex + direction, 0),
+            searchResults.length - 1
+        );
+
+        const messages = document.querySelectorAll('#messagesList .message-content');
+        messages.forEach(msg => msg.style.backgroundColor = '');
+
+        const targetMessage = messages[searchResults[currentSearchIndex]];
+        targetMessage.style.backgroundColor = '#fff3cd';
+        targetMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        updateSearchNavigation();
     }
-
-    // 검색창 외부 클릭시 검색 결과 숨기기
-    document.addEventListener('click', function(e) {
-        const searchResults = document.getElementById('searchResults');
-        const searchBar = document.querySelector('.search-bar');
-        if (!searchBar.contains(e.target)) {
-            searchResults.style.display = 'none';
-        }
-    });
-
-    document.getElementById('messageSearch')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchMessages();
-        }
-    });
-
-    // 키보드 단축키 추가
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'F3' || (e.ctrlKey && e.key === 'g')) {
-            e.preventDefault();
-            navigateSearchResults(1);
-        } else if (e.shiftKey && e.key === 'F3' || (e.ctrlKey && e.shiftKey && e.key === 'G')) {
-            e.preventDefault();
-            navigateSearchResults(-1);
-        }
-    });
 </script>
 </body>
 </html>

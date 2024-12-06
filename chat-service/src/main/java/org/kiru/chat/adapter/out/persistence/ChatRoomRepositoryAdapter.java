@@ -1,19 +1,18 @@
 package org.kiru.chat.adapter.out.persistence;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
-import org.kiru.core.chat.userchatroom.entity.QUserJoinChatRoom;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
-import org.springframework.data.web.config.EnableSpringDataWebSupport.QuerydslActivator;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +44,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
     @Transactional
     public Optional<ChatRoom> findById(Long id) {
         return chatRoomRepository.findById(id)
+                .filter(ChatRoomJpaEntity::getVisible)
                 .map(ChatRoom::fromEntity);
     }
 
@@ -65,6 +65,41 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
             chatRoom.setLatestMessageContent(latestMessageContent);
             return chatRoom;
         }).toList();
+    }
+
+@Override
+@Transactional
+public ChatRoom getOrCreateRoom(Long userId, Long adminId) {
+    List<UserJoinChatRoom> userChatRoomExist = userJoinChatRoomRepository.findByUserIdAndAdminId(userId, adminId);
+    if (!userChatRoomExist.isEmpty()) {
+        return chatRoomRepository.findById(userChatRoomExist.getFirst().getChatRoomId())
+                .map(ChatRoom::fromEntity)
+                .orElseThrow(() -> new IllegalStateException("Chat room not found"));
+    } else {
+        ChatRoom chatRoom = ChatRoom.of("CONTACTO MANAGER", ChatRoomType.PRIVATE);
+        ChatRoomJpaEntity chatRoomJpa = chatRoomRepository.saveAndFlush(ChatRoomJpaEntity.of(chatRoom,false));
+        userJoinChatRoomRepository.saveAll(
+                List.of(
+                        UserJoinChatRoom.builder()
+                                .chatRoomId(chatRoomJpa.getId())
+                                .userId(adminId)
+                                .build(),
+                        UserJoinChatRoom.builder()
+                                .chatRoomId(chatRoomJpa.getId())
+                                .userId(userId)
+                                .build()
+                )
+        );
+        return ChatRoom.fromEntity(chatRoomJpa);
+    }
+}
+
+    @Override
+    public ChatRoom findAndSetVisible(Long roomId) {
+        ChatRoomJpaEntity chatRoomJpaEntity = chatRoomRepository.findById(roomId).orElseThrow(
+                ()-> new EntityNotFoundException("Chat room not found"));
+        chatRoomJpaEntity.setVisible(true);
+        return ChatRoom.fromEntity(chatRoomJpaEntity);
     }
 
     @Override

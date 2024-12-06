@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,24 +66,33 @@ public class UserService implements GetUserMainPageUseCase {
         return chatRooms;
     }
 
-public ChatRoom getUserChatRoom(Long roomId, Long userId) {
-    ChatRoom chatRoom = chatApiClient.getRoom(roomId, userId);
-    List<Long> participantIds = chatRoom.getParticipants().stream()
-            .filter(participantId -> !participantId.equals(userId))
-            .toList();
-    Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(participantIds);
-    Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(participantIds);
-    setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
-    setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
-    return chatRoom;
-}
+    public ChatRoom getUserChatRoom(Long roomId, Long userId) {
+        ChatRoom chatRoom = chatApiClient.getRoom(roomId, userId);
+        List<Long> participantIds = chatRoom.getParticipants().stream()
+                .filter(participantId -> !participantId.equals(userId))
+                .toList();
+        Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(participantIds);
+        Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(participantIds);
+        setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
+        setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
+        return chatRoom;
+    }
 
-    private User getUserDetails(User user) {
+    public User getUserDetails(User user) {
         Long userId = user.getId();
-        user.userPurposes(getUserPurposes(userId));
-        user.userTalents(userTalentRepository.findAllByUserId(userId));
-        user.userPortfolio(getUserPortfolio(userId));
-        return user;
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            CompletableFuture<List<PurposeType>> purposesFuture = CompletableFuture.supplyAsync(
+                    () -> getUserPurposes(userId), executor);
+            CompletableFuture<List<UserTalent>> talentsFuture = CompletableFuture.supplyAsync(
+                    () -> userTalentRepository.findAllByUserId(userId), executor);
+            CompletableFuture<UserPortfolio> portfolioImgsFuture = CompletableFuture.supplyAsync(
+                    () -> getUserPortfolio(userId), executor);
+            CompletableFuture.allOf(purposesFuture, talentsFuture, portfolioImgsFuture).join();
+            user.userPurposes(purposesFuture.join());
+            user.userTalents(talentsFuture.join());
+            user.userPortfolio(portfolioImgsFuture.join());
+            return user;
+        }
     }
 
     private List<PurposeType> getUserPurposes(Long userId) {
@@ -147,10 +157,13 @@ public ChatRoom getUserChatRoom(Long roomId, Long userId) {
     }
 
     private Map<Long, UserPortfolioImg> getUserPortfolioImgMap(List<Long> allParticipantIds) {
-        List<UserPortfolioImg> userPortfolioImgs = userPortfolioRepository.findAllByUserIdInWithMinSequence(
-                allParticipantIds);
+        List<UserPortfolioImg> userPortfolioImgs = userPortfolioRepository.findAllByUserIdInWithMinSequence(allParticipantIds);
         return userPortfolioImgs.stream()
-                .collect(Collectors.toMap(UserPortfolioImg::getUserId, img -> img));
+                .collect(Collectors.toMap(
+                        UserPortfolioImg::getUserId,
+                        img -> img,
+                        (existing, replacement) -> existing
+                ));
     }
 
     private Map<Long, String> getUserIdToUsernameMap(List<Long> allParticipantIds) {

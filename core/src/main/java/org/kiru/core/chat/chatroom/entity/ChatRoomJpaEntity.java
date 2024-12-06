@@ -1,5 +1,6 @@
 package org.kiru.core.chat.chatroom.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -13,9 +14,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.chat.common.BaseTimeEntity;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Builder
@@ -38,10 +41,25 @@ public class ChatRoomJpaEntity extends BaseTimeEntity {
     @Builder.Default
     private ChatRoomType type = ChatRoomType.PRIVATE;
 
+
+    @Column(name = "visible")
+    @Builder.Default
+    @Setter
+    private Boolean visible = true;
+
     public static ChatRoomJpaEntity of(ChatRoom chatRoom) {
         return ChatRoomJpaEntity.builder()
                 .title(chatRoom.getTitle())
                 .type(chatRoom.getType())
+                .visible(true)
+                .build();
+    }
+
+    public static ChatRoomJpaEntity of(ChatRoom chatRoom,Boolean visible) {
+        return ChatRoomJpaEntity.builder()
+                .title(chatRoom.getTitle())
+                .type(chatRoom.getType())
+                .visible(visible)
                 .build();
     }
 }

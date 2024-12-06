@@ -11,25 +11,28 @@ import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
 import org.kiru.chat.application.port.in.GetAlreadyLikedUserIdsUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
+import org.kiru.chat.application.port.in.GetMessageUseCase;
 import org.kiru.chat.application.port.in.SendMessageUseCase;
-import org.kiru.chat.application.port.out.GetAllMessageByRoomQuery;
+import org.kiru.chat.application.port.out.GetMessageByRoomQuery;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.chat.application.port.out.SaveMessagePort;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetChatRoomUseCase , AddParticipantUseCase ,
-        GetAlreadyLikedUserIdsUseCase{
+        GetAlreadyLikedUserIdsUseCase, GetMessageUseCase {
     private final GetChatRoomQuery getChatRoomQuery;
     private final SaveChatRoomPort saveChatRoomPort;
     private final SaveMessagePort saveMessagePort;
-    private final GetAllMessageByRoomQuery getAllMessageByRoomQuery;
+    private final GetMessageByRoomQuery getMessageByRoomQuery;
     private final GetOtherParticipantQuery getOtherParticipantQuery;
     private final GetAlreadyLikedUserIdsQuery getAlreadyLikedUserIdsQuery;
 
@@ -39,9 +42,8 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     }
 
     public ChatRoom findRoomById(Long roomId, Long userId, Boolean isUserAdmin) {
-        ChatRoom chatRoom = getChatRoomQuery.findById(roomId).orElseThrow(
-                RuntimeException::new);
-        List<Message> messages = getAllMessageByRoomQuery.findAllByChatRoomId(roomId,userId,isUserAdmin);
+        ChatRoom chatRoom = getChatRoomQuery.findById(roomId).orElseThrow(RuntimeException::new);
+        List<Message> messages = getMessageByRoomQuery.findAllByChatRoomId(roomId, userId, isUserAdmin);
         chatRoom.addMessage(messages);
         Long otherUserId = getOtherParticipantQuery.getOtherParticipantId(roomId, userId);
         chatRoom.addParticipant(otherUserId);
@@ -53,10 +55,22 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
         return getChatRoomQuery.findRoomsByUserId(userId);
     }
 
+    @Override
+    public ChatRoom getOrCreateRoomUseCase(Long userId, Long adminId) {
+        ChatRoom chatRoom = getChatRoomQuery.getOrCreateRoom(userId, adminId);
+        Long otherUserId = getOtherParticipantQuery.getOtherParticipantId(chatRoom.getId(), userId);
+        if (otherUserId != null) {
+            chatRoom.addParticipant(otherUserId);
+            List<Message> messages = getMessageByRoomQuery.findAllByChatRoomId(chatRoom.getId(), userId, true);
+            chatRoom.addMessage(messages);
+            return chatRoom;
+        }
+        return chatRoom;
+    }
+
     @Transactional
     public Message sendMessage(Long roomId, Message message) {
-        ChatRoom chatRoom = getChatRoomQuery.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+        ChatRoom chatRoom = getChatRoomQuery.findAndSetVisible(roomId);
         message.chatRoom(roomId);
         Objects.requireNonNull(chatRoom.getMessages()).add(message);
         saveMessagePort.save(message);
@@ -78,5 +92,10 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     @Override
     public List<AdminUserResponse> getMatchedUsers(Long userId) {
         return getAlreadyLikedUserIdsQuery.getMatchedUsers(userId);
+    }
+
+    @Override
+    public Slice<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin,Pageable pageable) {
+        return getMessageByRoomQuery.getMessages(roomId, userId,isUserAdmin, pageable);
     }
 }

@@ -3,6 +3,7 @@ package org.kiru.user.admin.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.admin.dto.AdminLikeUserResponse;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
@@ -12,10 +13,12 @@ import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.AdminService;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.response.ChatRoomListResponse;
+import org.kiru.user.user.dto.response.ChatRoomResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,9 +69,25 @@ public class AdminController {
     }
 
     @GetMapping("/users/{userId}/likes")
-    public ResponseEntity<AdminLikeUserResponse> getUserLikes(Pageable pageable, @PathVariable Long userId) {
-        List<AdminLikeUserDto> userLikes = adminService.getUserLikes(pageable, userId);
-        List<AdminLikeUserDto> userLiked = adminService.getUserLiked(pageable, userId);
-        return ResponseEntity.ok(AdminLikeUserResponse.of(userLiked,userLikes));
+    public ResponseEntity<AdminLikeUserResponse> getUserLikes(Pageable pageable, @PathVariable Long userId, @RequestParam(required = false) String name) {
+        AdminLikeUserResponse adminLikeUserResponse;
+        if (name != null && !name.isEmpty()) {
+            adminLikeUserResponse = adminService.getUserLikesAndUserLikedByName(pageable, userId, name);
+        } else {
+            adminLikeUserResponse = adminService.getUserLikesAndUserLiked(pageable, userId);
+        }
+        return ResponseEntity.ok(adminLikeUserResponse);
+    }
+
+    @GetMapping("/cs")
+    public ResponseEntity<ChatRoomResponse> getUserLikes(@UserId Long adminId, @RequestParam Long userId) {
+        ChatRoom chatRooms = adminService.getOrCreateCsChatRoom(userId,adminId);
+        return ResponseEntity.ok(ChatRoomResponse.of(chatRooms));
+    }
+
+    @GetMapping("/rooms/{roomId}/messages")
+    public ResponseEntity<Slice<Message>> getMessages(@PathVariable Long roomId, @UserId Long userId, Pageable pageable) {
+        Slice<Message> messages = adminService.getMessages(roomId, userId, pageable);
+        return ResponseEntity.ok(messages);
     }
 }

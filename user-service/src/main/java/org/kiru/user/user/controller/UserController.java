@@ -1,9 +1,6 @@
 package org.kiru.user.user.controller;
 
-import feign.Param;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.user.user.domain.User;
@@ -51,6 +48,11 @@ public class UserController {
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteUser(@UserId Long userId){
         userService.deleteUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Void> test(@UserId Long userId){
         return ResponseEntity.ok().build();
     }
 }

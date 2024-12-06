@@ -8,4 +8,8 @@ public interface GetChatRoomQuery {
     Optional<ChatRoom> findById(Long id);
 
     List<ChatRoom> findRoomsByUserId(Long userId);
+
+    ChatRoom getOrCreateRoom(Long userId, Long adminId);
+
+    ChatRoom findAndSetVisible(Long roomId);
 }

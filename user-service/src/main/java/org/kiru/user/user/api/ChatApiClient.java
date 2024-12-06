@@ -3,10 +3,13 @@ package org.kiru.user.user.api;
 import feign.Param;
 import java.util.List;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.chat.message.domain.Message;
 import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.userlike.api.CreateChatRoomRequest;
 import org.kiru.user.userlike.api.CreateChatRoomResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,4 +40,13 @@ public interface ChatApiClient {
 
     @GetMapping("/api/v1/chat/rooms/{roomId}")
     ChatRoom adminGetChatRoom(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId, @RequestParam("changeStatus") Boolean changeStatus);
+
+    @GetMapping("/api/v1/chat/cs/rooms")
+    ChatRoom getOrCreateCsChatRoom(@RequestParam Long adminId, @RequestParam Long userId);
+
+    @GetMapping("/api/v1/chat/rooms/{roomId}/message")
+    Slice<Message> getMessages(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);
+
+    @GetMapping("/api/v1/chat/rooms/{roomId}/message")
+    Slice<Message> getMessagesByAdmin(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);
 }
