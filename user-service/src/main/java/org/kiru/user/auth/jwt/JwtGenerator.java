@@ -15,8 +15,8 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
-import org.kiru.user.exception.UnauthorizedException;
-import org.kiru.user.exception.code.FailureCode;
+import org.kiru.core.exception.UnauthorizedException;
+import org.kiru.core.exception.code.FailureCode;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor

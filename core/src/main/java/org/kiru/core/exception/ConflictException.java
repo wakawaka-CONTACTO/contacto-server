@@ -1,7 +1,7 @@
-package org.kiru.user.exception;
+package org.kiru.core.exception;
 
 
-import org.kiru.user.exception.code.FailureCode;
+import org.kiru.core.exception.code.FailureCode;
 
 public class ConflictException extends ContactoException {
     public ConflictException() {

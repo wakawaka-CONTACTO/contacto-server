@@ -1,4 +1,4 @@
-package org.kiru.user.exception.code;
+package org.kiru.core.exception.code;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
