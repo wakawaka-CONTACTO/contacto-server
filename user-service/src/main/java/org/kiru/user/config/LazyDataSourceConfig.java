@@ -12,11 +12,9 @@ import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 public class LazyDataSourceConfig {
     @Bean
     public DataSource lazyDataSource(DataSourceProperties properties) {
-        HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl(properties.getUrl());
-        dataSource.setUsername(properties.getUsername());
-        dataSource.setPassword(properties.getPassword());
-        dataSource.setDriverClassName(properties.getDriverClassName());
+        HikariDataSource dataSource = properties.initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
         return new LazyConnectionDataSourceProxy(dataSource);
     }
 }
