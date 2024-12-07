@@ -9,9 +9,10 @@ import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.jwt.JwtProvider;
 import org.kiru.user.auth.jwt.Token;
-import org.kiru.user.exception.EntityNotFoundException;
-import org.kiru.user.exception.UnauthorizedException;
-import org.kiru.user.exception.code.FailureCode;
+import org.kiru.core.exception.EntityNotFoundException;
+import org.kiru.core.exception.InvalidValueException;
+import org.kiru.core.exception.UnauthorizedException;
+import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.user.dto.event.UserCreateEvent;
 import org.kiru.user.user.dto.request.SignHelpDto;
 import org.kiru.user.user.dto.request.UserPurposesReq;
@@ -67,22 +68,24 @@ public class AuthService {
         return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
     }
 
-
     // 로그인
     @Transactional
     public UserJwtInfoRes signIn(final UserSignInReq userSignInReq) {
-        UserJpaEntity user = userRepository.findByEmail(userSignInReq.email()).orElseThrow(
-                () -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
-        matchesPassword(userSignInReq.password(), user.getPassword());
-        deleteRefreshToken(user.getId());
-        Token issuedToken = issueToken(user.getId(), user.getEmail());
-        return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
+        return userRepository.findByEmail(userSignInReq.email())
+                .filter(user -> user.getLoginType() == LoginType.LOCAL)
+                .filter(user -> matchesPassword(userSignInReq.password(), user.getPassword()))
+                .map(user -> {
+                    deleteRefreshToken(user.getId());
+                    Token issuedToken = issueToken(user.getId(), user.getEmail());
+                    return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
+                })
+                .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_USER_CREDENTIALS));
     }
 
     @Transactional
     public UserJwtInfoRes reissue(final Long userId) {
         refreshTokenRepository.deleteByUserId(userId)
-                .orElseThrow(() -> new UnauthorizedException(FailureCode.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE));
         UserJpaEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
         Token newToken = issueToken(userId, user.getEmail());
@@ -104,18 +107,21 @@ public class AuthService {
 
     // 비밀번호 비교 로직
     public boolean matchesPassword(String rawPassword, String encodedPassword) {
-        boolean check = passwordEncoder.matches(rawPassword, encodedPassword);
-        if(check){
-            return true;
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new UnauthorizedException(FailureCode.PASSWORD_MISMATCH);
         }
-        throw new UnauthorizedException(FailureCode.UNAUTHORIZED);
+        return true;
     }
 
     public SignHelpDtoRes signHelp(SignHelpDto signHelpDto) {
         String email = userRepository.findByUsername(signHelpDto.userName())
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
-        String maskedEmail = maskEmail(email);
-        return new SignHelpDtoRes(maskedEmail);
+        try {
+            String maskedEmail = maskEmail(email);
+            return new SignHelpDtoRes(maskedEmail);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidValueException(FailureCode.INVALID_EMAIL_FORMAT);
+        }
     }
 
     private String maskEmail(String email) {

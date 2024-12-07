@@ -3,9 +3,10 @@ package org.kiru.user.common;
 import io.lettuce.core.RedisConnectionException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.kiru.user.common.FailureResponse.FieldError;
-import org.kiru.user.exception.ContactoException;
-import org.kiru.user.exception.code.FailureCode;
+import org.kiru.core.exception.response.FailureResponse;
+import org.kiru.core.exception.response.FailureResponse.FieldError;
+import org.kiru.core.exception.ContactoException;
+import org.kiru.core.exception.code.FailureCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -26,10 +27,11 @@ public class GlobalExceptionHandler {
         FailureResponse response = new FailureResponse(FailureCode.INVALID_TYPE_VALUE, errors);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(BindException.class)
     protected ResponseEntity<FailureResponse> handleBindException(final BindException e) {
         log.error(">>> handle: BindException ", e);
-        final FailureResponse response = FailureResponse.of(FailureCode.INVALID_INPUT_VALUE,e.getBindingResult());
+        final FailureResponse response = FailureResponse.of(FailureCode.INVALID_INPUT_VALUE, e.getBindingResult());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -38,6 +40,11 @@ public class GlobalExceptionHandler {
         final String value = e.getValue() == null ? "" : e.getValue().toString();
         final List<FieldError> errors = FailureResponse.FieldError.of(e.getName(), value, e.getErrorCode());
         return new ResponseEntity<>(new FailureResponse(FailureCode.INVALID_TYPE_VALUE, errors), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FeignClientException.class)
+    public ResponseEntity<FailureResponse> handleFeignClientException(FeignClientException e) {
+        return new ResponseEntity<>(e.getFailureResponse(), HttpStatus.valueOf(e.getFailureResponse().getStatus().value()));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -52,7 +59,7 @@ public class GlobalExceptionHandler {
         log.error(">>> handle: ContactoException ", e);
         final FailureCode errorCode = e.getFailureCode();
         final FailureResponse response = FailureResponse.of(errorCode);
-        return new ResponseEntity<>(response,errorCode.getHttpStatus());
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
     @ExceptionHandler(Exception.class)

@@ -13,6 +13,8 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework:spring-web' // spring-web 의존성 추가
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'

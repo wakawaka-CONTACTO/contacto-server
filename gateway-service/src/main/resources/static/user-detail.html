@@ -2254,7 +2254,7 @@
                 `;
 
                 // WebSocket 연결
-                const socket = new SockJS(`http://localhost:8081/chat-websocket?userId=${userId}&accessToken=${token.replace('Bearer ', '')}`);
+                const socket = new SockJS(`${CONFIG.API_CHAT_BASE_URL}/chat-websocket?userId=${userId}&accessToken=${token.replace('Bearer ', '')}`);
                 stompClient = Stomp.over(socket);
 
                 const headers = {

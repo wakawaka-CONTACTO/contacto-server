@@ -1,4 +1,4 @@
-package org.kiru.user.common;
+package org.kiru.core.exception.response;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.kiru.user.exception.code.FailureCode;
+import org.kiru.core.exception.code.FailureCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -23,7 +23,7 @@ public class FailureResponse {
     private List<FieldError> errors;
     private String code;
 
-    protected FailureResponse(final FailureCode code, final List<FieldError> errors) {
+    public FailureResponse(final FailureCode code, final List<FieldError> errors) {
         this.message = code.getMessage();
         this.status = code.getHttpStatus();
         this.errors = errors;
@@ -83,7 +83,7 @@ public class FailureResponse {
             return fieldErrors;
         }
 
-        protected static List<FieldError> of(final BindingResult bindingResult) {
+        public static List<FieldError> of(final BindingResult bindingResult) {
             final List<org.springframework.validation.FieldError> fieldErrors = bindingResult.getFieldErrors();
             return fieldErrors.stream()
                     .map(error -> new FieldError(
@@ -93,7 +93,7 @@ public class FailureResponse {
                     .toList();
         }
 
-        public static Object of(List<org.springframework.validation.FieldError> fieldErrors) {
+        public static List<FieldError> of(List<org.springframework.validation.FieldError> fieldErrors) {
             return fieldErrors.stream()
                     .map(error -> new FieldError(
                             error.getField(),

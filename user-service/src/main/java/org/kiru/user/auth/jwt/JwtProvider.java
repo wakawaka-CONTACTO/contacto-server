@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 
-import org.kiru.user.exception.code.FailureCode;
+import org.kiru.core.exception.code.FailureCode;
 import org.springframework.stereotype.Component;
 
 

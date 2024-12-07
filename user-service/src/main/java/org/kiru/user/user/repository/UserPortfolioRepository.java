@@ -15,7 +15,6 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
     void deleteAllByUserId(Long userId);
     Optional<UserPortfolioImg> findByUserIdAndSequence(Long userId, int sequence);
 
-
     @Query("SELECT new org.kiru.user.portfolio.dto.res.UserPortfolioResDto(" +
             "u.id, u.username, upi.portfolioId, upi.portfolioImageUrl) " +
             "FROM UserPortfolioImg upi " +
@@ -24,10 +23,7 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
     List<UserPortfolioResDto> findAllPortfoliosByUserIds(List<Long> userIds);
 
     List<UserPortfolioImg> findAllByUserIdIn(List<Long> allParticipantIds);
-//    SELECT upi
-//    FROM user_portfolio_imgs upi
-//    WHERE upi.user_id IN (1,2,3,4,5)   AND upi.sequence = 1
-//    GROUP BY upi.user_id, upi.id, upi.portfolio_id, upi.portfolio_image_url, upi.sequence
+
     @Query("SELECT upi FROM UserPortfolioImg upi " +
             "WHERE upi.userId IN :userIds " +
             "AND upi.sequence = 1 " +

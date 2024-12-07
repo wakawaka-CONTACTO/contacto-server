@@ -1,6 +1,5 @@
 package org.kiru.chat.application.service;
 
-
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +19,9 @@ import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.chat.application.port.out.SaveMessagePort;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
+import org.kiru.core.exception.EntityNotFoundException;
+import org.kiru.core.exception.ForbiddenException;
+import org.kiru.core.exception.code.FailureCode;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -42,8 +44,12 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     }
 
     public ChatRoom findRoomById(Long roomId, Long userId, Boolean isUserAdmin) {
-        ChatRoom chatRoom = getChatRoomQuery.findById(roomId).orElseThrow(RuntimeException::new);
+        ChatRoom chatRoom = getChatRoomQuery.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
         List<Message> messages = getMessageByRoomQuery.findAllByChatRoomId(roomId, userId, isUserAdmin);
+        if (!isUserAdmin && messages.isEmpty()) {
+            throw new ForbiddenException(FailureCode.CHAT_ROOM_ACCESS_DENIED);
+        }
         chatRoom.addMessage(messages);
         Long otherUserId = getOtherParticipantQuery.getOtherParticipantId(roomId, userId);
         chatRoom.addParticipant(otherUserId);
@@ -71,17 +77,27 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     @Transactional
     public Message sendMessage(Long roomId, Message message) {
         ChatRoom chatRoom = getChatRoomQuery.findAndSetVisible(roomId);
-        message.chatRoom(roomId);
-        Objects.requireNonNull(chatRoom.getMessages()).add(message);
-        saveMessagePort.save(message);
-        return message;
+        if (chatRoom == null) {
+            throw new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND);
+        }
+        try {
+            message.chatRoom(roomId);
+            Objects.requireNonNull(chatRoom.getMessages()).add(message);
+            saveMessagePort.save(message);
+            return message;
+        } catch (Exception e) {
+            throw new ForbiddenException(FailureCode.CHAT_MESSAGE_SEND_FAILED);
+        }
     }
 
     @Override
     public boolean addParticipant(Long roomId, Long userId) {
         ChatRoom chatRoom = getChatRoomQuery.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
-        return chatRoom.addParticipant(userId);
+                .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
+        if (!chatRoom.addParticipant(userId)) {
+            throw new ForbiddenException(FailureCode.CHAT_ROOM_JOIN_FAILED);
+        }
+        return true;
     }
 
     @Override
