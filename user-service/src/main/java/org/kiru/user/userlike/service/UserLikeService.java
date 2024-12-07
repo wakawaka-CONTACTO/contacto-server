@@ -36,10 +36,10 @@ public class UserLikeService {
                 CompletableFuture<Void> allFutures = CompletableFuture.allOf(portfolioFuture, chatRoomIdFuture);
                 allFutures.join();
                 return LikeResponse.of(
-                        isMatched, portfolioFuture.join(), chatRoomIdFuture.join().getChatRoomId()
+                        true, portfolioFuture.join(), chatRoomIdFuture.join().getChatRoomId()
                 );
             }
         }
-        return LikeResponse.of(isMatched, null, null);
+        return LikeResponse.of(false, null, null);
     }
 }

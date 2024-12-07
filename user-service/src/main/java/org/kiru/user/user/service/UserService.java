@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.exception.ContactoException;
 import org.kiru.core.user.talent.entity.UserTalent;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserJpaEntity;
@@ -18,9 +19,8 @@ import org.kiru.core.user.userPortfolioImg.domain.UserPortfolio;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
-import org.kiru.user.admin.dto.AdminMatchedUserResponse;
-import org.kiru.user.exception.EntityNotFoundException;
-import org.kiru.user.exception.code.FailureCode;
+import org.kiru.core.exception.EntityNotFoundException;
+import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
@@ -53,29 +53,29 @@ public class UserService implements GetUserMainPageUseCase {
     }
 
     public List<ChatRoom> getUserChatRooms(Long userId) {
-        List<ChatRoom> chatRooms = chatApiClient.getUserChatRooms(userId);
-        List<Long> allParticipantIds = getAllParticipantIds(chatRooms);
+            List<ChatRoom> chatRooms = chatApiClient.getUserChatRooms(userId);
+            List<Long> allParticipantIds = getAllParticipantIds(chatRooms);
 
-        Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(allParticipantIds);
-        Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(allParticipantIds);
+            Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(allParticipantIds);
+            Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(allParticipantIds);
 
-        for (ChatRoom chatRoom : chatRooms) {
-            setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
-            setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
-        }
-        return chatRooms;
+            for (ChatRoom chatRoom : chatRooms) {
+                setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
+                setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
+            }
+            return chatRooms;
     }
 
     public ChatRoom getUserChatRoom(Long roomId, Long userId) {
-        ChatRoom chatRoom = chatApiClient.getRoom(roomId, userId);
-        List<Long> participantIds = chatRoom.getParticipants().stream()
-                .filter(participantId -> !participantId.equals(userId))
-                .toList();
-        Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(participantIds);
-        Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(participantIds);
-        setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
-        setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
-        return chatRoom;
+            ChatRoom chatRoom = chatApiClient.getRoom(roomId, userId);
+            List<Long> participantIds = chatRoom.getParticipants().stream()
+                    .filter(participantId -> !participantId.equals(userId))
+                    .toList();
+            Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(participantIds);
+            Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(participantIds);
+            setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
+            setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
+            return chatRoom;
     }
 
     public User getUserDetails(User user) {
@@ -86,7 +86,7 @@ public class UserService implements GetUserMainPageUseCase {
             CompletableFuture<List<UserTalent>> talentsFuture = CompletableFuture.supplyAsync(
                     () -> userTalentRepository.findAllByUserId(userId), executor);
             CompletableFuture<UserPortfolio> portfolioImgsFuture = CompletableFuture.supplyAsync(
-                    () -> getUserPortfolio(userId), executor);
+                    () -> getUserPortfolioByUserId(userId), executor);
             CompletableFuture.allOf(purposesFuture, talentsFuture, portfolioImgsFuture).join();
             user.userPurposes(purposesFuture.join());
             user.userTalents(talentsFuture.join());
@@ -100,8 +100,12 @@ public class UserService implements GetUserMainPageUseCase {
                 .map(UserPurpose::getPurposeType).toList();
     }
 
-    private UserPortfolio getUserPortfolio(Long userId) {
+    private UserPortfolio getUserPortfolioByUserId(Long userId) {
         List<UserPortfolioImg> userPortfolioImgs = userPortfolioRepository.findAllByUserId(userId);
+        return getUserPortfolioByPortfolioImg(userPortfolioImgs);
+    }
+
+    private UserPortfolio getUserPortfolioByPortfolioImg(List<UserPortfolioImg> userPortfolioImgs) {
         if (userPortfolioImgs.isEmpty()) {
             return null;
         }
@@ -110,37 +114,37 @@ public class UserService implements GetUserMainPageUseCase {
         return UserPortfolio.builder()
                 .portfolioId(portfolioId)
                 .portfolioImages(userPortfolioImgs.stream().map(UserPortfolioImg::getPortfolioImageUrl).toList())
-                .userId(userId)
+                .userId(userPortfolioImgs.get(0).getUserId())
                 .build();
     }
 
     @Transactional
     public User updateUser(Long userId, UserUpdateDto userUpdateDto) {
-        UserJpaEntity existingUser = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
-        );
-        updateUserDetails(existingUser, userUpdateDto);
-        CompletableFuture<List<UserPurpose>> purposesFuture = CompletableFuture.supplyAsync(
-                () -> userUpdateUseCase.updateUserPurposes(userId, userUpdateDto));
-
-
-        CompletableFuture<List<UserTalent>> talentsFuture = CompletableFuture.supplyAsync(
-                () -> userUpdateUseCase.updateUserTalents(userId, userUpdateDto));
-        CompletableFuture<List<UserPortfolioImg>> portfolioImgsFuture = CompletableFuture.supplyAsync(
-                () -> userUpdateUseCase.updateUserPortfolioImages(userId, userUpdateDto));
-        CompletableFuture.allOf(purposesFuture, talentsFuture, portfolioImgsFuture).join();
-        User updatedUser = User.of(userQueryWithCache.saveUser(existingUser));
-        updatedUser.userPurposes(purposesFuture.join().stream().map(UserPurpose::getPurposeType).toList());
-        updatedUser.userTalents(talentsFuture.join());
-        updatedUser.userPortfolio(getUserPortfolio(userId));
-        return updatedUser;
+        UserJpaEntity existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+        try {
+            updateUserDetails(existingUser, userUpdateDto);
+            CompletableFuture<List<UserPurpose>> purposesFuture = CompletableFuture.supplyAsync(
+                    () -> userUpdateUseCase.updateUserPurposes(userId, userUpdateDto));
+            CompletableFuture<List<UserTalent>> talentsFuture = CompletableFuture.supplyAsync(
+                    () -> userUpdateUseCase.updateUserTalents(userId, userUpdateDto));
+            CompletableFuture<List<UserPortfolioImg>> portfolioImgsFuture = CompletableFuture.supplyAsync(
+                    () -> userUpdateUseCase.updateUserPortfolioImages(userId, userUpdateDto));
+            CompletableFuture.allOf(purposesFuture, talentsFuture, portfolioImgsFuture).join();
+            User updatedUser = User.of(userQueryWithCache.saveUser(existingUser));
+            updatedUser.userPurposes(userPurposeRepository.saveAll(purposesFuture.join()).stream().map(UserPurpose::getPurposeType).toList());
+            updatedUser.userTalents(userTalentRepository.saveAll(talentsFuture.join()));
+            updatedUser.userPortfolio(getUserPortfolioByPortfolioImg(userPortfolioRepository.saveAll(portfolioImgsFuture.join())));
+            return updatedUser;
+        } catch (Exception e) {
+            throw new ContactoException(FailureCode.USER_UPDATE_FAILED);
+        }
     }
 
     public void updateUserDetails(UserJpaEntity existingUser, UserUpdateDto userUpdateDto) {
         existingUser.updateDetails(
                 User.builder()
                         .username(userUpdateDto.getUsername())
-                        .password(userUpdateDto.getPassword())
                         .description(userUpdateDto.getDescription())
                         .email(userUpdateDto.getEmail())
                         .instagramId(userUpdateDto.getInstagramId())
@@ -198,15 +202,14 @@ public class UserService implements GetUserMainPageUseCase {
     @Transactional
     public User updateUserPwd(UserUpdatePwdDto userUpdatePwdDto) {
         UserJpaEntity existingUser = userRepository.findByEmail(userUpdatePwdDto.email()).orElseThrow(
-                () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
+                () -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND)
         );
         return userUpdateUseCase.updateUserPwd(existingUser,userUpdatePwdDto);
     }
 
     public void findExistUserByEmail(String email) {
-        userRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)
-        );
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
     }
 
     @Transactional
