@@ -24,6 +24,7 @@ import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
+import org.kiru.user.user.dto.response.UpdatePwdResponse;
 import org.kiru.user.user.repository.UserPortfolioRepository;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
@@ -33,6 +34,7 @@ import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.kiru.user.user.service.out.UserUpdateUseCase;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @Service
 @Slf4j
@@ -200,11 +202,13 @@ public class UserService implements GetUserMainPageUseCase {
     }
 
     @Transactional
-    public User updateUserPwd(UserUpdatePwdDto userUpdatePwdDto) {
-        UserJpaEntity existingUser = userRepository.findByEmail(userUpdatePwdDto.email()).orElseThrow(
-                () -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND)
-        );
-        return userUpdateUseCase.updateUserPwd(existingUser,userUpdatePwdDto);
+    public Boolean updateUserPwd(UserUpdatePwdDto userUpdatePwdDto) {
+        Optional<UserJpaEntity> existingUser = userRepository.findByEmail(userUpdatePwdDto.email());
+        if (existingUser.isPresent()) {
+            return userUpdateUseCase.updateUserPwd(existingUser.get(), userUpdatePwdDto);
+        } else {
+            return false;
+        }
     }
 
     public void findExistUserByEmail(String email) {

@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.exception.ContactoException;
 import org.kiru.core.user.talent.entity.UserTalent;
-import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
@@ -19,6 +18,7 @@ import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.external.s3.ImageService;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
+import org.kiru.user.user.dto.response.UpdatePwdResponse;
 import org.kiru.user.user.repository.UserPortfolioRepository;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
@@ -31,6 +31,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @RequiredArgsConstructor
 @Repository
@@ -110,9 +111,9 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
     }
 
     @Transactional
-    public User updateUserPwd(UserJpaEntity existingUser, UserUpdatePwdDto userUpdatePwdDto) {
+    public Boolean updateUserPwd(UserJpaEntity existingUser, UserUpdatePwdDto userUpdatePwdDto) {
         existingUser.setPassword(
                 passwordEncoder.encode(userUpdatePwdDto.password()));
-        return User.of(existingUser);
+        return true;
     }
 }
