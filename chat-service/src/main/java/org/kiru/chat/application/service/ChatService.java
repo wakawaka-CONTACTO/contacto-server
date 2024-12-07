@@ -44,7 +44,7 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     }
 
     public ChatRoom findRoomById(Long roomId, Long userId, Boolean isUserAdmin) {
-        ChatRoom chatRoom = getChatRoomQuery.findById(roomId)
+        ChatRoom chatRoom = getChatRoomQuery.findById(roomId,isUserAdmin)
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
         List<Message> messages = getMessageByRoomQuery.findAllByChatRoomId(roomId, userId, isUserAdmin);
         if (!isUserAdmin && messages.isEmpty()) {
@@ -92,7 +92,7 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
 
     @Override
     public boolean addParticipant(Long roomId, Long userId) {
-        ChatRoom chatRoom = getChatRoomQuery.findById(roomId)
+        ChatRoom chatRoom = getChatRoomQuery.findById(roomId, false)
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
         if (!chatRoom.addParticipant(userId)) {
             throw new ForbiddenException(FailureCode.CHAT_ROOM_JOIN_FAILED);

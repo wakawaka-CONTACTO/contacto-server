@@ -3,6 +3,7 @@ package org.kiru.user.common;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import lombok.RequiredArgsConstructor;
 import org.kiru.core.exception.response.FailureResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -11,13 +12,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Component
+@RequiredArgsConstructor
 public class FeignErrorDecoder implements ErrorDecoder {
 
     private final ObjectMapper objectMapper;
-
-    public FeignErrorDecoder(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
 
     @Override
     public Exception decode(String methodKey, Response response) {

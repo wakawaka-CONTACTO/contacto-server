@@ -42,7 +42,11 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
 
     @Override
     @Transactional
-    public Optional<ChatRoom> findById(Long id) {
+    public Optional<ChatRoom> findById(Long id, Boolean isUserAdmin) {
+        if(isUserAdmin!=null && isUserAdmin){
+            return chatRoomRepository.findById(id)
+                    .map(ChatRoom::fromEntity);
+        }
         return chatRoomRepository.findById(id)
                 .filter(ChatRoomJpaEntity::getVisible)
                 .map(ChatRoom::fromEntity);

@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 
 public interface GetChatRoomQuery {
-    Optional<ChatRoom> findById(Long id);
+    Optional<ChatRoom> findById(Long id, Boolean isUserAdmin);
 
     List<ChatRoom> findRoomsByUserId(Long userId);
 
