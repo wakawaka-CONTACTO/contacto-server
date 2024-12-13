@@ -49,36 +49,53 @@ public class UserService implements GetUserMainPageUseCase {
     private final UserUpdateUseCase userUpdateUseCase;
     private final ChatApiClient chatApiClient;
 
+    @Cacheable(value = "userDetail", key = "#userId", unless = "#result == null")
     public User getUserFromIdToMainPage(Long userId) {
         User user = User.of(userQueryWithCache.getUser(userId));
         return getUserDetails(user);
     }
 
-    public List<ChatRoom> getUserChatRooms(Long userId) {
-            List<ChatRoom> chatRooms = chatApiClient.getUserChatRooms(userId);
-            List<Long> allParticipantIds = getAllParticipantIds(chatRooms);
-
-            Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(allParticipantIds);
-            Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(allParticipantIds);
-
-            for (ChatRoom chatRoom : chatRooms) {
-                setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
-                setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
-            }
-            return chatRooms;
+    public List<ChatRoom> getUserChatRooms(Long userId, Pageable pageable) {
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            CompletableFuture<List<ChatRoom>> chatRoomsFuture = CompletableFuture.supplyAsync(
+                    () -> chatApiClient.getUserChatRooms(userId, pageable), executor);
+            CompletableFuture<List<Long>> allParticipantIdsFuture = chatRoomsFuture.thenApplyAsync(
+                    this::getAllParticipantIds, executor);
+            CompletableFuture<Map<Long, UserPortfolioImg>> userPortfolioImgMapFuture = allParticipantIdsFuture.thenApplyAsync(
+                    this::getUserPortfolioImgMap, executor);
+            CompletableFuture<Map<Long, String>> userIdToUsernameMapFuture = allParticipantIdsFuture.thenApplyAsync(
+                    this::getUserIdToUsernameMap, executor);
+            return chatRoomsFuture.thenCombineAsync(userPortfolioImgMapFuture, (chatRooms, userPortfolioImgMap) -> {
+                Map<Long, String> userIdToUsernameMap = userIdToUsernameMapFuture.join();
+                for (ChatRoom chatRoom : chatRooms) {
+                    setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
+                    setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
+                }
+                return chatRooms;
+            }, executor).join();
+        }
     }
 
     public ChatRoom getUserChatRoom(Long roomId, Long userId) {
-            ChatRoom chatRoom = chatApiClient.getRoom(roomId, userId);
-            List<Long> participantIds = chatRoom.getParticipants().stream()
-                    .filter(participantId -> !participantId.equals(userId))
-                    .toList();
-            Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(participantIds);
-            Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(participantIds);
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        CompletableFuture<ChatRoom> chatRoomFuture = CompletableFuture.supplyAsync(
+                () -> chatApiClient.getRoom(roomId, userId), executor);
+        CompletableFuture<List<Long>> participantIdsFuture = chatRoomFuture.thenApplyAsync(
+                chatRoom -> chatRoom.getParticipants().stream()
+                        .filter(participantId -> !participantId.equals(userId))
+                        .toList(), executor);
+        CompletableFuture<Map<Long, UserPortfolioImg>> userPortfolioImgMapFuture = participantIdsFuture.thenApplyAsync(
+                this::getUserPortfolioImgMap, executor);
+        CompletableFuture<Map<Long, String>> userIdToUsernameMapFuture = participantIdsFuture.thenApplyAsync(
+                this::getUserIdToUsernameMap, executor);
+        return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFuture, (chatRoom, userPortfolioImgMap) -> {
+            Map<Long, String> userIdToUsernameMap = userIdToUsernameMapFuture.join();
             setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
             setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
             return chatRoom;
+        }, executor).join();
     }
+}
 
     public User getUserDetails(User user) {
         Long userId = user.getId();

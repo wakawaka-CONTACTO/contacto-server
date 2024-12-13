@@ -49,8 +49,8 @@ public class ChatRoomController {
     }
 
     @GetMapping("/rooms")
-    public List<ChatRoom> getChatRoomsByUserId(@UserId Long userId) {
-        return getChatRoomUseCase.findRoomsByUserId(userId);
+    public List<ChatRoom> getChatRoomsByUserId(@UserId Long userId, Pageable pageable) {
+        return getChatRoomUseCase.findRoomsByUserId(userId,pageable);
     }
 
     @GetMapping("/rooms/{roomId}")

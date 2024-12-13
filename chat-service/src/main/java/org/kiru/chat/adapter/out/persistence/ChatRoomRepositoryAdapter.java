@@ -12,18 +12,24 @@ import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
+import org.kiru.core.chat.message.entity.MessageJpaEntity;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
+import org.kiru.core.exception.EntityNotFoundException;
+import org.kiru.core.exception.code.FailureCode;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
-public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoomPort, GetOtherParticipantQuery ,
+@Transactional(readOnly = true)
+public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoomPort, GetOtherParticipantQuery,
         GetAlreadyLikedUserIdsQuery {
     private final ChatRoomRepository chatRoomRepository;
     private final UserJoinChatRoomRepository userJoinChatRoomRepository;
 
-    @Override
     @Transactional
     public ChatRoom save(ChatRoom chatRoom, Long userId, Long userId2) {
         ChatRoomJpaEntity entity = ChatRoomJpaEntity.of(chatRoom);
@@ -40,10 +46,8 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         return ChatRoom.fromEntity(chatRoomJpa);
     }
 
-    @Override
-    @Transactional
     public Optional<ChatRoom> findById(Long id, Boolean isUserAdmin) {
-        if(isUserAdmin!=null && isUserAdmin){
+        if (isUserAdmin != null && isUserAdmin) {
             return chatRoomRepository.findById(id)
                     .map(ChatRoom::fromEntity);
         }
@@ -52,9 +56,9 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
                 .map(ChatRoom::fromEntity);
     }
 
-    @Override
-    public List<ChatRoom> findRoomsByUserId(Long userId) {
-        List<Object[]> results = userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(userId);
+    public List<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
+        Slice<Object[]> results = userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(
+                userId, pageable);
         return results.stream().map(result -> {
             ChatRoomJpaEntity chatRoomJpa = (ChatRoomJpaEntity) result[0];
             ChatRoom chatRoom = ChatRoom.fromEntity(chatRoomJpa);

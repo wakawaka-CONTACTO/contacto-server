@@ -57,8 +57,8 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     }
 
     @Override
-    public List<ChatRoom> findRoomsByUserId(Long userId) {
-        return getChatRoomQuery.findRoomsByUserId(userId);
+    public List<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
+        return getChatRoomQuery.findRoomsByUserId(userId,pageable);
     }
 
     @Override
