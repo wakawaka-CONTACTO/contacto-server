@@ -44,13 +44,13 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     }
 
 
-    public ChatRoom findRoomById(Long roomId, Long userId, Boolean isUserAdmin) {
+    public ChatRoom findRoomById(Long roomId, Long userId, boolean isUserAdmin) {
         ChatRoom chatRoom = getChatRoomQuery.findRoomWithMessagesAndParticipants(roomId, userId, isUserAdmin);
-        if (isUserAdmin || !chatRoom.getParticipants().contains(userId)) {
-            throw new ForbiddenException(FailureCode.CHAT_ROOM_ACCESS_DENIED);
+        if (isUserAdmin || Objects.requireNonNull(chatRoom.getParticipants()).contains(userId)) {
+            chatRoom.removeParticipant(userId);
+            return chatRoom;
         }
-        chatRoom.removeParticipant(userId);
-        return chatRoom;
+        throw new ForbiddenException(FailureCode.CHAT_ROOM_ACCESS_DENIED);
     }
 
     @Override
