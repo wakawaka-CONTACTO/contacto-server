@@ -75,6 +75,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         }).toList();
     }
 
+    @Transactional
     public ChatRoom getOrCreateRoom(Long userId, Long adminId) {
         List<UserJoinChatRoom> userChatRoomExist = userJoinChatRoomRepository.findByUserIdAndAdminId(userId, adminId);
         if (!userChatRoomExist.isEmpty()) {
