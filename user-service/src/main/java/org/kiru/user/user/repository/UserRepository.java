@@ -12,8 +12,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
-    Optional<UserJpaEntity> findByIdAndSocialId(Long userId, String socialID);
-
     Optional<UserJpaEntity> findByEmail(String email);
 
     @Query("SELECT u.id, u.username " +
@@ -26,11 +24,6 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             "WHERE u.username = :username")
     Optional<String> findByUsername(String username);
 
-    @Query("SELECT u.username " +
-            "FROM UserJpaEntity u " +
-            "WHERE u.username = :username")
-    Optional<String> findUserNameByUsername(String username);
-
     @Query("SELECT new org.kiru.user.admin.dto.AdminUserDto$UserDto(u.id, u.username, p.portfolioImageUrl) " +
             "FROM UserJpaEntity u " +
             "INNER JOIN UserPortfolioImg p ON u.id = p.userId " +
@@ -42,9 +35,4 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             "INNER JOIN UserPortfolioImg p ON u.id = p.userId " +
             "WHERE u.username LIKE %:name%")
     List<UserDto> findSimpleUserByName(String name);
-
-    @Query("SELECT u.id, u.username " +
-            "FROM UserJpaEntity u " +
-            "WHERE u.id IN :userIds")
-    List<Object> findSimpleUserByIds(List<Long> userIds);
 }

@@ -18,8 +18,7 @@ import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.external.s3.ImageService;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
-import org.kiru.user.user.dto.response.UpdatePwdResponse;
-import org.kiru.user.user.repository.UserPortfolioRepository;
+import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.repository.UserTalentRepository;
@@ -31,7 +30,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @RequiredArgsConstructor
 @Repository

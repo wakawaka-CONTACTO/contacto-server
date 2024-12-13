@@ -16,7 +16,6 @@ import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.entity.QUserLike;
 import org.kiru.core.user.userlike.entity.UserLike;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
-import org.kiru.user.portfolio.repository.UserPortfolioImgRepository;
 import org.kiru.user.userlike.service.out.GetMatchedUserPortfolioQuery;
 import org.kiru.user.userlike.service.out.SendLikeOrDislikeUseCase;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -28,7 +27,6 @@ public class UserLikeAdapter implements SendLikeOrDislikeUseCase, GetMatchedUser
 
     private final JPAQueryFactory queryFactory;
     private final UserLikeRepository userLikeRepository;
-    private final UserPortfolioImgRepository userPortfolioImgRepository;
 
     @Transactional
     public UserLike sendOrDislike(Long userId, Long likedUserId, LikeStatus status) {
