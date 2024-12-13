@@ -43,16 +43,13 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
             return saveChatRoomPort.save(chatRoom, createChatRoomRequest.getUserId(), createChatRoomRequest.getUserId2());
     }
 
+
     public ChatRoom findRoomById(Long roomId, Long userId, Boolean isUserAdmin) {
-        ChatRoom chatRoom = getChatRoomQuery.findById(roomId,isUserAdmin)
-                .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
-        List<Message> messages = getMessageByRoomQuery.findAllByChatRoomId(roomId, userId, isUserAdmin);
-        if (!isUserAdmin && messages.isEmpty()) {
+        ChatRoom chatRoom = getChatRoomQuery.findRoomWithMessagesAndParticipants(roomId, userId, isUserAdmin);
+        if (isUserAdmin || !chatRoom.getParticipants().contains(userId)) {
             throw new ForbiddenException(FailureCode.CHAT_ROOM_ACCESS_DENIED);
         }
-        chatRoom.addMessage(messages);
-        Long otherUserId = getOtherParticipantQuery.getOtherParticipantId(roomId, userId);
-        chatRoom.addParticipant(otherUserId);
+        chatRoom.removeParticipant(userId);
         return chatRoom;
     }
 

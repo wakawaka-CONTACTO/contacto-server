@@ -1,10 +1,10 @@
 package org.kiru.chat.adapter.out.persistence;
 
-import jakarta.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
@@ -75,53 +75,64 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         }).toList();
     }
 
-@Override
-@Transactional
-public ChatRoom getOrCreateRoom(Long userId, Long adminId) {
-    List<UserJoinChatRoom> userChatRoomExist = userJoinChatRoomRepository.findByUserIdAndAdminId(userId, adminId);
-    if (!userChatRoomExist.isEmpty()) {
-        return chatRoomRepository.findById(userChatRoomExist.getFirst().getChatRoomId())
-                .map(ChatRoom::fromEntity)
-                .orElseThrow(() -> new IllegalStateException("Chat room not found"));
-    } else {
-        ChatRoom chatRoom = ChatRoom.of("CONTACTO MANAGER", ChatRoomType.PRIVATE);
-        ChatRoomJpaEntity chatRoomJpa = chatRoomRepository.saveAndFlush(ChatRoomJpaEntity.of(chatRoom,false));
-        userJoinChatRoomRepository.saveAll(
-                List.of(
-                        UserJoinChatRoom.builder()
-                                .chatRoomId(chatRoomJpa.getId())
-                                .userId(adminId)
-                                .build(),
-                        UserJoinChatRoom.builder()
-                                .chatRoomId(chatRoomJpa.getId())
-                                .userId(userId)
-                                .build()
-                )
-        );
-        return ChatRoom.fromEntity(chatRoomJpa);
+    public ChatRoom getOrCreateRoom(Long userId, Long adminId) {
+        List<UserJoinChatRoom> userChatRoomExist = userJoinChatRoomRepository.findByUserIdAndAdminId(userId, adminId);
+        if (!userChatRoomExist.isEmpty()) {
+            return chatRoomRepository.findById(userChatRoomExist.getFirst().getChatRoomId())
+                    .map(ChatRoom::fromEntity)
+                    .orElseThrow(() -> new IllegalStateException("Chat room not found"));
+        } else {
+            ChatRoom chatRoom = ChatRoom.of("CONTACTO MANAGER", ChatRoomType.PRIVATE);
+            ChatRoomJpaEntity chatRoomJpa = chatRoomRepository.saveAndFlush(ChatRoomJpaEntity.of(chatRoom, false));
+            userJoinChatRoomRepository.saveAll(
+                    List.of(
+                            UserJoinChatRoom.builder()
+                                    .chatRoomId(chatRoomJpa.getId())
+                                    .userId(adminId)
+                                    .build(),
+                            UserJoinChatRoom.builder()
+                                    .chatRoomId(chatRoomJpa.getId())
+                                    .userId(userId)
+                                    .build()
+                    )
+            );
+            return ChatRoom.fromEntity(chatRoomJpa);
+        }
     }
-}
 
     @Override
     public ChatRoom findAndSetVisible(Long roomId) {
         ChatRoomJpaEntity chatRoomJpaEntity = chatRoomRepository.findById(roomId).orElseThrow(
-                ()-> new EntityNotFoundException("Chat room not found"));
+                () -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
         chatRoomJpaEntity.setVisible(true);
         return ChatRoom.fromEntity(chatRoomJpaEntity);
     }
 
-    @Override
+    public ChatRoom findRoomWithMessagesAndParticipants(Long roomId, Long userId, Boolean isUserAdmin) {
+        List<Object[]> results = !isUserAdmin ?
+                chatRoomRepository.findRoomWithMessagesAndParticipants(roomId)
+                        .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND))
+                : chatRoomRepository.findRoomWithMessagesAndParticipantsByAdmin(roomId)
+                        .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
+        ChatRoom chatRoom = ChatRoom.fromEntity((ChatRoomJpaEntity) results.getFirst()[0]);
+        for (Object[] result : results) {
+            Optional.ofNullable((MessageJpaEntity) result[1])
+                    .map(MessageJpaEntity::fromEntity).ifPresent(chatRoom::addMessage);
+            Optional.ofNullable((Long) result[2])
+                    .ifPresent(chatRoom::addParticipant);
+        }
+        return chatRoom;
+    }
+
     public Long getOtherParticipantId(Long roomId, Long senderId) {
         List<Long> otherParticipantIds = userJoinChatRoomRepository.findOtherParticipantIds(roomId, senderId);
         return otherParticipantIds.isEmpty() ? null : otherParticipantIds.getFirst();
     }
 
-    @Override
     public List<Long> getAlreadyLikedUserIds(Long userId) {
         return userJoinChatRoomRepository.findAlreadyLikedUserIds(userId);
     }
 
-    @Override
     public List<AdminUserResponse> getMatchedUsers(Long userId) {
         return userJoinChatRoomRepository.getMatchedUser(userId);
     }

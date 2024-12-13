@@ -41,8 +41,6 @@ public class ChatRoomJpaEntity extends BaseTimeEntity {
     @Builder.Default
     private ChatRoomType type = ChatRoomType.PRIVATE;
 
-
-    @Column(name = "visible")
     @Builder.Default
     @Setter
     private Boolean visible = true;

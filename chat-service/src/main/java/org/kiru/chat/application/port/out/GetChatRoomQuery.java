@@ -13,4 +13,7 @@ public interface GetChatRoomQuery {
     ChatRoom getOrCreateRoom(Long userId, Long adminId);
 
     ChatRoom findAndSetVisible(Long roomId);
+
+    ChatRoom findRoomWithMessagesAndParticipants(Long roomId, Long userId, Boolean isUserAdmin);
+
 }

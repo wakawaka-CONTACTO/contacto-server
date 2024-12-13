@@ -6,17 +6,14 @@ import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.admin.dto.AdminLikeUserResponse;
-import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.dto.AdminMatchedUserResponse;
 import org.kiru.user.admin.dto.AdminUserDto;
-import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.AdminService;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.response.ChatRoomListResponse;
 import org.kiru.user.user.dto.response.ChatRoomResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
@@ -58,8 +55,8 @@ public class AdminController {
     }
 
     @GetMapping("/chatroom")
-    public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@RequestParam Long userId){
-        List<ChatRoom> chatRooms = userService.getUserChatRooms(userId);
+    public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@RequestParam Long userId, Pageable pageable){
+        List<ChatRoom> chatRooms = userService.getUserChatRooms(userId,pageable);
         return ResponseEntity.ok(chatRooms.stream().map(ChatRoomListResponse::of).toList());
     }
 
