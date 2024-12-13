@@ -46,8 +46,8 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         return ChatRoom.fromEntity(chatRoomJpa);
     }
 
-    public Optional<ChatRoom> findById(Long id, Boolean isUserAdmin) {
-        if (isUserAdmin != null && isUserAdmin) {
+    public Optional<ChatRoom> findById(Long id, boolean isUserAdmin) {
+        if (isUserAdmin) {
             return chatRoomRepository.findById(id)
                     .map(ChatRoom::fromEntity);
         }
@@ -108,7 +108,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         return ChatRoom.fromEntity(chatRoomJpaEntity);
     }
 
-    public ChatRoom findRoomWithMessagesAndParticipants(Long roomId, Long userId, Boolean isUserAdmin) {
+    public ChatRoom findRoomWithMessagesAndParticipants(Long roomId, Long userId, boolean isUserAdmin) {
         List<Object[]> results = !isUserAdmin ?
                 chatRoomRepository.findRoomWithMessagesAndParticipants(roomId)
                         .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND))

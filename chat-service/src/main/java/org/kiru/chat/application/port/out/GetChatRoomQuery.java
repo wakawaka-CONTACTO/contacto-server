@@ -6,7 +6,7 @@ import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.springframework.data.domain.Pageable;
 
 public interface GetChatRoomQuery {
-    Optional<ChatRoom> findById(Long id, Boolean isUserAdmin);
+    Optional<ChatRoom> findById(Long id, boolean isUserAdmin);
 
     List<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable);
 
@@ -14,6 +14,6 @@ public interface GetChatRoomQuery {
 
     ChatRoom findAndSetVisible(Long roomId);
 
-    ChatRoom findRoomWithMessagesAndParticipants(Long roomId, Long userId, Boolean isUserAdmin);
+    ChatRoom findRoomWithMessagesAndParticipants(Long roomId, Long userId, boolean isUserAdmin);
 
 }
