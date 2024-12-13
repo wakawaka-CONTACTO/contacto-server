@@ -50,9 +50,20 @@ public class ChatRoom {
         Objects.requireNonNull(this.messages).addAll(message);
     }
 
+    public void addMessage(final Message message) {
+        Objects.requireNonNull(this.messages).add(message);
+    }
+
     public boolean addParticipant(final Long userId) {
         if (this.participants != null && this.type == ChatRoomType.PRIVATE) {
             return this.participants.add(userId);
+        }
+        return false;
+    }
+
+    public boolean removeParticipant(final Long userId) {
+        if (this.participants != null && this.type == ChatRoomType.PRIVATE) {
+            return this.participants.remove(userId);
         }
         return false;
     }

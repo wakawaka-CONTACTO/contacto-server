@@ -24,17 +24,18 @@ import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
-import org.kiru.user.user.dto.response.UpdatePwdResponse;
-import org.kiru.user.user.repository.UserPortfolioRepository;
+import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.repository.UserTalentRepository;
 import org.kiru.user.user.service.in.GetUserMainPageUseCase;
 import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.kiru.user.user.service.out.UserUpdateUseCase;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @Service
 @Slf4j
@@ -49,36 +50,53 @@ public class UserService implements GetUserMainPageUseCase {
     private final UserUpdateUseCase userUpdateUseCase;
     private final ChatApiClient chatApiClient;
 
+    @Cacheable(value = "userDetail", key = "#userId", unless = "#result == null")
     public User getUserFromIdToMainPage(Long userId) {
         User user = User.of(userQueryWithCache.getUser(userId));
         return getUserDetails(user);
     }
 
-    public List<ChatRoom> getUserChatRooms(Long userId) {
-            List<ChatRoom> chatRooms = chatApiClient.getUserChatRooms(userId);
-            List<Long> allParticipantIds = getAllParticipantIds(chatRooms);
-
-            Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(allParticipantIds);
-            Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(allParticipantIds);
-
-            for (ChatRoom chatRoom : chatRooms) {
-                setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
-                setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
-            }
-            return chatRooms;
+    public List<ChatRoom> getUserChatRooms(Long userId, Pageable pageable) {
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            CompletableFuture<List<ChatRoom>> chatRoomsFuture = CompletableFuture.supplyAsync(
+                    () -> chatApiClient.getUserChatRooms(userId, pageable), executor);
+            CompletableFuture<List<Long>> allParticipantIdsFuture = chatRoomsFuture.thenApplyAsync(
+                    this::getAllParticipantIds, executor);
+            CompletableFuture<Map<Long, UserPortfolioImg>> userPortfolioImgMapFuture = allParticipantIdsFuture.thenApplyAsync(
+                    this::getUserPortfolioImgMap, executor);
+            CompletableFuture<Map<Long, String>> userIdToUsernameMapFuture = allParticipantIdsFuture.thenApplyAsync(
+                    this::getUserIdToUsernameMap, executor);
+            return chatRoomsFuture.thenCombineAsync(userPortfolioImgMapFuture, (chatRooms, userPortfolioImgMap) -> {
+                Map<Long, String> userIdToUsernameMap = userIdToUsernameMapFuture.join();
+                for (ChatRoom chatRoom : chatRooms) {
+                    setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
+                    setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
+                }
+                return chatRooms;
+            }, executor).join();
+        }
     }
 
     public ChatRoom getUserChatRoom(Long roomId, Long userId) {
-            ChatRoom chatRoom = chatApiClient.getRoom(roomId, userId);
-            List<Long> participantIds = chatRoom.getParticipants().stream()
-                    .filter(participantId -> !participantId.equals(userId))
-                    .toList();
-            Map<Long, UserPortfolioImg> userPortfolioImgMap = getUserPortfolioImgMap(participantIds);
-            Map<Long, String> userIdToUsernameMap = getUserIdToUsernameMap(participantIds);
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        CompletableFuture<ChatRoom> chatRoomFuture = CompletableFuture.supplyAsync(
+                () -> chatApiClient.getRoom(roomId, userId), executor);
+        CompletableFuture<List<Long>> participantIdsFuture = chatRoomFuture.thenApplyAsync(
+                chatRoom -> chatRoom.getParticipants().stream()
+                        .filter(participantId -> !participantId.equals(userId))
+                        .toList(), executor);
+        CompletableFuture<Map<Long, UserPortfolioImg>> userPortfolioImgMapFuture = participantIdsFuture.thenApplyAsync(
+                this::getUserPortfolioImgMap, executor);
+        CompletableFuture<Map<Long, String>> userIdToUsernameMapFuture = participantIdsFuture.thenApplyAsync(
+                this::getUserIdToUsernameMap, executor);
+        return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFuture, (chatRoom, userPortfolioImgMap) -> {
+            Map<Long, String> userIdToUsernameMap = userIdToUsernameMapFuture.join();
             setChatRoomThumbnail(chatRoom, userPortfolioImgMap);
             setChatRoomTitle(chatRoom, userId, userIdToUsernameMap);
             return chatRoom;
+        }, executor).join();
     }
+}
 
     public User getUserDetails(User user) {
         Long userId = user.getId();
@@ -89,11 +107,13 @@ public class UserService implements GetUserMainPageUseCase {
                     () -> userTalentRepository.findAllByUserId(userId), executor);
             CompletableFuture<UserPortfolio> portfolioImgsFuture = CompletableFuture.supplyAsync(
                     () -> getUserPortfolioByUserId(userId), executor);
-            CompletableFuture.allOf(purposesFuture, talentsFuture, portfolioImgsFuture).join();
-            user.userPurposes(purposesFuture.join());
-            user.userTalents(talentsFuture.join());
-            user.userPortfolio(portfolioImgsFuture.join());
-            return user;
+            return CompletableFuture.allOf(purposesFuture, talentsFuture, portfolioImgsFuture)
+                    .thenApply(v -> {
+                        user.userPurposes(purposesFuture.join());
+                        user.userTalents(talentsFuture.join());
+                        user.userPortfolio(portfolioImgsFuture.join());
+                        return user;
+                    }).join();
         }
     }
 
@@ -121,6 +141,7 @@ public class UserService implements GetUserMainPageUseCase {
     }
 
     @Transactional
+    @CachePut(value = "userDetail", key = "#userId", unless = "#result == null")
     public User updateUser(Long userId, UserUpdateDto userUpdateDto) {
         UserJpaEntity existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
@@ -134,9 +155,12 @@ public class UserService implements GetUserMainPageUseCase {
                     () -> userUpdateUseCase.updateUserPortfolioImages(userId, userUpdateDto));
             CompletableFuture.allOf(purposesFuture, talentsFuture, portfolioImgsFuture).join();
             User updatedUser = User.of(userQueryWithCache.saveUser(existingUser));
-            updatedUser.userPurposes(userPurposeRepository.saveAll(purposesFuture.join()).stream().map(UserPurpose::getPurposeType).toList());
+            updatedUser.userPurposes(
+                    userPurposeRepository.saveAll(purposesFuture.join()).stream().map(UserPurpose::getPurposeType)
+                            .toList());
             updatedUser.userTalents(userTalentRepository.saveAll(talentsFuture.join()));
-            updatedUser.userPortfolio(getUserPortfolioByPortfolioImg(userPortfolioRepository.saveAll(portfolioImgsFuture.join())));
+            updatedUser.userPortfolio(
+                    getUserPortfolioByPortfolioImg(userPortfolioRepository.saveAll(portfolioImgsFuture.join())));
             return updatedUser;
         } catch (Exception e) {
             throw new ContactoException(FailureCode.USER_UPDATE_FAILED);
@@ -163,12 +187,12 @@ public class UserService implements GetUserMainPageUseCase {
     }
 
     private Map<Long, UserPortfolioImg> getUserPortfolioImgMap(List<Long> allParticipantIds) {
-        List<UserPortfolioImg> userPortfolioImgs = userPortfolioRepository.findAllByUserIdInWithMinSequence(allParticipantIds);
+        List<UserPortfolioImg> userPortfolioImgs = userPortfolioRepository.findAllByUserIdInWithMinSequence(
+                allParticipantIds);
         return userPortfolioImgs.stream()
                 .collect(Collectors.toMap(
                         UserPortfolioImg::getUserId,
-                        img -> img,
-                        (existing, replacement) -> existing
+                        img -> img
                 ));
     }
 
@@ -219,9 +243,5 @@ public class UserService implements GetUserMainPageUseCase {
     @Transactional
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
-    }
-
-    public List<Long> getAlreadyLikedUserIds(Long userId) {
-        return chatApiClient.getAlreadyLikedUserIds(userId);
     }
 }

@@ -19,7 +19,7 @@ import org.kiru.core.user.userPortfolioImg.domain.UserPortfolio;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.kiru.core.exception.BadRequestException;
 import org.kiru.core.exception.code.FailureCode;
-import org.kiru.user.user.repository.UserPortfolioRepository;
+import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

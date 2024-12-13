@@ -1,12 +1,13 @@
 package org.kiru.chat.adapter.out.persistence;
 
 import java.util.List;
-import java.util.Optional;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
-import org.kiru.core.user.user.domain.User;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 
 public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRoom, Long> {
@@ -25,8 +26,8 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
             "SELECT MAX(lm2.createdAt) FROM MessageJpaEntity lm2 WHERE lm2.chatRoomId = cr.id) " +
             "WHERE uj.chatRoomId IN (SELECT uj2.chatRoomId FROM UserJoinChatRoom uj2 WHERE uj2.userId = :userId) " +
             "GROUP BY cr.id, lm.content")
-    List<Object[]> findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(Long userId);
-
+    Slice<Object[]> findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(Long userId,
+                                                                                               Pageable pageable);
     @Query("SELECT u.userId FROM UserJoinChatRoom u " +
             "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId " +
             "WHERE uj.userId = :userId AND u.userId <> :userId")
@@ -43,5 +44,6 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
             + "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId "
             + "WHERE u.userId = :userId "
             + "AND uj.userId = :adminId")
+    @Transactional
     List<UserJoinChatRoom> findByUserIdAndAdminId(Long userId, Long adminId);
 }

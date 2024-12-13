@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.kiru.core.user.talent.entity.UserTalent;
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userPortfolioImg.domain.UserPortfolio;
@@ -14,15 +15,16 @@ import org.kiru.core.user.userPurpose.domain.PurposeType;
 @Getter
 @AllArgsConstructor
 @Builder
+@NoArgsConstructor
 public class User {
     @NotNull
-    private final Long id;
+    private Long id;
     @NotNull
-    private final String username;
+    private String username;
 
-    private final String socialId;
+    private String socialId;
     @NotNull
-    private final LoginType loginType;
+    private LoginType loginType;
     @NotNull
     @Email
     private String email;

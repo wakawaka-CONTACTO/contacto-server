@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -27,19 +28,21 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @Builder
 @Getter
-@Table(name = "users")
+@Table(name = "users",
+        indexes = {@Index(name = "idx_username", columnList = "username"),
+                @Index(name = "idx_email", columnList = "email")})
 @SQLDelete(sql = "UPDATE users SET deleted = true WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class UserJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Long id;
+    private Long id;
 
     @Column(name = "username")
     private String username;
 
     @Column(name = "social_id")
-    private  String socialId;
+    private String socialId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "login_type")
@@ -49,10 +52,10 @@ public class UserJpaEntity {
     @Email
     private String email;
 
-    @Column(name = "description",length = 1024)
+    @Column(name = "description", length = 1024)
     private String description;
 
-    @Column(name = "instagram_id",nullable = false)
+    @Column(name = "instagram_id", nullable = false)
     private String instagramId;
 
     @Column(name = "web_url")
@@ -65,7 +68,6 @@ public class UserJpaEntity {
     @Column(name = "deleted")
     @Builder.Default
     private Boolean deleted = false;
-
 
     public static UserJpaEntity of(User user) {
         return UserJpaEntity.builder()

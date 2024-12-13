@@ -8,6 +8,7 @@ import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.response.ChatRoomListResponse;
 import org.kiru.user.user.dto.response.ChatRoomResponse;
 import org.kiru.user.user.service.UserService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,8 +29,8 @@ public class UserController {
     }
 
     @GetMapping("/me/chatroom")
-    public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@UserId Long userId){
-        List<ChatRoom> chatRooms = userService.getUserChatRooms(userId);
+    public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@UserId Long userId, Pageable pageable){
+        List<ChatRoom> chatRooms = userService.getUserChatRooms(userId,pageable);
         return ResponseEntity.ok(chatRooms.stream().map(ChatRoomListResponse::of).toList());
     }
 

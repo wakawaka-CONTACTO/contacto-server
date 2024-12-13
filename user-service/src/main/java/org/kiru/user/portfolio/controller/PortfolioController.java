@@ -1,8 +1,6 @@
 package org.kiru.user.portfolio.controller;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.domain.User;
@@ -10,6 +8,7 @@ import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
 import org.kiru.user.portfolio.service.PortfolioService;
 import org.kiru.user.user.service.UserService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,8 +24,8 @@ public class PortfolioController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserPortfolioResDto>> getPortfolios(@UserId Long userId) {
-        List<UserPortfolioResDto> portfolios = portfolioService.getUserPortfolios(userId);
+    public ResponseEntity<List<UserPortfolioResDto>> getPortfolios(@UserId Long userId, Pageable pageable) {
+        List<UserPortfolioResDto> portfolios = portfolioService.getUserPortfolios(userId,pageable);
         return ResponseEntity.ok(portfolios);
     }
 
