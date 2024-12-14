@@ -4,7 +4,7 @@ on:
   push:
     branches: ["dev"]
     paths:
-      - 'user-service/**'
+      - 'user-service/src/main/**'
 
 jobs:
   build_and_deploy:
