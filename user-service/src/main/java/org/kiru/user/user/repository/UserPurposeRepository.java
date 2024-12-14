@@ -25,18 +25,4 @@ public interface UserPurposeRepository extends JpaRepository<UserPurpose, Long> 
     Slice<Long> findUserIdsByPurposeTypesOrderByCount(@Param("purposes") List<PurposeType> purposes, Pageable pageable);
 
     void deleteAllByUserId(Long userId);
-
-    @Query("SELECT DISTINCT up.userId, COUNT(up2.purposeType) as purposeCount, " +
-        "(SELECT COUNT(ul2) FROM UserLike ul2 WHERE ul2.likedUserId = up.userId) as likeCount " +
-        "FROM UserPurpose up " +
-        "LEFT JOIN UserPurpose up2 ON up.purposeType = up2.purposeType AND up2.userId = :userId " +
-        "WHERE up.userId != :userId " +
-        "AND NOT EXISTS ( " +
-        "    SELECT 1 FROM UserLike ul " +
-        "    WHERE (ul.likedUserId = up.userId AND ul.userId = :userId) " +
-        "    OR (ul.userId = up.userId AND ul.likedUserId = :userId AND ul.isMatched = true) " +
-        ") " +
-        "GROUP BY up.userId " +
-        "ORDER BY purposeCount DESC, likeCount DESC")
-        Slice<Object[]> findDistinctUserIdsWithCounts(@Param("userId") Long userId, Pageable pageable);
 }

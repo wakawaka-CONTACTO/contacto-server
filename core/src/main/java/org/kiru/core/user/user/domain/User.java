@@ -23,7 +23,7 @@ public class User {
     private String username;
 
     private String socialId;
-    @NotNull
+
     private LoginType loginType;
     @NotNull
     @Email
@@ -32,7 +32,7 @@ public class User {
     private String description;
     @NotNull
     private String instagramId;
-    @NotNull
+
     private String webUrl;
 
     private String password;
