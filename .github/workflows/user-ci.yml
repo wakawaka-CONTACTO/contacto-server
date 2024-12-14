@@ -7,7 +7,7 @@ on:
       - 'user-service/**'
 
 jobs:
-  build_and_deploy:
+  CI:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
