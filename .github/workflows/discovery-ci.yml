@@ -1,0 +1,31 @@
+name: Discovery Service CICD
+
+on:
+  push:
+    branches: ["dev"]
+    paths:
+      - 'discovery/**'
+
+jobs:
+  CI:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Create application.yml
+        run: |
+          mkdir -p discovery/src/main/resources
+          echo "${{ secrets.DISCOVERY_APPLICATION }}" > discovery/src/main/resources/application.yml
+          cat discovery/src/main/resources/application.yml
+
+      - name: Build Discovery Service
+        run: |
+          ./gradlew :discovery:build 
+
