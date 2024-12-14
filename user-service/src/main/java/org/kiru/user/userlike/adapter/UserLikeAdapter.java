@@ -1,4 +1,4 @@
-package org.kiru.user.userlike.repository;
+package org.kiru.user.userlike.adapter;
 
 import com.querydsl.core.Tuple;
 import jakarta.transaction.Transactional;
@@ -16,6 +16,7 @@ import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.entity.QUserLike;
 import org.kiru.core.user.userlike.entity.UserLike;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
+import org.kiru.user.userlike.repository.UserLikeRepository;
 import org.kiru.user.userlike.service.out.GetMatchedUserPortfolioQuery;
 import org.kiru.user.userlike.service.out.SendLikeOrDislikeUseCase;
 import com.querydsl.jpa.impl.JPAQueryFactory;

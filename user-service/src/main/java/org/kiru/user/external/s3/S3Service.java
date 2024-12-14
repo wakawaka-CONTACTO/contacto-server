@@ -26,7 +26,7 @@ public class S3Service {
     private final AWSConfig awsConfig;
     private final String basePath;
     private static final List<String> IMAGE_EXTENSIONS = Arrays.asList("image/jpeg", "image/png", "image/jpg", "image/webp", "image/heic", "image/heif","image/avif");
-    private static final Long MAX_FILE_SIZE = 7 * 1024 * 1024L;
+    private static final Long MAX_FILE_SIZE = 10 * 1024 * 1024L;
 
     public S3Service(@Value("${aws-property.s3-bucket-name}") final String bucketName, AWSConfig awsConfig, @Value("${cloudfront.domain}") String basePath) {
         this.bucketName = bucketName;
@@ -55,10 +55,9 @@ public class S3Service {
     }
 
 
-    public void deleteImage(String imageUrl) throws IOException {
+    public void deleteImage(String imageUrl) {
         String imageKey = extractImageKeyFromImageUrl(imageUrl);
         final S3Client s3Client = awsConfig.getS3Client();
-
         s3Client.deleteObject((DeleteObjectRequest.Builder builder) ->
                 builder.bucket(bucketName)
                         .key(imageKey)
