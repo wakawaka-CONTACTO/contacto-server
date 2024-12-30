@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MessageRepository extends JpaRepository<MessageJpaEntity, Long> {
     List<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId);
-
     List<MessageJpaEntity> findAllByChatRoomIdAndReadStatusFalse(Long chatRoomId);
     Slice<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable);
 }

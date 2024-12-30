@@ -68,6 +68,7 @@ public class ChatRoomController {
     }
 
     @PostMapping("/rooms/{roomId}/participants")
+    @Deprecated
     public ResponseEntity<String> addParticipant(@PathVariable Long roomId, @UserId Long userId) {
         boolean added = addParticipantUseCase.addParticipant(roomId, userId);
         return added ? ResponseEntity.ok("Participant added")

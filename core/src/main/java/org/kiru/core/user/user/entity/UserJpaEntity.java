@@ -17,11 +17,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.domain.User;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.stereotype.Component;
 
 @Entity
 @AllArgsConstructor

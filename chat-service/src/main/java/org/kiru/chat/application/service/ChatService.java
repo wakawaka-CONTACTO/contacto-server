@@ -43,7 +43,6 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
             return saveChatRoomPort.save(chatRoom, createChatRoomRequest.getUserId(), createChatRoomRequest.getUserId2());
     }
 
-
     public ChatRoom findRoomById(Long roomId, Long userId, boolean isUserAdmin) {
         ChatRoom chatRoom = getChatRoomQuery.findRoomWithMessagesAndParticipants(roomId, userId, isUserAdmin);
         if (isUserAdmin || Objects.requireNonNull(chatRoom.getParticipants()).contains(userId)) {

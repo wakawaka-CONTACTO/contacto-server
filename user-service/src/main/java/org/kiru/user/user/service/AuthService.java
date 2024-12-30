@@ -72,7 +72,6 @@ public class AuthService {
     @Transactional
     public UserJwtInfoRes signIn(final UserSignInReq userSignInReq) {
         return userRepository.findByEmail(userSignInReq.email())
-                .filter(user -> user.getLoginType() == LoginType.LOCAL)
                 .filter(user -> matchesPassword(userSignInReq.password(), user.getPassword()))
                 .map(user -> {
                     deleteRefreshToken(user.getId());
