@@ -1,5 +1,6 @@
 package org.kiru.core.user.talent.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,9 +27,11 @@ public class UserTalent {
     private Long id;
 
     @NotNull
+    @Column(name = "user_id")
     private Long userId;
 
     @Enumerated(EnumType.STRING)
     @NotNull
+    @Column(name = "talent_type")
     private Talent.TalentType talentType;
 }
