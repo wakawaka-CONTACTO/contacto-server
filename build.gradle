@@ -33,6 +33,13 @@ subprojects {
 	repositories {
 		mavenCentral()
 	}
+
+	tasks.withType(JavaExec).configureEach {
+		jvmArgs += [
+				"-XX:+UseZGC",
+				"-XX:+ZGenerational"
+		]
+	}
 }
 
 project(':chat-service') {
@@ -52,3 +59,5 @@ project(':user-service') {
 		implementation project(':core')
 	}
 }
+
+
