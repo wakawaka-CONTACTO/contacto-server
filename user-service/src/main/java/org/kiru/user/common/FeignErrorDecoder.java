@@ -3,29 +3,49 @@ package org.kiru.user.common;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import io.micrometer.core.instrument.util.IOUtils;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.response.FailureResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class FeignErrorDecoder implements ErrorDecoder {
 
     private final ObjectMapper objectMapper;
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        HttpStatus status = HttpStatus.valueOf(response.status());
-        FailureResponse failureResponse = null;
-        try (InputStream bodyIs = response.body().asInputStream()) {
-            failureResponse = objectMapper.readValue(bodyIs, FailureResponse.class);
-        } catch (IOException e) {
-            return new RuntimeException("REQUEST FAILED...");
+        try {
+            // 에러 응답 본문 파싱
+            String errorBody = IOUtils.toString(response.body().asInputStream(), StandardCharsets.UTF_8);
+            FailureResponse failureResponse = parseErrorResponse(errorBody);
+            return new FeignClientException(
+                    failureResponse
+            );
+        } catch (Exception e) {
+            log.error("Feign error decoding failed", e);
+            return new FeignClientException(
+                    FailureResponse.builder()
+                            .status(HttpStatus.valueOf(response.status()))
+                            .message(e.getMessage()).code("FEIGN_COMMUNICATION_ERROR").build());
         }
-        return new FeignClientException(failureResponse);
+    }
+
+    private FailureResponse parseErrorResponse(String errorBody) {
+        try {
+            return objectMapper.readValue(errorBody, FailureResponse.class);
+        } catch (Exception e) {
+            // 파싱 실패 시 기본 에러 응답 생성
+            return FailureResponse.builder()
+                    .message(e.getCause().toString())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .code(e.getMessage())
+                    .build();
+        }
     }
 }

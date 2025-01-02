@@ -2,11 +2,12 @@ package org.kiru.user.common;
 
 import io.lettuce.core.RedisConnectionException;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 import lombok.extern.slf4j.Slf4j;
-import org.kiru.core.exception.response.FailureResponse;
-import org.kiru.core.exception.response.FailureResponse.FieldError;
 import org.kiru.core.exception.ContactoException;
 import org.kiru.core.exception.code.FailureCode;
+import org.kiru.core.exception.response.FailureResponse;
+import org.kiru.core.exception.response.FailureResponse.FieldError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -79,4 +80,41 @@ public class GlobalExceptionHandler {
         final FailureResponse response = FailureResponse.of(FailureCode.REDIS_CONNECTION_ERROR, errors);
         return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
     }
+
+    @ExceptionHandler(CompletionException.class)
+    public ResponseEntity<FailureResponse> handleCompletionException(CompletionException e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof FeignClientException feignException) {
+            log.error("Feign Client Exception in CompletableFuture", feignException);
+            new ResponseEntity<>(feignException.getFailureResponse(), HttpStatus.valueOf(feignException.getFailureResponse().getStatus().value()));
+        }
+        log.error("Unexpected CompletionException", e.getCause());
+        FailureResponse failureResponse = FailureResponse.builder()
+                .message("비동기 작업 중 예상치 못한 오류가 발생했습니다.")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .code(FailureCode.INTERNAL_SERVER_ERROR.getCode())
+                .errors(
+                        FieldError.of(
+                                e.getClass().getName(),
+                                e.getMessage(),
+                                getErrorSource(e)
+                        )
+                ).build();
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(failureResponse);
+    }
+
+    private String getErrorSource(Throwable e) {
+        StackTraceElement errorLocation = e.getStackTrace()[0];
+        return String.format("%s.%s(%s:%d)",
+                errorLocation.getClassName(),
+                errorLocation.getMethodName(),
+                errorLocation.getFileName(),
+                errorLocation.getLineNumber()
+        );
+    }
+
+
+
 }
