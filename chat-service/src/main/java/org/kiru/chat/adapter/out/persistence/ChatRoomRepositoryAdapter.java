@@ -1,23 +1,25 @@
 package org.kiru.chat.adapter.out.persistence;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
+import org.kiru.chat.adapter.out.persistence.dto.ChatRoomWithDetails;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
+import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.chat.message.entity.MessageJpaEntity;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.code.FailureCode;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,16 +59,17 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
     }
 
     public List<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
-        Slice<Object[]> results = userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(
-                userId, pageable);
-        return results.stream().map(result -> {
+        return userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(
+                userId, pageable).stream().parallel().map(result -> {
             ChatRoomJpaEntity chatRoomJpa = (ChatRoomJpaEntity) result[0];
             ChatRoom chatRoom = ChatRoom.fromEntity(chatRoomJpa);
             int unreadMessageCount = ((Number) result[1]).intValue();
             String latestMessageContent = (String) result[2];
-            List<Long> participants = Arrays.stream(((String) result[3]).split(","))
-                    .map(Long::parseLong)
-                    .filter(participantId -> !participantId.equals(userId))
+            List<Long> participants = Pattern.compile(",")
+                    .splitAsStream((String) result[3])
+                    .mapToLong(Long::parseLong)
+                    .filter(participantId -> participantId != userId)
+                    .boxed()
                     .toList();
             chatRoom.addParticipants(participants);
             chatRoom.setUnreadMessageCount(unreadMessageCount);
@@ -110,18 +113,26 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
     }
 
     public ChatRoom findRoomWithMessagesAndParticipants(Long roomId, Long userId, boolean isUserAdmin) {
-        List<Object[]> results = !isUserAdmin ?
+        List<ChatRoomWithDetails> results = isUserAdmin ?
+                chatRoomRepository.findRoomWithMessagesAndParticipantsByAdmin(roomId)
+                        .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND)) :
                 chatRoomRepository.findRoomWithMessagesAndParticipants(roomId)
-                        .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND))
-                : chatRoomRepository.findRoomWithMessagesAndParticipantsByAdmin(roomId)
-                        .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
-        ChatRoom chatRoom = ChatRoom.fromEntity((ChatRoomJpaEntity) results.getFirst()[0]);
-        for (Object[] result : results) {
-            Optional.ofNullable((MessageJpaEntity) result[1])
-                    .map(MessageJpaEntity::fromEntity).ifPresent(chatRoom::addMessage);
-            Optional.ofNullable((Long) result[2])
-                    .ifPresent(chatRoom::addParticipant);
+                    .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
+        if (results.isEmpty()) {
+            throw new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND);
         }
+        ChatRoom chatRoom = ChatRoom.fromEntity(results.getFirst().chatRoom());
+        List<Message> messages = results.stream()
+                .map(ChatRoomWithDetails::message)
+                .distinct()
+                .filter(Objects::nonNull)
+                .map(MessageJpaEntity::fromEntity)
+                .toList();
+        List<Long> participants = results.stream()
+                .map(ChatRoomWithDetails::userId)
+                .toList();
+        chatRoom.addParticipants(participants);
+        chatRoom.addMessage(messages);
         return chatRoom;
     }
 
