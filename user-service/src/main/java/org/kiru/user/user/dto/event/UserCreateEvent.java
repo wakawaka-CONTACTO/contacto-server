@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Builder
 public record UserCreateEvent(
-        Long userId,
+        Long userId,String userName,
         List<MultipartFile> images, List<UserPurposesReq> purposes, List<UserTalentsReq> talents
 ){
 }

@@ -38,7 +38,7 @@ public class ImageService {
     private String cachePath;
 
     @Transactional
-    public UserPortfolio saveImages(final List<MultipartFile> images, final Long userId) {
+    public UserPortfolio saveImages(final List<MultipartFile> images, final Long userId, String userName) {
         Queue<UserPortfolioImg> savedImages = new ConcurrentLinkedQueue<>();
         Long portfolioId = generatePortfolioId();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -46,7 +46,7 @@ public class ImageService {
                     .mapToObj(index -> CompletableFuture.runAsync(() -> {
                         try {
                             String imagePath = s3Service.uploadImage(path, images.get(index));
-                            UserPortfolioImg newImage = UserPortfolioImg.of(userId, portfolioId,cachePath + imagePath, index + 1);
+                            UserPortfolioImg newImage = UserPortfolioImg.of(userId, portfolioId,cachePath + imagePath, index + 1,userName);
                             savedImages.add(newImage);
                         } catch (IOException e) {
                             throw new CompletionException(new BadRequestException(FailureCode.BAD_REQUEST));
@@ -67,7 +67,7 @@ public class ImageService {
         try {
             String imagePath = s3Service.uploadImage(path, image);
             String imageUrl = cachePath + imagePath;
-            UserPortfolioImg newImage = UserPortfolioImg.of(userId, userPortfolioImg.getPortfolioId(),cachePath + imagePath, userPortfolioImg.getSequence());
+            UserPortfolioImg newImage = UserPortfolioImg.of(userId, userPortfolioImg.getPortfolioId(),cachePath + imagePath, userPortfolioImg.getSequence(), userPortfolioImg.getUserName());
             userPortfolioImg.portfolioImageUrl(imageUrl);
             userPortfolioRepository.save(newImage);
             return newImage;
@@ -78,14 +78,14 @@ public class ImageService {
     }
 
     @Transactional
-    public List<UserPortfolioImg> saveImagesWithSequence(final Map<Integer, MultipartFile> images, final Long userId, final Long portfolioId) {
+    public List<UserPortfolioImg> saveImagesWithSequence(final Map<Integer, MultipartFile> images, final Long userId, final Long portfolioId, String userName) {
         Queue<UserPortfolioImg> savedImages = new ConcurrentLinkedQueue<>();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             List<CompletableFuture<Void>> futures = images.entrySet().stream()
                     .map(entry -> CompletableFuture.runAsync(() -> {
                         try {
                             String imagePath = s3Service.uploadImage(path, entry.getValue());
-                            UserPortfolioImg newImage = UserPortfolioImg.of(userId, portfolioId, cachePath + imagePath, entry.getKey());
+                            UserPortfolioImg newImage = UserPortfolioImg.of(userId, portfolioId, cachePath + imagePath, entry.getKey(),userName);
                             savedImages.add(newImage);
                         } catch (IOException e) {
                             throw new CompletionException(new BadRequestException(FailureCode.BAD_REQUEST));

@@ -8,17 +8,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.exception.ContactoException;
+import org.kiru.core.exception.EntityNotFoundException;
+import org.kiru.core.exception.code.FailureCode;
 import org.kiru.core.user.talent.entity.UserTalent;
+import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
-import org.kiru.core.exception.EntityNotFoundException;
-import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.external.s3.ImageService;
+import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
-import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.repository.UserTalentRepository;
@@ -44,16 +45,16 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
 
     @Override
     @Cacheable(value = "user", key = "#userId", unless = "#result == null")
-    public UserJpaEntity getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND));
+    public User getUser(Long userId) {
+        return User.of(userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND)));
     }
 
     @Override
     @CachePut(value = "user", key = "#user.id", unless = "#result == null")
-    public UserJpaEntity saveUser(UserJpaEntity user) {
+    public User saveUser(UserJpaEntity user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        return User.of(userRepository.save(user));
     }
 
     @Transactional
@@ -95,12 +96,12 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
         }
         List<UserPortfolioImg> updatedPortfolioImgs = new ArrayList<>();
         if (!multipartImages.isEmpty()) {
-            updatedPortfolioImgs.addAll(imageService.saveImagesWithSequence(multipartImages, userId, portfolioId));
+            updatedPortfolioImgs.addAll(imageService.saveImagesWithSequence(multipartImages, userId, portfolioId, userUpdateDto.getUsername()));
         }
         for (Entry<Integer, String> entry : stringImages.entrySet()) {
             Integer sequence = entry.getKey();
             String imageUrl = entry.getValue();
-            UserPortfolioImg newImg = UserPortfolioImg.of(userId, portfolioId, imageUrl, sequence);
+            UserPortfolioImg newImg = UserPortfolioImg.of(userId, portfolioId, imageUrl, sequence,userUpdateDto.getUsername());
             updatedPortfolioImgs.add(newImg);
         }
         updatedPortfolioImgs.sort(Comparator.comparing(UserPortfolioImg::getSequence));

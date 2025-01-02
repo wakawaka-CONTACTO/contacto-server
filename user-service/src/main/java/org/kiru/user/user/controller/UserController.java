@@ -41,9 +41,8 @@ public class UserController {
     }
 
     @GetMapping("/me/email")
-    public ResponseEntity<Void> getUser(@RequestParam("email") String email){
-        userService.findExistUserByEmail(email);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<User> getUser(@RequestParam("email") String email){
+        return ResponseEntity.ok(userService.findExistUserByEmail(email));
     }
 
     @DeleteMapping("/me")

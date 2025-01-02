@@ -59,6 +59,7 @@ public class AuthService {
         Token issuedToken = issueToken(user.getId(), user.getEmail());
         applicationEventPublisher.publishEvent(
                 UserCreateEvent.builder()
+                        .userName(user.getUsername())
                         .userId(user.getId())
                         .images(images)
                         .purposes(purposes)
