@@ -8,7 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kiru.core.user.userlike.domain.LikeStatus;
-import org.kiru.core.user.userlike.entity.UserLike;
+import org.kiru.core.user.userlike.domain.UserLike;
+import org.kiru.core.user.userlike.entity.UserLikeJpaEntity;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -18,11 +19,11 @@ class SendLikeOrDislikeUseCaseTest {
     @Mock
     private SendLikeOrDislikeUseCase sendLikeOrDislikeUseCase;
 
-    private UserLike testUserLike;
+    private UserLikeJpaEntity testUserLike;
 
     @BeforeEach
     void setUp() {
-        testUserLike = UserLike.builder()
+        testUserLike = UserLikeJpaEntity.builder()
             .userId(1L)
             .likedUserId(2L)
             .likeStatus(LikeStatus.LIKE)
@@ -52,7 +53,7 @@ class SendLikeOrDislikeUseCaseTest {
     @DisplayName("싫어요 보내기 - 성공")
     void sendOrDislike_Dislike_Success() {
         // Given
-        UserLike dislikeUserLike = UserLike.builder()
+        UserLikeJpaEntity dislikeUserLike = UserLikeJpaEntity.builder()
             .userId(1L)
             .likedUserId(2L)
             .likeStatus(LikeStatus.DISLIKE)
@@ -77,7 +78,7 @@ class SendLikeOrDislikeUseCaseTest {
     @DisplayName("매칭된 좋아요 - 성공")
     void sendOrDislike_Matched_Success() {
         // Given
-        UserLike matchedUserLike = UserLike.builder()
+        UserLike matchedUserLike = UserLikeJpaEntity.builder()
             .userId(1L)
             .likedUserId(2L)
             .likeStatus(LikeStatus.LIKE)

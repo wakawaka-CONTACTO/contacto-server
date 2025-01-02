@@ -2,9 +2,9 @@ package org.kiru.user.user.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,20 +12,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kiru.core.exception.ContactoException;
-import org.kiru.core.exception.EntityNotFoundException;
-import org.kiru.core.user.talent.entity.UserTalent;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
-import org.kiru.core.user.userPurpose.domain.PurposeType;
-import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.external.s3.ImageService;
 import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.dto.request.UserUpdateDto;
@@ -111,7 +106,7 @@ class UserRepositoryAdapterTest {
                 .build()
         );
 
-        when(imageService.saveImagesWithSequence(anyMap(), anyLong(), anyLong()))
+        when(imageService.saveImagesWithSequence(anyMap(), anyLong(), anyLong(),anyString()))
             .thenReturn(savedImages);
 
         // When
@@ -122,7 +117,7 @@ class UserRepositoryAdapterTest {
         assertThat(result).isSortedAccordingTo(
             java.util.Comparator.comparing(UserPortfolioImg::getSequence));
         verify(userPortfolioRepository).deleteAllByUserId(userId);
-        verify(imageService).saveImagesWithSequence(anyMap(), anyLong(), anyLong());
+        verify(imageService).saveImagesWithSequence(anyMap(), anyLong(), anyLong(),anyString());
     }
 
     @Test
@@ -166,7 +161,7 @@ class UserRepositoryAdapterTest {
                 .build()
         );
 
-        when(imageService.saveImagesWithSequence(anyMap(), anyLong(), anyLong()))
+        when(imageService.saveImagesWithSequence(anyMap(), anyLong(), anyLong(),anyString()))
             .thenReturn(savedImages);
 
         // When
@@ -179,7 +174,7 @@ class UserRepositoryAdapterTest {
         assertThat(result.get(0).getPortfolioImageUrl()).isEqualTo("new-image.jpg");
         assertThat(result.get(1).getPortfolioImageUrl()).isEqualTo("existing-image.jpg");
         verify(userPortfolioRepository).deleteAllByUserId(userId);
-        verify(imageService).saveImagesWithSequence(anyMap(), anyLong(), anyLong());
+        verify(imageService).saveImagesWithSequence(anyMap(), anyLong(), anyLong(),anyString());
     }
 
     @Test

@@ -4,6 +4,7 @@ import java.util.List;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.user.admin.dto.MatchedUserResponse;
+import org.kiru.user.config.FeignConfig;
 import org.kiru.user.userlike.api.CreateChatRoomRequest;
 import org.kiru.user.userlike.api.CreateChatRoomResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "chat-service")
+@FeignClient(name = "chat-service",configuration = FeignConfig.class)
 public interface ChatApiClient {
     @GetMapping("/api/v1/chat/rooms")
     List<ChatRoom> getUserChatRooms(@RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);

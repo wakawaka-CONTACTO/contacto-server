@@ -30,7 +30,6 @@ import org.kiru.user.user.service.out.UserUpdateUseCase;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -56,22 +55,22 @@ class UserServiceTest {
     @Mock
     private UserUpdateUseCase userUpdateUseCase;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
 
-    private UserJpaEntity testUser;
+    private UserJpaEntity testUserJpa;
+    private User testUser;
     private UserUpdateDto testUpdateDto;
     private List<UserTalent> testTalents;
     private List<UserPortfolioImg> testPortfolioImgs;
 
     @BeforeEach
     void setUp() {
-        testUser = UserJpaEntity.builder()
+        testUserJpa = UserJpaEntity.builder()
                 .id(1L)
                 .email("test@example.com")
                 .username("testUser")
                 .description("Test Description")
                 .build();
+        testUser = User.of(testUserJpa);
         testUpdateDto = new UserUpdateDto();
         testUpdateDto.setUsername("updatedUser");
         testUpdateDto.setDescription("Updated Description");
@@ -111,7 +110,7 @@ class UserServiceTest {
     @DisplayName("사용자 정보 수정 - 성공")
     void updateUser_Success() {
         // Given
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUserJpa));
         when(userQueryWithCache.saveUser(any())).thenReturn(testUser);
         when(userUpdateUseCase.updateUserTalents(eq(1L), any())).thenReturn(testTalents);
         when(userUpdateUseCase.updateUserPortfolioImages(eq(1L), any())).thenReturn(testPortfolioImgs);
@@ -143,7 +142,7 @@ class UserServiceTest {
     void updateUserPwd_Success() {
         // Given
         UserUpdatePwdDto pwdDto = new UserUpdatePwdDto("test@example.com", "newPassword");
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUserJpa));
         when(userUpdateUseCase.updateUserPwd(any(), any())).thenReturn(true);
         // When
         Boolean result = userService.updateUserPwd(pwdDto);

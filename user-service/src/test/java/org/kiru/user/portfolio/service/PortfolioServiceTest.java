@@ -68,14 +68,14 @@ class PortfolioServiceTest {
         Slice<Long> likedUserIds = new SliceImpl<>(Arrays.asList(6L, 7L));
         Slice<Long> popularUserIds = new SliceImpl<>(Arrays.asList(8L, 9L));
 
-        when(userLikeRepository.findAllMatchedUserIdByUserId(testUserId))
-            .thenReturn(matchedUserIds);
-        when(userPurposeRepository.findUserIdsByPurposeTypesOrderByCount(any(), any()))
-            .thenReturn(new SliceImpl<>(matchingUserIds));
-        when(userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(any(), any()))
-            .thenReturn(likedUserIds);
-        when(userLikeRepository.findAllUserIdOrderByLikedUserIdCountDesc(any()))
-            .thenReturn(popularUserIds);
+//        when(userLikeRepository.findAllMatchedUserIdByUserId(testUserId))
+//            .thenReturn(matchedUserIds);
+//        when(userPurposeRepository.findUserIdsByPurposeTypesOrderByCount(any(), any()))
+//            .thenReturn(new SliceImpl<>(matchingUserIds));
+//        when(userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(any(), any()))
+//            .thenReturn(likedUserIds);
+//        when(userLikeRepository.findAllUserIdOrderByLikedUserIdCountDesc(any()))
+//            .thenReturn(popularUserIds);
         when(getUserPortfoliosQuery.findAllPortfoliosByUserIds(anyList()))
             .thenReturn(testPortfolios);
 
@@ -98,9 +98,9 @@ class PortfolioServiceTest {
         when(userPurposeRepository.findUserIdsByPurposeTypesOrderByCount(any(), any()))
             .thenReturn(new SliceImpl<>(List.of()));
         when(userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(any(), any()))
-            .thenReturn(new SliceImpl<>(List.of()));
-        when(userLikeRepository.findAllUserIdOrderByLikedUserIdCountDesc(any()))
-            .thenReturn(new SliceImpl<>(List.of()));
+            .thenReturn(List.of());
+//        when(userLikeRepository.findAllUserIdOrderByLikedUserIdCountDesc(any()))
+//            .thenReturn(new SliceImpl<>(List.of()));
         when(getUserPortfoliosQuery.findAllPortfoliosByUserIds(anyList()))
             .thenReturn(List.of());
 
@@ -120,12 +120,12 @@ class PortfolioServiceTest {
         Slice<Long> likedUserIds = new SliceImpl<>(Arrays.asList(3L, 4L, 5L)); // 중복된 ID 포함
         Slice<Long> popularUserIds = new SliceImpl<>(Arrays.asList(4L, 5L, 6L)); // 중복된 ID 포함
 
-        when(userLikeRepository.findAllMatchedUserIdByUserId(testUserId))
-            .thenReturn(matchedUserIds);
-        when(userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(any(), any()))
-            .thenReturn(likedUserIds);
-        when(userLikeRepository.findAllUserIdOrderByLikedUserIdCountDesc(any()))
-            .thenReturn(popularUserIds);
+//        when(userLikeRepository.findAllMatchedUserIdByUserId(testUserId))
+//            .thenReturn(matchedUserIds);
+//        when(userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(any(), any()))
+//            .thenReturn(likedUserIds);
+//        when(userLikeRepository.findAllUserIdOrderByLikedUserIdCountDesc(any()))
+//            .thenReturn(popularUserIds);
         when(getUserPortfoliosQuery.findAllPortfoliosByUserIds(anyList()))
             .thenReturn(testPortfolios);
         // When
