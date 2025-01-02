@@ -18,8 +18,8 @@ import org.kiru.user.admin.dto.AdminUserDto.UserDto;
 import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.out.AdminUserQuery;
 import org.kiru.user.user.api.ChatApiClient;
+import org.kiru.user.user.dto.UserIdUsername;
 import org.kiru.user.user.repository.UserRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -31,10 +31,12 @@ public class AdminService {
     private final ChatApiClient chatApiClient;
     private final UserRepository userRepository;
 
-    public Page<AdminUserDto> getUsers(Pageable pageable) {
-        Page<UserDto> users = adminUserQuery.findAll(pageable);
+    public List<AdminUserDto> getUsers(Pageable pageable) {
+        List<UserDto> users = adminUserQuery.findAll(pageable);
         List<Long> connectedUserIds = chatApiClient.getConnectedUserIds();
-        return users.map(user -> AdminUserDto.of(user, connectedUserIds.contains(user.id())));
+        return users.stream()
+                .map(user -> AdminUserDto.of(user, connectedUserIds.contains(user.id())))
+                .toList();
     }
 
     public List<AdminUserDto> findUserByName(String name) {
@@ -48,12 +50,12 @@ public class AdminService {
         List<Long> userIds = chatApiClientMatchedUsers.stream()
                 .map(MatchedUserResponse::userId)
                 .toList();
-        List<Object[]> userNames = userRepository.findUsernamesByIds(userIds);
+        List<UserIdUsername> userNames = userRepository.findUsernamesByIds(userIds);
         List<AdminMatchedUserResponse> adminMatchedUserResponses =  chatApiClientMatchedUsers.stream()
                 .map(matchedUser -> {
                     String name = userNames.stream()
-                            .filter(user -> user[0].equals(matchedUser.userId()))
-                            .map(user -> (String) user[1])
+                            .filter(user -> user.id().equals(matchedUser.userId()))
+                            .map(UserIdUsername::name)
                             .findFirst()
                             .orElse(null);
                     return new AdminMatchedUserResponse(matchedUser.userId(), name, matchedUser.matchedAt());
@@ -74,17 +76,17 @@ public class AdminService {
     }
 
     private List<AdminLikeUserDto> getUserLikesInternal(Pageable pageable, Long userId, String name, boolean isLiked) {
-        Page<AdminLikeUserDto> page;
+        List<AdminLikeUserDto> result;
         if (isLiked) {
             if (name == null) {
-                page = adminUserQuery.findUserLiked(pageable, userId);
+                result = adminUserQuery.findUserLiked(pageable, userId);
             } else {
-                page = adminUserQuery.findUserLikedByName(pageable, userId, name);
+                result = adminUserQuery.findUserLikedByName(pageable, userId, name);
             }
         } else {
-            page = (name == null ? adminUserQuery.findUserLikes(pageable, userId) : adminUserQuery.findUserLikesByName(pageable, userId, name));
+            result = (name == null ? adminUserQuery.findUserLikes(pageable, userId) : adminUserQuery.findUserLikesByName(pageable, userId, name));
         }
-        return page.getContent();
+        return result;
     }
 
     public AdminLikeUserResponse getUserLikesAndUserLiked(Pageable pageable, Long userId) {
