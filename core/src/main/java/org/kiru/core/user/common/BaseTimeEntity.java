@@ -23,6 +23,7 @@ public abstract class BaseTimeEntity {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(name = "update_at")
     private LocalDateTime updateAt;
 }
+

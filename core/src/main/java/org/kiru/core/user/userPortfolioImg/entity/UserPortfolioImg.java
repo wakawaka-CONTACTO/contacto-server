@@ -42,12 +42,17 @@ public class UserPortfolioImg {
     @Getter
     private int sequence;
 
-    public static UserPortfolioImg of(Long userId, Long portfolioId, String portfolioImageUrl, int sequence) {
+    @Getter
+    @Column(name = "username")
+    private String userName;
+
+    public static UserPortfolioImg of(Long userId, Long portfolioId, String portfolioImageUrl, int sequence, String userName) {
         return UserPortfolioImg.builder()
                 .userId(userId)
                 .portfolioId(portfolioId)
                 .portfolioImageUrl(portfolioImageUrl)
                 .sequence(sequence)
+                .userName(userName)
                 .build();
     }
 
