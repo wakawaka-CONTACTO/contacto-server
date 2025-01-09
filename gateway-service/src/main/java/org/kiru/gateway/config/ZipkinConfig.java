@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile({"local", "docker"})
 public class ZipkinConfig {
-    private static List<String> WHITE_LISTED_PATHS = List.of("actuator", "eureka");
+    private static final List<String> WHITE_LISTED_PATHS = List.of("actuator", "eureka");
 
     @Bean
     public SamplerFunction<HttpRequest> customHttpSampler() {

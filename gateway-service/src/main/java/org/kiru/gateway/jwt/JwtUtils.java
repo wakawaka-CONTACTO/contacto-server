@@ -53,12 +53,16 @@ public class JwtUtils {
                         .map(JwtValidResponse::of)
                         .switchIfEmpty(Mono.error(new IllegalArgumentException("User not found")));
             }  catch (MalformedJwtException ex) {
+                log.error("Invalid JWT token", ex);
                 return Mono.just(JwtValidResponse.of(JwtValidationType.INVALID_JWT_TOKEN));
             } catch (ExpiredJwtException ex) {
+                log.error("Invalid JWT token", ex);
                 return  Mono.just(JwtValidResponse.of(JwtValidationType.EXPIRED_JWT_TOKEN));
             } catch (UnsupportedJwtException ex) {
+                log.error("Invalid JWT token", ex);
                 return  Mono.just(JwtValidResponse.of(JwtValidationType.UNSUPPORTED_JWT_TOKEN));
             } catch (IllegalArgumentException ex) {
+                log.error("IllegalArgumentException", ex);
                 return  Mono.just(JwtValidResponse.of(JwtValidationType.EMPTY_JWT));
             } catch (Exception ex) {
                 log.error("Error processing JWT token", ex);

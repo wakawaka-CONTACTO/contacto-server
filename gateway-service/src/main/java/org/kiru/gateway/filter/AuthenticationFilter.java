@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -37,21 +36,26 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Config> {
                 if (token != null) {
                     return jwtUtils.validateToken(token)
                             .flatMap(jwtValidResponse -> {
-                                if (jwtValidResponse.getStatus() == JwtValidationType.VALID_JWT) {
-                                    HttpHeaders writableHeaders = HttpHeaders.writableHttpHeaders(request.getHeaders());
-                                    writableHeaders.add("X-User-Id", String.valueOf(jwtValidResponse.getUser().getId()));
-                                    ServerHttpRequest modifiedRequest = new ServerHttpRequestDecorator(request) {
-                                        @Override
-                                        public HttpHeaders getHeaders() {
-                                            return writableHeaders;
-                                        }
-                                    };
-                                    ServerWebExchange modifiedExchange = exchange.mutate()
-                                            .request(modifiedRequest)
-                                            .build();
-                                    return chain.filter(modifiedExchange);
+                                try {
+                                    if (jwtValidResponse.getStatus() == JwtValidationType.VALID_JWT) {
+                                        HttpHeaders writableHeaders = HttpHeaders.writableHttpHeaders(
+                                                request.getHeaders());
+                                        writableHeaders.add("X-User-Id",
+                                                String.valueOf(jwtValidResponse.getUser().getId()));
+                                        ServerHttpRequest modifiedRequest = new ServerHttpRequestDecorator(request) {
+                                            @Override
+                                            public HttpHeaders getHeaders() {
+                                                return writableHeaders;
+                                            }
+                                        };
+                                        return chain.filter(exchange.mutate()
+                                                .request(modifiedRequest)
+                                                .build());
+                                    }
+                                } catch (Exception e) {
+                                    log.error("Error processing JWT token", e);
                                 }
-                                return Mono.error(new RuntimeException("Invalid JWT token"));
+                                return Mono.error(new RuntimeException("Invalid JWT token: " + token + " : " + jwtValidResponse.getStatus()));
                             })
                             .onErrorResume(e -> {
                                 log.error("Error processing JWT token", e);
