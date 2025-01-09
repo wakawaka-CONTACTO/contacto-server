@@ -23,7 +23,7 @@ public interface ChatApiClient {
     List<ChatRoom> getUserChatRooms(@RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);
 
     @GetMapping("/api/v1/chat/rooms/{roomId}")
-    ChatRoom getRoom(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId);
+    ChatRoom getRoom(@PathVariable("roomId") Long roomId, @RequestHeader("X-User-Id") Long userId);
 
     @PostMapping("/api/v1/chat/rooms")
     CreateChatRoomResponse createRoom(@RequestHeader("X-User-Id") Long userId,

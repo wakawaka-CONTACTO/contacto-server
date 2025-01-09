@@ -168,6 +168,7 @@ public class UserService implements GetUserMainPageUseCase {
                     getUserPortfolioByPortfolioImg(userPortfolioRepository.saveAll(portfolioImgsFuture.join())));
             return updatedUser;
         } catch (Exception e) {
+            log.error(e.getMessage());
             throw new ContactoException(FailureCode.USER_UPDATE_FAILED);
         }
     }

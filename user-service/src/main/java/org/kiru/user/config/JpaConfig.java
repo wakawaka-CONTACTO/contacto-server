@@ -3,6 +3,7 @@ package org.kiru.user.config;
 import java.util.Objects;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import org.springframework.transaction.PlatformTransactionManager;
         entityManagerFactoryRef = "entityManagerFactory",
         transactionManagerRef = "transactionManager"
 )
+@EntityScan(basePackages = {"org.kiru.core.user","org.kiru.core.user.like"})
 @Profile({"docker", "local"})
 public class JpaConfig {
     @Bean(name = "entityManagerFactory")

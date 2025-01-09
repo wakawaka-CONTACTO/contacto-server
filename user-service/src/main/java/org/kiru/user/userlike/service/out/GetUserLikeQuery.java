@@ -9,5 +9,5 @@ public interface GetUserLikeQuery {
 
     List<Long> findAllMatchedUserIdByUserId(Long userId);
 
-    List<Long> findAllLikeMeUserIdAndNotMatchedByLikedUserId(Long likedUserId, Pageable pageable);
+    List<Long> findAllLikeMeUserIdAndNotMatchedByLikedUserId(Long userId, Pageable pageable);
 }
