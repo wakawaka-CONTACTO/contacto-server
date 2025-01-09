@@ -19,5 +19,5 @@ public interface UserLikeMongoRepository extends MongoRepository<UserLikeMongoEn
            fields="{'liked_user_id': 1}")
     List<UserIdProjection> findAllMatchedUserIdByUserId(Long userId);
 
-    UserLike save(UserLike userLike);
+    UserLikeMongoEntity save(UserLike userLike);
 }

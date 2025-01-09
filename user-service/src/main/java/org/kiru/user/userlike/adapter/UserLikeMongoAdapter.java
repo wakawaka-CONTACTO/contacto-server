@@ -8,7 +8,6 @@ import org.bson.Document;
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.domain.UserLike;
-import org.kiru.core.user.userlike.entity.UserLikeJpaEntity;
 import org.kiru.core.user.userlike.entity.UserLikeMongoEntity;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.service.out.UserLikeAdminUseCase;
@@ -45,7 +44,7 @@ public class UserLikeMongoAdapter implements SendLikeOrDislikeUseCase, GetUserLi
         Query oppositeLikeQuery = new Query(
                 Criteria.where("userId").is(likedUserId).and("likedUserId").is(userId).and("likeStatus")
                         .is(LIKE));
-        UserLike oppositeLike = mongoTemplate.findOne(oppositeLikeQuery, UserLikeJpaEntity.class);
+        UserLike oppositeLike = mongoTemplate.findOne(oppositeLikeQuery, UserLikeMongoEntity.class);
         // 2. Find or create current like record
         UserLike userLike = userLikeRepository.findByUserIdAndLikedUserId(userId, likedUserId)
                 .orElseGet(() -> UserLikeMongoEntity.of(userId, likedUserId, status, false));
@@ -56,7 +55,7 @@ public class UserLikeMongoAdapter implements SendLikeOrDislikeUseCase, GetUserLi
             // Update opposite like
             Query updateQuery = new Query(Criteria.where("userId").is(likedUserId).and("likedUserId").is(userId));
             Update update = new Update().set("isMatched", true);
-            mongoTemplate.updateFirst(updateQuery, update, UserLikeJpaEntity.class);
+            mongoTemplate.updateFirst(updateQuery, update, UserLikeMongoEntity.class);
         }
         return userLikeRepository.save(userLike);
     }
@@ -117,7 +116,7 @@ public class UserLikeMongoAdapter implements SendLikeOrDislikeUseCase, GetUserLi
         // 좋아요 목록 조회
         List<UserLike> likes = mongoTemplate.find(query, UserLike.class);
         // 좋아요 총 개수 조회
-        long total = mongoTemplate.count(query, UserLikeJpaEntity.class);
+        long total = mongoTemplate.count(query, UserLikeMongoEntity.class);
         // DTO 변환
         // 사용자 정보 조회 로직 추가 필요
         return likes.stream()
