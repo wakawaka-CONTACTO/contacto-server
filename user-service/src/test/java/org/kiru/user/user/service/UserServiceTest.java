@@ -19,6 +19,7 @@ import org.kiru.core.user.talent.entity.UserTalent;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
+import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
@@ -30,6 +31,7 @@ import org.kiru.user.user.service.out.UserUpdateUseCase;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -55,9 +57,13 @@ class UserServiceTest {
     @Mock
     private UserUpdateUseCase userUpdateUseCase;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     private UserJpaEntity testUserJpa;
     private User testUser;
+    private User updateUser;
+
     private UserUpdateDto testUpdateDto;
     private List<UserTalent> testTalents;
     private List<UserPortfolioImg> testPortfolioImgs;
@@ -70,6 +76,12 @@ class UserServiceTest {
                 .username("testUser")
                 .description("Test Description")
                 .build();
+        updateUser = User.of(UserJpaEntity.builder()
+                .id(1L)
+                .email("updated@example.com")
+                .username("updatedUser")
+                .description("Updated Description")
+                .build());
         testUser = User.of(testUserJpa);
         testUpdateDto = new UserUpdateDto();
         testUpdateDto.setUsername("updatedUser");
@@ -111,9 +123,10 @@ class UserServiceTest {
     void updateUser_Success() {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUserJpa));
-        when(userQueryWithCache.saveUser(any())).thenReturn(testUser);
+        when(userUpdateUseCase.updateUserPurposes(eq(1L), any())).thenReturn(Arrays.asList(UserPurpose.builder().build()));
         when(userUpdateUseCase.updateUserTalents(eq(1L), any())).thenReturn(testTalents);
         when(userUpdateUseCase.updateUserPortfolioImages(eq(1L), any())).thenReturn(testPortfolioImgs);
+        when(userQueryWithCache.saveUser(any())).thenReturn(updateUser);
         when(userTalentRepository.saveAll(any())).thenReturn(testTalents);
         when(userPortfolioRepository.saveAll(any())).thenReturn(testPortfolioImgs);
 
@@ -122,7 +135,9 @@ class UserServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isEqualTo("updated@example.com");
+        assertThat(result.getUsername()).isEqualTo(testUpdateDto.getUsername());
+        assertThat(result.getDescription()).isEqualTo(testUpdateDto.getDescription());
+        assertThat(result.getEmail()).isEqualTo(testUpdateDto.getEmail());
         verify(userRepository).findById(1L);
         verify(userQueryWithCache).saveUser(any());
     }

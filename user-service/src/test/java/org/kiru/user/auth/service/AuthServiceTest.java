@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.kiru.core.exception.ContactoException;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.UnauthorizedException;
 import org.kiru.core.user.refreshtoken.RefreshToken;
@@ -173,5 +174,15 @@ class AuthServiceTest {
 
         // When & Then
         assertThrows(EntityNotFoundException.class, () -> authService.signHelp(signHelpDto));
+    }
+
+    @Test
+    @DisplayName("토큰 재발급 - 리프레시 토큰 없음")
+    void reissue_RefreshTokenNotFound() {
+        // Given
+        when(refreshTokenRepository.deleteByUserId(anyLong())).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(UnauthorizedException.class, () -> authService.reissue(1L));
     }
 }
