@@ -18,6 +18,7 @@ import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.external.s3.ImageService;
 import org.kiru.user.portfolio.repository.UserPortfolioRepository;
+import org.kiru.user.portfolio.service.out.GetUserPurposeQuery;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
 import org.kiru.user.user.repository.UserPurposeRepository;
@@ -27,6 +28,7 @@ import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.kiru.user.user.service.out.UserUpdateUseCase;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Repository
 @Transactional
-public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseCase {
+public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseCase, GetUserPurposeQuery {
     private final UserRepository userRepository;
     private final UserPurposeRepository userPurposeRepository;
     private final UserTalentRepository userTalentRepository;
@@ -114,5 +116,12 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdateUseC
         existingUser.setPassword(
                 passwordEncoder.encode(userUpdatePwdDto.password()));
         return true;
+    }
+
+    @Override
+    @Cacheable(value = "userPurpose", key = "#purposeTypes", unless = "#result == null")
+    public List<Long> findUserIdByPurposeType(Long userId, List<PurposeType> purposeTypes, Pageable pageable) {
+        return userPurposeRepository.findUserIdsByPurposeTypesOrderByCount(purposeTypes, pageable)
+                .getContent();
     }
 }

@@ -16,6 +16,7 @@ import org.kiru.user.userlike.dto.Longs;
 import org.kiru.user.userlike.repository.UserLikeJpaRepository;
 import org.kiru.user.userlike.service.out.GetUserLikeQuery;
 import org.kiru.user.userlike.service.out.SendLikeOrDislikeUseCase;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +31,14 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
 
     @Transactional
     public UserLike sendOrDislike(Long userId, Long likedUserId, LikeStatus status) {
-        // 1. 상대방이 나를 좋아요(`LIKE`)한 기록이 있는지 먼저 조회
-        UserLike oppositeLike = userLikeRepository.findOppositeLike(likedUserId, userId, LikeStatus.LIKE);
-        // 2. 현재 `userId -> likedUserId` 관계 조회 또는 생성
+        // 현재 `userId -> likedUserId` 관계 조회 또는 생성
         UserLike userLike = userLikeRepository.findByUserIdAndLikedUserId(userId, likedUserId)
                 .orElseGet(() -> UserLikeJpaEntity.of(userId, likedUserId, status, false));
+        // 1. 상대방이 나를 좋아요(`LIKE`)한 기록이 있는지 먼저 조회
+        if(userLike.isMatched() && status == LikeStatus.LIKE) {
+            return userLike;
+        }
+        UserLike oppositeLike = userLikeRepository.findOppositeLike(likedUserId, userId, LikeStatus.LIKE);
         userLike.likeStatus(status);
         // 3. 상대방이 나를 이미 `LIKE`했다면 상호 매칭으로 처리
         if (oppositeLike != null && status == LikeStatus.LIKE) {
@@ -47,6 +51,7 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
     }
 
     @Override
+    @Cacheable(value = "popularIds", key = "#pageable.pageNumber", unless = "#result==null")
     public Longs getPopularUserId(Pageable pageable) {
         return new Longs(userLikeRepository.findPopularUserId(pageable));
     }
@@ -57,8 +62,9 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
     }
 
     @Override
-    public List<Long> findAllLikeMeUserIdAndNotMatchedByLikedUserId(Long likedUserId, Pageable pageable) {
-        return userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(likedUserId, pageable);
+    @Cacheable(value = "like", key = "#userId+'-'+#pageable.pageNumber", unless = "#result == null")
+    public List<Long> findAllLikeMeUserIdAndNotMatchedByLikedUserId(Long userId, Pageable pageable) {
+        return userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(userId, pageable);
     }
 
     @Override
@@ -66,7 +72,6 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
         QUserJpaEntity qUserJpaEntity = QUserJpaEntity.userJpaEntity;
         QUserLikeJpaEntity qUserLike = QUserLikeJpaEntity.userLikeJpaEntity;
         QUserPortfolioImg qUserPortfolioImg = QUserPortfolioImg.userPortfolioImg;
-
         List<AdminLikeUserDto> likes = queryFactory.select(Projections.constructor(AdminLikeUserDto.class,
                         qUserJpaEntity.id,
                         qUserJpaEntity.username,
@@ -82,13 +87,6 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-//        Long total = queryFactory.select(qUserLike.count())
-//                .from(qUserLike)
-//                .innerJoin(qUserJpaEntity)
-//                .on(isLiked ? qUserLike.userId.eq(qUserJpaEntity.id) : qUserLike.likedUserId.eq(qUserJpaEntity.id))
-//                .where((isLiked ? qUserLike.likedUserId.eq(userId) : qUserLike.userId.eq(userId))
-//                        .and(name != null ? qUserJpaEntity.username.containsIgnoreCase(name) : null))
-//                .fetchOne();
         return likes;
     }
 }
