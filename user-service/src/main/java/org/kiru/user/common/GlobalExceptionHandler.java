@@ -86,7 +86,7 @@ public class GlobalExceptionHandler {
         Throwable cause = e.getCause();
         if (cause instanceof FeignClientException feignException) {
             log.error("Feign Client Exception in CompletableFuture", feignException);
-            new ResponseEntity<>(feignException.getFailureResponse(), HttpStatus.valueOf(feignException.getFailureResponse().getStatus().value()));
+            return new ResponseEntity<>(feignException.getFailureResponse(), HttpStatus.valueOf(feignException.getFailureResponse().getStatus().value()));
         }
         log.error("Unexpected CompletionException", e.getCause());
         FailureResponse failureResponse = FailureResponse.builder()

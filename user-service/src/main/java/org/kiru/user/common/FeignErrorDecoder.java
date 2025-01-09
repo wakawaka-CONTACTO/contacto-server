@@ -22,6 +22,15 @@ public class FeignErrorDecoder implements ErrorDecoder {
     public Exception decode(String methodKey, Response response) {
         try {
             // 에러 응답 본문 파싱
+            if (response.body() == null) {
+                return new FeignClientException(
+                        FailureResponse.builder()
+                                .status(HttpStatus.valueOf(response.status()))
+                                .message("Empty response body")
+                                .code("FEIGN_EMPTY_BODY")
+                                .build()
+                );
+            }
             String errorBody = IOUtils.toString(response.body().asInputStream(), StandardCharsets.UTF_8);
             FailureResponse failureResponse = parseErrorResponse(errorBody);
             return new FeignClientException(
