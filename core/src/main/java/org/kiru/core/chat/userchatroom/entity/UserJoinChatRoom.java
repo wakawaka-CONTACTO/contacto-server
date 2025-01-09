@@ -24,7 +24,8 @@ import lombok.RequiredArgsConstructor;
                 )
         },
         indexes = {
-                @Index(name = "user_chat_chat_room_id_idx", columnList = "chat_room_id")
+                @Index(name = "user_chat_chat_room_id_idx", columnList = "chat_room_id"),
+                @Index(name = "user_chat_user_id_idx", columnList = "user_id")
         }
 )
 @Getter

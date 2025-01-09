@@ -1,13 +1,13 @@
 package org.kiru.chat.adapter.out.persistence;
 
 import java.util.List;
+import java.util.Optional;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
 
 
 public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRoom, Long> {
@@ -43,6 +43,14 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
             + "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId "
             + "WHERE u.userId = :userId "
             + "AND uj.userId = :adminId")
-    @Transactional
     List<UserJoinChatRoom> findByUserIdAndAdminId(Long userId, Long adminId);
+
+    @Query("FROM UserJoinChatRoom u "
+            + "WHERE u.chatRoomId IN ( "
+            + "    SELECT uj.chatRoomId "
+            + "    FROM UserJoinChatRoom uj "
+            + "    WHERE uj.userId = :userId "
+            + ")"
+            + "AND u.userId = :userId2")
+    Optional<UserJoinChatRoom> findAlreadyRoomByUserIds(Long userId, Long userId2);
 }

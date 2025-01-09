@@ -12,7 +12,7 @@ import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
-@Profile({"dev"})
+@Profile({"dev","local","docker"})
 public class LazyDataSourceConfig {
     @Value("${db.connections}")
     private int connections;

@@ -54,7 +54,7 @@ public class ChatRoomController {
     }
 
     @GetMapping("/rooms/{roomId}")
-    public ChatRoom getRoom(@PathVariable Long roomId, @UserId Long userId,
+    public ChatRoom getRoom(@PathVariable("roomId") Long roomId, @UserId Long userId,
                             @RequestParam(required = false, defaultValue = "false") boolean changeStatus) {
         return getChatRoomUseCase.findRoomById(roomId, userId, changeStatus);
     }
