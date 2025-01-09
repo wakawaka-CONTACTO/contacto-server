@@ -16,7 +16,7 @@ class LoadBalancedRoutingDataSource extends AbstractRoutingDataSource {
     @Override
     protected Object determineCurrentLookupKey() {
         String key = monitor.getDataSourceKey();
-        log.info("determineCurrentLookupKey: {}", key);
+//        log.info("determineCurrentLookupKey: {}", key);
         return key;
     }
 }

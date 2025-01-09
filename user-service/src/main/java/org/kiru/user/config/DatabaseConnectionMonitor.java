@@ -1,21 +1,26 @@
 package org.kiru.user.config;
 
+import static org.springframework.transaction.support.TransactionSynchronizationManager.isCurrentTransactionReadOnly;
+
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import jakarta.annotation.PreDestroy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Configuration(proxyBeanMethods = false)
 @Slf4j
@@ -24,6 +29,8 @@ class DatabaseConnectionMonitor {
     private final Map<String, HikariDataSource> dataSources;
     private final Map<String, Boolean> connectionHealthCache = new ConcurrentHashMap<>();
     private final ScheduledExecutorService healthCheckExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final ExecutorService asyncExecutor = Executors.newVirtualThreadPerTaskExecutor();
+    private final List<String> keys = new ArrayList<>(List.of("primary", "secondary"));
 
     public DatabaseConnectionMonitor(Map<String, HikariDataSource> dataSources) {
         this.dataSources = dataSources;
@@ -31,61 +38,54 @@ class DatabaseConnectionMonitor {
     }
 
     private void updateConnectionHealthCache() {
-        dataSources.forEach((key, dataSource) -> {
-            HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();
-            boolean isHealthy = false;
-            try {
-                isHealthy =
-                        performHealthCheck(dataSource) &&
-                                poolMXBean.getTotalConnections() > 0 &&
-                                poolMXBean.getActiveConnections() < poolMXBean.getIdleConnections();
-            } catch (Exception e) {
-                log.error("Health check failed for datasource {}: {}", key, e.getMessage());
-            }
-            connectionHealthCache.put(key, isHealthy);
-        });
+        List<CompletableFuture<Void>> tasks = dataSources.entrySet().stream()
+                .map(entry -> CompletableFuture.runAsync(() -> {
+                    String key = entry.getKey();
+                    HikariDataSource dataSource = entry.getValue();
+                    boolean isHealthy = checkHealth(dataSource, key);
+                    connectionHealthCache.put(key, isHealthy);
+                }, asyncExecutor))
+                .toList();
+        tasks.forEach(CompletableFuture::join);
     }
 
-    public String getDataSourceKey() {
-        boolean isReadOnly = isTransactionReadOnly();
-        Map<String, HikariDataSource> healthyDataSources = getHealthyDataSources();
-        if (!isReadOnly) {
-            return "primary";
-        } else if (healthyDataSources.isEmpty()) {
-            return getLeastConnectionByDataSource(dataSources);
-        }
-        return getLeastConnectionByDataSource(healthyDataSources);
-    }
-
-    private boolean isTransactionReadOnly() {
+    private boolean checkHealth(HikariDataSource dataSource, String dataSourceKey) {
         try {
-            return TransactionAspectSupport.currentTransactionStatus().isReadOnly();
+            HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();
+            boolean canConnect = performHealthCheck(dataSource);
+            // 예시 조건: totalConnections > 0, active < idle
+            boolean poolCondition = (poolMXBean.getTotalConnections() > 0)
+                    && (poolMXBean.getActiveConnections() < poolMXBean.getIdleConnections());
+            return canConnect && poolCondition;
         } catch (Exception e) {
+            log.error("Health check failed for datasource {}: {}", dataSourceKey, e.getMessage());
             return false;
         }
     }
 
-    private Map<String, HikariDataSource> getHealthyDataSources() {
-        return dataSources.entrySet().stream()
-                .filter(entry -> connectionHealthCache.getOrDefault(entry.getKey(), false))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private String getLeastConnectionByDataSource(Map<String, HikariDataSource> dataSources) {
-        return dataSources.entrySet().stream()
-                .min(Comparator.comparingInt(entry -> {
-                    HikariPoolMXBean poolMXBean = entry.getValue().getHikariPoolMXBean();
-                    return poolMXBean.getThreadsAwaitingConnection();
-                }))
+    public String getDataSourceKey() {
+        boolean isReadOnly = isCurrentTransactionReadOnly();
+        log.info("Is current transaction read-only: {}", isCurrentTransactionReadOnly());
+        if (!isReadOnly) {
+            return "primary";
+        }
+        return dataSources.entrySet().parallelStream()
+                .filter(entry -> Boolean.TRUE.equals(connectionHealthCache.getOrDefault(entry.getKey(), false)))
+                .sorted(Comparator.comparingInt(e -> e.getValue().getHikariPoolMXBean().getActiveConnections()))
                 .map(Map.Entry::getKey)
-                .orElse("primary");
+                .findAny()
+                .orElseGet(() -> {
+                    Collections.shuffle(keys);
+                    String randomKey = keys.getFirst();
+                    log.warn("No healthy datasource found, falling back to random datasource: {}", randomKey);
+                    return randomKey;
+                });
     }
 
     private boolean performHealthCheck(HikariDataSource dataSource) {
-        try (Connection connection = dataSource.getConnection()) {
-            return connection.isValid(5);
+        try (Connection conn = dataSource.getConnection()) {
+            return (conn != null && !conn.isClosed());
         } catch (SQLException e) {
-            log.error("Database connection health check failed", e);
             return false;
         }
     }
@@ -93,17 +93,12 @@ class DatabaseConnectionMonitor {
     public void logConnectionStats() {
         dataSources.forEach((key, dataSource) -> {
             HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();
-//            log.debug("DataSource {}: Active={}, Idle={}, Total={}, Healthy={}",
-//                    key,
-//                    poolMXBean.getActiveConnections(),
-//                    poolMXBean.getIdleConnections(),
-//                    poolMXBean.getTotalConnections(),
-//                    connectionHealthCache.getOrDefault(key, false));
         });
     }
 
     @PreDestroy
     public void shutdown() {
         healthCheckExecutor.shutdown();
+        asyncExecutor.shutdown();
     }
 }
