@@ -15,7 +15,7 @@ import org.springframework.http.server.observation.ServerRequestObservationConte
 @Slf4j
 @Profile({"local", "docker"})
 public class ZipkinConfig {
-    private static final List<String> WHITE_LISTED_PATHS = List.of("actuator", "eureka");
+    private static final List<String> WHITE_LISTED_PATHS = List.of("actuator", "eureka","discovery", "swagger");
 
     @Bean
     ObservationPredicate noopServerRequestObservationPredicate() {
@@ -23,10 +23,19 @@ public class ZipkinConfig {
             if (context instanceof ServerRequestObservationContext c) {
                 HttpServletRequest servletRequest = c.getCarrier();
                 String requestURI = servletRequest.getRequestURI();
-                return WHITE_LISTED_PATHS.stream().noneMatch(requestURI::contains);
+                for (String whiteListedPath : WHITE_LISTED_PATHS) {
+                    if(requestURI.contains(whiteListedPath)){
+                        return false;
+                    }
+                }
+                return true;
             } else if (context instanceof ClientRequestObservationContext c) {
                 String uriTemplate = c.getUriTemplate();
-                return WHITE_LISTED_PATHS.stream().noneMatch(Objects.requireNonNull(uriTemplate)::contains);
+                for (String whiteListedPath : WHITE_LISTED_PATHS) {
+                    if(Objects.requireNonNull(uriTemplate).contains(whiteListedPath)){
+                        return false;
+                    }
+                }
             }
             return true;
         };

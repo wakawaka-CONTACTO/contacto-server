@@ -2,7 +2,6 @@ package org.kiru.gateway.common;
 
 import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserR2dbcEntity;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
@@ -16,7 +15,6 @@ public interface UserGatewayRepository extends ReactiveCrudRepository<UserR2dbcE
     @Query("SELECT * FROM users WHERE id = :userId AND email = :email")
     Mono<UserR2dbcEntity> findByIdAndEmailNoCache(Long userId, String email);
 
-    @Cacheable(cacheNames = "user", key = "#userId", unless = "#result == null", cacheManager = "rediscacheManager")
     default Mono<User> findByIdAndEmail(Long userId, String email) {
         return findByIdAndEmailNoCache(userId, email)
                 .map(User::of);

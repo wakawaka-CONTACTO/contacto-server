@@ -12,13 +12,14 @@ import org.kiru.core.user.user.domain.User;
 @Setter
 public class JwtValidResponse {
     private JwtValidationType status;
-    private User user;
+    private String email;
+    private Long userId;
 
     public static JwtValidResponse of(JwtValidationType status) {
-        return new JwtValidResponse(status, null);
+        return new JwtValidResponse(status, null, null);
     }
 
     public static JwtValidResponse of(User user) {
-        return new JwtValidResponse(JwtValidationType.VALID_JWT, user);
+        return new JwtValidResponse(JwtValidationType.VALID_JWT, user.getEmail(), user.getId());
     }
 }

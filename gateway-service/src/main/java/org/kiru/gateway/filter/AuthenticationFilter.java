@@ -41,7 +41,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Config> {
                                         HttpHeaders writableHeaders = HttpHeaders.writableHttpHeaders(
                                                 request.getHeaders());
                                         writableHeaders.add("X-User-Id",
-                                                String.valueOf(jwtValidResponse.getUser().getId()));
+                                                String.valueOf(jwtValidResponse.getUserId()));
                                         ServerHttpRequest modifiedRequest = new ServerHttpRequestDecorator(request) {
                                             @Override
                                             public HttpHeaders getHeaders() {

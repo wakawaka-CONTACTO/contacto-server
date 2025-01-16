@@ -33,9 +33,7 @@ public class FeignErrorDecoder implements ErrorDecoder {
             }
             String errorBody = IOUtils.toString(response.body().asInputStream(), StandardCharsets.UTF_8);
             FailureResponse failureResponse = parseErrorResponse(errorBody);
-            return new FeignClientException(
-                    failureResponse
-            );
+            return new FeignClientException(failureResponse);
         } catch (Exception e) {
             log.error("Feign error decoding failed", e);
             return new FeignClientException(
@@ -49,7 +47,6 @@ public class FeignErrorDecoder implements ErrorDecoder {
         try {
             return objectMapper.readValue(errorBody, FailureResponse.class);
         } catch (Exception e) {
-            // 파싱 실패 시 기본 에러 응답 생성
             return FailureResponse.builder()
                     .message(e.getCause().toString())
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)

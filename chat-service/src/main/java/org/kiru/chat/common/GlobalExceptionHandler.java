@@ -1,7 +1,9 @@
 package org.kiru.chat.common;
 
+import io.micrometer.tracing.SpanName;
+import io.micrometer.tracing.annotation.ContinueSpan;
+import io.opentelemetry.api.trace.Span;
 import java.util.List;
-import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.ContactoException;
 import org.kiru.core.exception.code.FailureCode;
@@ -19,108 +21,95 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @Slf4j
 @ControllerAdvice
+@SpanName("Exception")
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ContinueSpan(log = "Error")
     public ResponseEntity<FailureResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
         final BindingResult bindingResult = e.getBindingResult();
-        final List<FieldError> errors = FieldError.of(bindingResult);
+        log.error(">>> handle: MethodArgumentNotValidException ", e);
+        final List<FailureResponse.FieldError> errors = FailureResponse.FieldError.of(bindingResult);
         FailureResponse response = new FailureResponse(FailureCode.INVALID_TYPE_VALUE, errors);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .header("X-Trace-Id", getCurrentTraceId())
+                .header("X-Span-Id", getCurrentSpanId(e))
+                .body(response);
     }
 
+    @ContinueSpan(log = "Error")
     @ExceptionHandler(BindException.class)
     protected ResponseEntity<FailureResponse> handleBindException(final BindException e) {
         log.error(">>> handle: BindException ", e);
         final FailureResponse response = FailureResponse.of(FailureCode.INVALID_INPUT_VALUE, e.getBindingResult());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .header("X-Trace-Id", getCurrentTraceId())
+                .header("X-Span-Id", getCurrentSpanId(e))
+                .body(response);
     }
 
+    @ContinueSpan(log = "Error")
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<FailureResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         final String value = e.getValue() == null ? "" : e.getValue().toString();
-        final List<FieldError> errors = FieldError.of(e.getName(), value, e.getErrorCode());
-        return new ResponseEntity<>(new FailureResponse(FailureCode.INVALID_TYPE_VALUE, errors),
-                HttpStatus.BAD_REQUEST);
+        final List<FieldError> errors = FailureResponse.FieldError.of(e.getName(), value, e.getErrorCode());
+        log.error(">>> handle: MethodArgumentTypeMismatchException ", e);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .header("X-Trace-Id", getCurrentTraceId())
+                .header("X-Span-Id", getCurrentSpanId(e))
+                .body(new FailureResponse(FailureCode.INVALID_TYPE_VALUE, errors));
     }
 
-
+    @ContinueSpan(log = "Error")
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     protected ResponseEntity<FailureResponse> handleHttpRequestMethodNotSupportedException(
             final HttpRequestMethodNotSupportedException e) {
         log.error(">>> handle: HttpRequestMethodNotSupportedException ", e);
         final FailureResponse response = FailureResponse.of(FailureCode.METHOD_NOT_ALLOWED);
-        return new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED);
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .header("X-Trace-Id", getCurrentTraceId())
+                .header("X-Span-Id", getCurrentSpanId(e))
+                .body(response);
     }
 
+    @ContinueSpan(log = "Error")
     @ExceptionHandler(ContactoException.class)
     public ResponseEntity<FailureResponse> handleContactoException(final ContactoException e) {
         log.error(">>> handle: ContactoException ", e);
         final FailureCode errorCode = e.getFailureCode();
         final FailureResponse response = FailureResponse.of(errorCode);
-        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .header("X-Trace-Id", getCurrentTraceId())
+                .header("X-Span-Id", getCurrentSpanId(e))
+                .body(response);
     }
 
+    @ContinueSpan(log = "Error")
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<FailureResponse> handleException(Exception e) {
-        log.error("Unexpected error occurred", e);
-        FailureResponse failureResponse = FailureResponse.builder()
-                .message(e.getMessage())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .code(FailureCode.INTERNAL_SERVER_ERROR.getCode())
-                .errors(
-                        FieldError.of(
-                                e.getClass().getName(),
-                                e.getLocalizedMessage(),
-                                e.getClass().getName()
-                        )
-                ).build();
+    protected ResponseEntity<FailureResponse> handleException(final Exception e) {
+        log.error(">>> handle: Exception ", e);
+        String errorMessage = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+        List<FailureResponse.FieldError> errors = FailureResponse.FieldError.of("Exception", "", errorMessage);
+        final FailureResponse response = FailureResponse.of(FailureCode.INTERNAL_SERVER_ERROR, errors);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(failureResponse);
+                .header("X-Trace-Id", getCurrentTraceId())
+                .header("X-Span-Id", getCurrentSpanId(e))
+                .body(response);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<FailureResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.error("Invalid argument error", e);
-        FailureResponse failureResponse = FailureResponse.builder()
-                .message(e.getMessage())
-                .status(HttpStatus.BAD_REQUEST)
-                .code(FailureCode.INVALID_INPUT_VALUE.getCode())
-                .errors(
-                        FieldError.of(
-                                e.getClass().getName(),
-                                e.getLocalizedMessage(),
-                                e.getClass().getName()
-                        )
-                ).build();
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(failureResponse);
+    private String getCurrentTraceId() {
+        return Span.current().getSpanContext().getTraceId();
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<FailureResponse> handleNoSuchElementException(NoSuchElementException e) {
-        StackTraceElement errorLocation = e.getStackTrace()[0];
-        String errorSource = String.format("%s.%s(%s:%d)",
-                errorLocation.getClassName(),
-                errorLocation.getMethodName(),
-                errorLocation.getFileName(),
-                errorLocation.getLineNumber()
-        );
-        log.error("No such element error in {}", errorSource, e);
-        FailureResponse failureResponse = FailureResponse.builder()
-                .message("요청한 리소스를 찾을 수 없습니다.")
-                .status(HttpStatus.NOT_FOUND)
-                .code(FailureCode.RESOURCE_NOT_FOUND.getCode())
-                .errors(
-                        FieldError.of(
-                                e.getClass().getName(),
-                                e.getMessage(),
-                                errorSource
-                        )
-                ).build();
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(failureResponse);
+    private String getCurrentSpanId(Throwable e) {
+        Span currentSpan = Span.current();
+        currentSpan.setAttribute("error", e.getMessage());
+        currentSpan.recordException(e);
+        return currentSpan.getSpanContext().getSpanId();
     }
 }
