@@ -15,11 +15,5 @@ public interface UserTalentRepository extends JpaRepository<UserTalent, Long> {
     })
     List<UserTalent> findAllByUserId(Long userId);
 
-    @QueryHints(value = {
-            @QueryHint(name = "org.hibernate.readOnly", value = "true"),
-            @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
-            @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
-
-    })
     void deleteAllByUserId(Long userId);
 }
