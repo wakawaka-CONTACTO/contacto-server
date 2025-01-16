@@ -1,30 +1,30 @@
 package org.kiru.user.admin.adapter;
 
-import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.kiru.core.user.user.entity.QUserJpaEntity;
-import org.kiru.core.user.userPortfolioImg.entity.QUserPortfolioImg;
-import org.kiru.core.user.userlike.entity.QUserLike;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
 import org.kiru.user.admin.service.out.AdminUserQuery;
+import org.kiru.user.admin.service.out.UserLikeAdminUseCase;
 import org.kiru.user.user.repository.UserRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-@RequiredArgsConstructor
 @Repository
 public class AdminAdapter implements AdminUserQuery {
     private final UserRepository userRepository;
-    private final JPAQueryFactory queryFactory;
+    private final UserLikeAdminUseCase userLikeAdminUseCase;
+
+    public AdminAdapter(UserRepository userRepository,
+                        @Qualifier("userLikeJpaAdapter")
+                        UserLikeAdminUseCase userLikeAdminUseCase) {
+        this.userRepository = userRepository;
+        this.userLikeAdminUseCase = userLikeAdminUseCase;
+    }
 
     @Override
-    public Page<UserDto> findAll(Pageable pageable) {
-        return userRepository.findSimpleUsers(pageable);
+    public List<UserDto> findAll(Pageable pageable) {
+        return userRepository.findSimpleUsers(pageable).getContent();
     }
 
     @Override
@@ -32,52 +32,27 @@ public class AdminAdapter implements AdminUserQuery {
         return userRepository.findSimpleUserByName(name);
     }
 
-    private Page<AdminLikeUserDto> findUserLikesInternal(Pageable pageable, Long userId, String name, boolean isLiked) {
-        QUserJpaEntity qUserJpaEntity = QUserJpaEntity.userJpaEntity;
-        QUserLike qUserLike = QUserLike.userLike;
-        QUserPortfolioImg qUserPortfolioImg = QUserPortfolioImg.userPortfolioImg;
-
-        List<AdminLikeUserDto> likes = queryFactory.select(Projections.constructor(AdminLikeUserDto.class,
-                        qUserJpaEntity.id,
-                        qUserJpaEntity.username,
-                        qUserPortfolioImg.portfolioImageUrl,
-                        qUserLike.createdAt))
-                .from(qUserLike)
-                .innerJoin(qUserJpaEntity).on(isLiked ? qUserLike.userId.eq(qUserJpaEntity.id) : qUserLike.likedUserId.eq(qUserJpaEntity.id))
-                .leftJoin(qUserPortfolioImg).on(qUserJpaEntity.id.eq(qUserPortfolioImg.userId).and(qUserPortfolioImg.sequence.eq(1)))
-                .where((isLiked ? qUserLike.likedUserId.eq(userId) : qUserLike.userId.eq(userId))
-                        .and(name != null ? qUserJpaEntity.username.containsIgnoreCase(name) : null))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        Long total = queryFactory.select(qUserLike.count())
-                .from(qUserLike)
-                .innerJoin(qUserJpaEntity).on(isLiked ? qUserLike.userId.eq(qUserJpaEntity.id) : qUserLike.likedUserId.eq(qUserJpaEntity.id))
-                .where((isLiked ? qUserLike.likedUserId.eq(userId) : qUserLike.userId.eq(userId))
-                        .and(name != null ? qUserJpaEntity.username.containsIgnoreCase(name) : null))
-                .fetchOne();
-
-        return new PageImpl<>(likes, pageable, total);
+    private List<AdminLikeUserDto> findUserLikesInternal(Pageable pageable, Long userId, String name, boolean isLiked) {
+        return userLikeAdminUseCase.findUserLikesInternal(pageable, userId, name, isLiked);
     }
 
     @Override
-    public Page<AdminLikeUserDto> findUserLikes(Pageable pageable, Long userId) {
+    public List<AdminLikeUserDto> findUserLikes(Pageable pageable, Long userId) {
         return findUserLikesInternal(pageable, userId, null, false);
     }
 
     @Override
-    public Page<AdminLikeUserDto> findUserLiked(Pageable pageable, Long userId) {
+    public List<AdminLikeUserDto> findUserLiked(Pageable pageable, Long userId) {
         return findUserLikesInternal(pageable, userId, null, true);
     }
 
     @Override
-    public Page<AdminLikeUserDto> findUserLikesByName(Pageable pageable, Long userId, String name) {
+    public List<AdminLikeUserDto> findUserLikesByName(Pageable pageable, Long userId, String name) {
         return findUserLikesInternal(pageable, userId, name, false);
     }
 
     @Override
-    public Page<AdminLikeUserDto> findUserLikedByName(Pageable pageable, Long userId, String name) {
+    public List<AdminLikeUserDto> findUserLikedByName(Pageable pageable, Long userId, String name) {
         return findUserLikesInternal(pageable, userId, name, true);
     }
 }

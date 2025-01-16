@@ -18,7 +18,6 @@ import lombok.Setter;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.chat.common.BaseTimeEntity;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Builder
@@ -39,6 +38,7 @@ public class ChatRoomJpaEntity extends BaseTimeEntity {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Builder.Default
+    @Column(name = "type")
     private ChatRoomType type = ChatRoomType.PRIVATE;
 
     @Builder.Default

@@ -4,8 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.kiru.core.user.user.entity.UserJpaEntity;
-import org.kiru.gateway.jwt.JwtValidationType;
+import org.kiru.core.user.user.domain.User;
 
 @Getter
 @NoArgsConstructor
@@ -13,13 +12,14 @@ import org.kiru.gateway.jwt.JwtValidationType;
 @Setter
 public class JwtValidResponse {
     private JwtValidationType status;
-    private UserJpaEntity user;
+    private String email;
+    private Long userId;
 
     public static JwtValidResponse of(JwtValidationType status) {
-        return new JwtValidResponse(status, null);
+        return new JwtValidResponse(status, null, null);
     }
 
-    public static JwtValidResponse of(UserJpaEntity user) {
-        return new JwtValidResponse(JwtValidationType.VALID_JWT, user);
+    public static JwtValidResponse of(User user) {
+        return new JwtValidResponse(JwtValidationType.VALID_JWT, user.getEmail(), user.getId());
     }
 }

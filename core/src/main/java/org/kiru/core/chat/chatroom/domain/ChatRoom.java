@@ -2,6 +2,7 @@ package org.kiru.core.chat.chatroom.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;

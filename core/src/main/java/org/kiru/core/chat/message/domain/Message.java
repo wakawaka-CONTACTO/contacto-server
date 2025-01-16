@@ -15,8 +15,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Message {
     private Long id;
+
     @Nonnull
     private String content;
+
     @Nonnull
     private Long senderId;
 

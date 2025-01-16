@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.kiru.core.user.talent.entity.UserTalent;
 import org.kiru.core.user.user.entity.UserJpaEntity;
+import org.kiru.core.user.user.entity.UserR2dbcEntity;
 import org.kiru.core.user.userPortfolioImg.domain.UserPortfolio;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 
@@ -54,6 +55,19 @@ public class User {
     }
 
     public static User of(UserJpaEntity user) {
+        return User.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .loginType(user.getLoginType())
+                .socialId(user.getSocialId())
+                .email(user.getEmail())
+                .description(user.getDescription())
+                .instagramId(user.getInstagramId())
+                .webUrl(user.getWebUrl())
+                .build();
+    }
+
+    public static User of(UserR2dbcEntity user) {
         return User.builder()
                 .id(user.getId())
                 .username(user.getUsername())

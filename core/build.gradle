@@ -13,7 +13,10 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework:spring-web' // spring-web 의존성 추가
+    implementation 'org.springframework:spring-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    testImplementation 'io.projectreactor:reactor-test'// spring-web 의존성 추가
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -22,6 +25,7 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:r2dbc-postgresql'
 }
 
 repositories {

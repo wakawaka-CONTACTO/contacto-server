@@ -13,7 +13,6 @@ import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.response.ChatRoomListResponse;
 import org.kiru.user.user.dto.response.ChatRoomResponse;
 import org.kiru.user.user.service.UserService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +30,8 @@ public class AdminController {
     private final UserService userService;
 
     @GetMapping("/users")
-    public ResponseEntity<Page<AdminUserDto>> getUsers(Pageable pageable) {
-        Page<AdminUserDto> users = adminService.getUsers(pageable);
+    public ResponseEntity<List<AdminUserDto>> getUsers(Pageable pageable) {
+        List<AdminUserDto> users = adminService.getUsers(pageable);
         return ResponseEntity.ok(users);
     }
 

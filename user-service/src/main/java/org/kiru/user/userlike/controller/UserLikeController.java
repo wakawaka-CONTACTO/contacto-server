@@ -2,6 +2,8 @@ package org.kiru.user.userlike.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.kiru.core.exception.BadRequestException;
+import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.userlike.dto.req.LikeRequest;
 import org.kiru.user.userlike.dto.res.LikeResponse;
@@ -23,6 +25,9 @@ public class UserLikeController {
     public ResponseEntity<LikeResponse> sendLikeOrDislike(
             @UserId Long userId,
             @RequestBody LikeRequest likeRequest) {
+        if(userId.equals(likeRequest.likedUserId())) {
+            throw new BadRequestException(FailureCode.INVALID_USER_LIKE);
+        }
         LikeResponse likeResponse = userLikeService.sendLikeOrDislike(userId, likeRequest.likedUserId(), likeRequest.status());
         return  ResponseEntity.status(HttpStatus.CREATED).body(likeResponse);
     }

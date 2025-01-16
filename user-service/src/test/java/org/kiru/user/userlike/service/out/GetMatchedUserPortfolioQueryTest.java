@@ -29,13 +29,13 @@ class GetMatchedUserPortfolioQueryTest {
                 .userId(1L)
                 .username("matchedUser1")
                 .portfolioId(1L)
-                .portfolioImages(Arrays.asList("match1.jpg", "match2.jpg"))
+                .portfolioImageUrl(Arrays.asList("match1.jpg", "match2.jpg"))
                 .build(),
             UserPortfolioResDto.builder()
                 .userId(2L)
                 .username("matchedUser2")
                 .portfolioId(2L)
-                .portfolioImages(Arrays.asList("match3.jpg", "match4.jpg"))
+                .portfolioImageUrl(Arrays.asList("match3.jpg", "match4.jpg"))
                 .build()
         );
     }
@@ -53,9 +53,9 @@ class GetMatchedUserPortfolioQueryTest {
         // Then
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getUserId()).isEqualTo(1L);
-        assertThat(result.get(0).getPortfolioImages()).hasSize(2);
+        assertThat(result.get(0).getPortfolioImageUrl()).hasSize(2);
         assertThat(result.get(1).getUserId()).isEqualTo(2L);
-        assertThat(result.get(1).getPortfolioImages()).hasSize(2);
+        assertThat(result.get(1).getPortfolioImageUrl()).hasSize(2);
     }
 
     @Test
@@ -87,6 +87,6 @@ class GetMatchedUserPortfolioQueryTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getUserId()).isEqualTo(1L);
         assertThat(result.get(0).getUsername()).isEqualTo("matchedUser1");
-        assertThat(result.get(0).getPortfolioImages()).hasSize(2);
+        assertThat(result.get(0).getPortfolioImageUrl()).hasSize(2);
     }
 }

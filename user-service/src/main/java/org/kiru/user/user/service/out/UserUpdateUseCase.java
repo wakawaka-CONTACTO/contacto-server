@@ -7,8 +7,7 @@ import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
-import org.kiru.user.user.dto.response.UpdatePwdResponse;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
+
 
 public interface UserUpdateUseCase {
     List<UserPurpose> updateUserPurposes(Long userId, UserUpdateDto userUpdateDto);

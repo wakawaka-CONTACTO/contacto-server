@@ -1,13 +1,13 @@
 package org.kiru.chat.adapter.out.persistence;
 
 import java.util.List;
+import java.util.Optional;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
 
 
 public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRoom, Long> {
@@ -16,18 +16,17 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
     List<Long> findOtherParticipantIds(Long chatRoomId, Long senderId);
 
     @Query("SELECT cr, " +
-            "COUNT(DISTINCT m.id) AS unreadMessageCount, " +
-            "lm.content AS latestMessageContent, " +
+            "COUNT(m.id)/2 AS unreadMessageCount, " +
+            "MAX(m.content) AS latestMessageContent, " +
             "STRING_AGG(CAST(uj.userId AS string), ',') AS participants " +
             "FROM ChatRoomJpaEntity cr " +
-            "JOIN UserJoinChatRoom uj ON cr.id = uj.chatRoomId " +
+            "LEFT JOIN UserJoinChatRoom uj ON cr.id = uj.chatRoomId " +
             "LEFT JOIN MessageJpaEntity m ON cr.id = m.chatRoomId AND m.readStatus = false AND m.senderId <> :userId " +
-            "LEFT JOIN MessageJpaEntity lm ON cr.id = lm.chatRoomId AND lm.createdAt = (" +
-            "SELECT MAX(lm2.createdAt) FROM MessageJpaEntity lm2 WHERE lm2.chatRoomId = cr.id) " +
             "WHERE uj.chatRoomId IN (SELECT uj2.chatRoomId FROM UserJoinChatRoom uj2 WHERE uj2.userId = :userId) " +
-            "GROUP BY cr.id, lm.content")
+            "GROUP BY cr.id")
     Slice<Object[]> findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(Long userId,
                                                                                                Pageable pageable);
+
     @Query("SELECT u.userId FROM UserJoinChatRoom u " +
             "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId " +
             "WHERE uj.userId = :userId AND u.userId <> :userId")
@@ -44,6 +43,14 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
             + "JOIN UserJoinChatRoom uj ON u.chatRoomId = uj.chatRoomId "
             + "WHERE u.userId = :userId "
             + "AND uj.userId = :adminId")
-    @Transactional
     List<UserJoinChatRoom> findByUserIdAndAdminId(Long userId, Long adminId);
+
+    @Query("FROM UserJoinChatRoom u "
+            + "WHERE u.chatRoomId IN ( "
+            + "    SELECT uj.chatRoomId "
+            + "    FROM UserJoinChatRoom uj "
+            + "    WHERE uj.userId = :userId "
+            + ")"
+            + "AND u.userId = :userId2")
+    Optional<UserJoinChatRoom> findAlreadyRoomByUserIds(Long userId, Long userId2);
 }

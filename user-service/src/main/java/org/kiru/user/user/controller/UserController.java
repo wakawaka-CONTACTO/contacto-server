@@ -35,15 +35,14 @@ public class UserController {
     }
 
     @GetMapping("/me/chatroom/{roomId}")
-    public ResponseEntity<ChatRoomResponse> getUserChatRoom(@PathVariable Long roomId, @UserId Long userId) {
+    public ResponseEntity<ChatRoomResponse> getUserChatRoom(@PathVariable("roomId") Long roomId, @UserId Long userId) {
         ChatRoom chatRooms = userService.getUserChatRoom(roomId,userId);
         return ResponseEntity.ok(ChatRoomResponse.of(chatRooms));
     }
 
     @GetMapping("/me/email")
-    public ResponseEntity<Void> getUser(@RequestParam("email") String email){
-        userService.findExistUserByEmail(email);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<User> getUserByEmail(@RequestParam("email") String email){
+        return ResponseEntity.ok(userService.findExistUserByEmail(email));
     }
 
     @DeleteMapping("/me")

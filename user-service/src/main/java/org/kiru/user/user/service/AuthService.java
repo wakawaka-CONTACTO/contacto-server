@@ -59,6 +59,7 @@ public class AuthService {
         Token issuedToken = issueToken(user.getId(), user.getEmail());
         applicationEventPublisher.publishEvent(
                 UserCreateEvent.builder()
+                        .userName(user.getUsername())
                         .userId(user.getId())
                         .images(images)
                         .purposes(purposes)
@@ -72,7 +73,6 @@ public class AuthService {
     @Transactional
     public UserJwtInfoRes signIn(final UserSignInReq userSignInReq) {
         return userRepository.findByEmail(userSignInReq.email())
-                .filter(user -> user.getLoginType() == LoginType.LOCAL)
                 .filter(user -> matchesPassword(userSignInReq.password(), user.getPassword()))
                 .map(user -> {
                     deleteRefreshToken(user.getId());
