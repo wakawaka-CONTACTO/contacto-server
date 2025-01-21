@@ -24,6 +24,7 @@ public enum FailureCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "e4103", "잘못된 필드를 넣었습니다."),
     INVALID_DISCORD_SIGNUP_MESSAGE(HttpStatus.BAD_REQUEST, "e4104", "회원가입 디스코드 알림 전송에 실패하였습니다."),
     INVALID_IMAGE_EDIT(HttpStatus.BAD_REQUEST, "e4105", "프로필 이미지 수정에 실패하였습니다."),
+    SOCKET_CONNECTED_FAILED(HttpStatus.BAD_REQUEST, "e4106", "소켓 연결에 실패하였습니다."),
 
     /**
      * 401 Unauthorized
@@ -96,7 +97,7 @@ public enum FailureCode {
     DISCORD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "e5004", "디스코드 로그 전송 내용이 존재하지 않습니다."), RESOURCE_NOT_FOUND(
             HttpStatus.NOT_FOUND,"e4404" , "요청한 리소스를 찾을수 없습니다." ),
     INVALID_USER_LIKE(HttpStatus.BAD_REQUEST,"e402" ,"좋아요하는 userID가 같습니다." ),
-    SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "e5005", "서비스가 이용 불가능합니다."),;
+    SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "e5005", "서비스가 이용 불가능합니다.");
 
 
     private final HttpStatus httpStatus;
