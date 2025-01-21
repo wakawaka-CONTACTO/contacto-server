@@ -18,9 +18,7 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
 
     @Override
     public Message save(Message message) {
-        MessageJpaEntity entity = MessageJpaEntity.of(message);
-        MessageJpaEntity savedEntity = messageRepository.save(entity);
-        return MessageJpaEntity.fromEntity(savedEntity);
+        return MessageJpaEntity.fromEntity(messageRepository.save(MessageJpaEntity.of(message)));
     }
 
     @Override

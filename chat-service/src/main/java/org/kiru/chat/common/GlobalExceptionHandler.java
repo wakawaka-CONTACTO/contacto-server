@@ -49,6 +49,17 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ContinueSpan(log="Error")
+    @ExceptionHandler(FeignClientException.class)
+    public ResponseEntity<FailureResponse> handleFeignClientException(FeignClientException e) {
+        log.error(">>> handle: FeignClientException ", e);
+        return ResponseEntity
+                .status(HttpStatus.valueOf(e.getFailureResponse().getStatus().value()))
+                .header("X-Trace-Id", getCurrentTraceId())
+                .header("X-Span-Id", getCurrentSpanId(e))
+                .body(e.getFailureResponse());
+    }
+
     @ContinueSpan(log = "Error")
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<FailureResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {

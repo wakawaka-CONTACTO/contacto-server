@@ -11,9 +11,9 @@ import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import javax.crypto.SecretKey;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.gateway.common.UserGatewayRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -21,6 +21,8 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
+
 public class JwtUtils {
     private final UserGatewayRepository userGatewayRepository;
     @Value("${jwt.secret}")
@@ -35,12 +37,6 @@ public class JwtUtils {
                 .setSigningKey(signingKey)
                 .build();
     }
-
-    @Autowired
-    public JwtUtils(UserGatewayRepository userGatewayRepository) {
-        this.userGatewayRepository = userGatewayRepository;
-    }
-
 
     @Cacheable(value = "token", key ="#token", unless = "#result == null")
     public Mono<JwtValidResponse> validateToken(String token) {

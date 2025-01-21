@@ -11,6 +11,8 @@ import org.kiru.core.chat.message.domain.Message;
 @AllArgsConstructor
 @Builder
 public class MessageResponse {
+    private Long id;
+
     @NotNull
     private String content;
 
@@ -25,6 +27,7 @@ public class MessageResponse {
 
     public static MessageResponse fromMessage(Message message) {
         return MessageResponse.builder()
+                .id(message.getId())
                 .content(message.getContent())
                 .senderId(message.getSenderId())
                 .createdAt(message.getCreatedAt())

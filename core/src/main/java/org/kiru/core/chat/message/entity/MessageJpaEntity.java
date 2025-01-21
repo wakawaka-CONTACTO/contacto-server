@@ -51,6 +51,7 @@ public class MessageJpaEntity extends BaseTimeEntity {
 
     public static Message fromEntity(MessageJpaEntity messageJpaEntity) {
         return Message.builder()
+                .id(messageJpaEntity.getId())
                 .chatRoomId(messageJpaEntity.getChatRoomId())
                 .content(messageJpaEntity.getContent())
                 .senderId(messageJpaEntity.getSenderId())

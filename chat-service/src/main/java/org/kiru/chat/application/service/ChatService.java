@@ -3,6 +3,7 @@ package org.kiru.chat.application.service;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.chat.adapter.out.persistence.GetOtherParticipantQuery;
@@ -12,21 +13,25 @@ import org.kiru.chat.application.port.in.GetAlreadyLikedUserIdsUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
 import org.kiru.chat.application.port.in.GetMessageUseCase;
 import org.kiru.chat.application.port.in.SendMessageUseCase;
-import org.kiru.chat.application.port.out.GetMessageByRoomQuery;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
+import org.kiru.chat.application.port.out.GetMessageByRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
 import org.kiru.chat.application.port.out.SaveMessagePort;
+import org.kiru.chat.event.MessageCreateEvent;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
+import org.kiru.core.chat.message.domain.TranslateLanguage;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.ForbiddenException;
 import org.kiru.core.exception.code.FailureCode;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetChatRoomUseCase , AddParticipantUseCase ,
@@ -37,6 +42,7 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     private final GetMessageByRoomQuery getMessageByRoomQuery;
     private final GetOtherParticipantQuery getOtherParticipantQuery;
     private final GetAlreadyLikedUserIdsQuery getAlreadyLikedUserIdsQuery;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ChatRoom createRoom(CreateChatRoomRequest createChatRoomRequest) {
             ChatRoom chatRoom = ChatRoom.of(createChatRoomRequest.getTitle(), createChatRoomRequest.getChatRoomType());
@@ -71,7 +77,8 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     }
 
     @Transactional
-    public Message sendMessage(Long roomId, Message message) {
+    public Message sendMessage(final Long roomId,Message message,final boolean isUserConnected,
+                               final TranslateLanguage translateLanguage) {
         ChatRoom chatRoom = getChatRoomQuery.findAndSetVisible(roomId);
         if (chatRoom == null) {
             throw new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND);
@@ -79,9 +86,13 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
         try {
             message.chatRoom(roomId);
             Objects.requireNonNull(chatRoom.getMessages()).add(message);
-            saveMessagePort.save(message);
-            return message;
+            Message saveMessage = saveMessagePort.save(message);
+            if(isUserConnected && translateLanguage != null && message.getSendedId() != null) {
+                applicationEventPublisher.publishEvent(MessageCreateEvent.of(saveMessage.getId(),message.getSendedId().toString(),message.getContent()));
+            }
+            return saveMessage;
         } catch (Exception e) {
+            log.error("Failed to send message", e);
             throw new ForbiddenException(FailureCode.CHAT_MESSAGE_SEND_FAILED);
         }
     }
