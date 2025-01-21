@@ -1,21 +1,28 @@
 package org.kiru.chat.config.websocket;
 
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.kiru.core.exception.ContactoException;
+import org.kiru.core.exception.code.FailureCode;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import java.util.Map;
-
 @Configuration
 @EnableWebSocketMessageBroker
+@Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+        config.enableSimpleBroker("/topic", "/queue");
         config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override
@@ -25,11 +32,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .addInterceptors(new HandshakeInterceptor() {
                     @Override
                     public boolean beforeHandshake(
-                            org.springframework.http.server.ServerHttpRequest request,
-                            org.springframework.http.server.ServerHttpResponse response,
-                            org.springframework.web.socket.WebSocketHandler wsHandler,
+                            ServerHttpRequest request,
+                            ServerHttpResponse response,
+                            WebSocketHandler wsHandler,
                             Map<String, Object> attributes) {
-
                         String query = request.getURI().getQuery();
                         if (query != null) {
                             String[] params = query.split("&");
@@ -45,18 +51,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             }
                         }
                         if (!attributes.containsKey("userId")) {
-                            throw new IllegalArgumentException("userId query parameter is missing");
+                            throw new ContactoException(FailureCode.SOCKET_CONNECTED_FAILED);
                         }
                         return true;
                     }
 
                     @Override
                     public void afterHandshake(
-                            org.springframework.http.server.ServerHttpRequest request,
-                            org.springframework.http.server.ServerHttpResponse response,
-                            org.springframework.web.socket.WebSocketHandler wsHandler,
+                            ServerHttpRequest request,
+                            ServerHttpResponse response,
+                            WebSocketHandler wsHandler,
                             Exception exception) {
-                        // 핸드셰이크 후 처리
+                        log.info(">>> afterHandshake OK");
                     }
                 })
                 .withSockJS();

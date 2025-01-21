@@ -6,6 +6,7 @@ import org.kiru.core.chat.message.entity.MessageJpaEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +21,7 @@ public interface MessageRepository extends JpaRepository<MessageJpaEntity, Long>
 
     })
     Slice<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable);
+
+    @Query("SELECT m,mt FROM MessageJpaEntity m LEFT JOIN TranslateMessageJpaEntity mt ON m.id = mt.messageId WHERE m.id IN :messageIds")
+    List<Object[]> findAllByMessageIds(List<Long> messageIds);
 }
