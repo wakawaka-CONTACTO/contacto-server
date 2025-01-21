@@ -30,6 +30,13 @@ public class ChatRoomController {
     private final WebSocketUserService webSocketUserService;
     private final GetMessageUseCase getMessageUseCase;
 
+    /**
+     * Creates a new chat room for a specific user.
+     *
+     * @param userId The ID of the user creating the chat room
+     * @param createChatRoomRequest The request containing details for creating the chat room
+     * @return A response containing the ID of the newly created chat room
+     */
     @PostMapping("/rooms")
     public CreateChatRoomResponse createRoom(@UserId Long userId,
                                              @RequestBody CreateChatRoomRequest createChatRoomRequest) {
@@ -41,17 +48,37 @@ public class ChatRoomController {
         return getChatRoomUseCase.findRoomsByUserId(userId,pageable);
     }
 
+    /**
+     * Retrieves a specific chat room by its ID, with optional status change.
+     *
+     * @param roomId The unique identifier of the chat room to retrieve
+     * @param userId The ID of the user requesting the chat room
+     * @param changeStatus Flag to indicate whether the room's status should be modified (default is false)
+     * @return The requested ChatRoom with potential status updates
+     */
     @GetMapping("/rooms/{roomId}")
     public ChatRoom getRoom(@PathVariable("roomId") Long roomId, @UserId Long userId,
                             @RequestParam(required = false, defaultValue = "false") boolean changeStatus) {
         return getChatRoomUseCase.findRoomById(roomId, userId, changeStatus);
     }
 
+    /**
+     * Retrieves a list of all currently connected user IDs via WebSocket.
+     *
+     * @return A list of user IDs that are currently connected to the WebSocket service
+     */
     @GetMapping("/connect-user")
     public List<Long> getAllConnectedUser() {
         return webSocketUserService.getConnectedUserIds();
     }
 
+    /**
+     * Retrieves or creates a chat room for a specific admin and user.
+     *
+     * @param adminId The ID of the admin user
+     * @param userId The ID of the user
+     * @return The existing or newly created ChatRoom between the specified admin and user
+     */
     @GetMapping("/cs/rooms")
     public ChatRoom getMatchedUsers(@RequestParam Long adminId, @RequestParam Long userId) {
         return getChatRoomUseCase.getOrCreateRoomUseCase(userId, adminId);

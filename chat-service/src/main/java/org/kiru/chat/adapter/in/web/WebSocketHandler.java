@@ -27,6 +27,17 @@ public class WebSocketHandler {
     private final SendMessageUseCase sendMessageUseCase;
     private final WebSocketUserService webSocketUserService;
 
+    /**
+     * Sends a chat message to a specific room and handles message routing and status.
+     *
+     * @param roomId The unique identifier of the chat room where the message is being sent
+     * @param message The message payload containing sender and content details
+     * @return The processed message after sending, with updated read status
+     * @throws IllegalArgumentException if message or receiver ID is not provided
+     *
+     * @see SendMessageUseCase
+     * @see WebSocketUserService
+     */
     @MessageMapping("/chat.send/{roomId}")
     @SendTo("/topic/{roomId}")
     public Message sendMessage(@DestinationVariable @Validated Long roomId, @Validated @Payload Message message) {

@@ -9,6 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "translate", url = "${translate.api.url}", configuration = FeignConfig.class)
 public interface TranslateApi {
+    /**
+     * Translates HTML content from one language to another.
+     *
+     * @param request The translation request containing source HTML, source language, and target language
+     * @return A translation response with the translated HTML content
+     * @throws FeignException If there is an error communicating with the translation service
+     */
     @PostMapping("/translate")
     TranslationResponse translateHtml(@RequestBody TranslationRequest request);
 }

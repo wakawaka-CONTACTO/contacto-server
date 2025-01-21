@@ -44,6 +44,13 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     private final GetAlreadyLikedUserIdsQuery getAlreadyLikedUserIdsQuery;
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    /**
+     * Creates a new chat room based on the provided request details.
+     *
+     * @param createChatRoomRequest the request containing details for creating a chat room
+     * @return the newly created and saved ChatRoom instance
+     * @throws IllegalArgumentException if the request contains invalid room creation parameters
+     */
     public ChatRoom createRoom(CreateChatRoomRequest createChatRoomRequest) {
             ChatRoom chatRoom = ChatRoom.of(createChatRoomRequest.getTitle(), createChatRoomRequest.getChatRoomType());
             return saveChatRoomPort.save(chatRoom, createChatRoomRequest.getUserId(), createChatRoomRequest.getUserId2());
@@ -76,6 +83,17 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
         return chatRoom;
     }
 
+    /**
+     * Sends a message to a specified chat room with optional translation and event publishing.
+     *
+     * @param roomId The unique identifier of the chat room where the message will be sent
+     * @param message The message to be sent, containing content and sender information
+     * @param isUserConnected A flag indicating whether the user is currently connected
+     * @param translateLanguage The language for potential message translation (can be null)
+     * @return The saved message after being persisted in the system
+     * @throws EntityNotFoundException If the specified chat room cannot be found
+     * @throws ForbiddenException If message sending fails due to system constraints
+     */
     @Transactional
     public Message sendMessage(final Long roomId,Message message,final boolean isUserConnected,
                                final TranslateLanguage translateLanguage) {
