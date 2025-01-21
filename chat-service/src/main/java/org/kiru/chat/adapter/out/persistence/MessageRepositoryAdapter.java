@@ -16,11 +16,29 @@ import org.springframework.transaction.annotation.Transactional;
 public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByRoomQuery {
     private final MessageRepository messageRepository;
 
+    /**
+     * Saves a message to the repository and returns the saved message.
+     *
+     * @param message The message to be saved
+     * @return The saved message with potentially updated metadata (e.g., generated ID)
+     */
     @Override
     public Message save(Message message) {
         return MessageJpaEntity.fromEntity(messageRepository.save(MessageJpaEntity.of(message)));
     }
 
+    /**
+     * Retrieves all messages for a specific chat room and updates their read status.
+     *
+     * @param chatRoomId The unique identifier of the chat room
+     * @param userId The identifier of the current user
+     * @param isUserAdmin A flag indicating whether the user has admin privileges
+     * @return A list of messages from the specified chat room, with read status potentially updated
+     *
+     * @throws IllegalArgumentException if chatRoomId is null
+     *
+     * @see MessageRepository
+     */
     @Override
     @Transactional
     public List<Message> findAllByChatRoomId(Long chatRoomId, Long userId, Boolean isUserAdmin) {

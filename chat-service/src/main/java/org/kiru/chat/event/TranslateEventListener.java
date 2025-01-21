@@ -23,16 +23,39 @@ public class TranslateEventListener {
     private final MessageTranslateUseCase translateUseCase;
     private final SimpMessagingTemplate messagingTemplate;
 
+    /**
+     * Handles the event triggered when a new message is created, initiating the translation process.
+     *
+     * @param event The message creation event containing the user ID and message ID
+     * @see MessageCreateEvent
+     */
     @TransactionalEventListener
     public void handleMessageCreatedEvent(MessageCreateEvent event) {
         handleTranslateEvent(event.userId(), List.of(event.messageId()));
     }
 
+    /**
+     * Handles a user's request to subscribe to message translations.
+     *
+     * @param event The event containing the user ID and list of message IDs to be translated
+     * @see UserTranslateSubscribeEvent
+     */
     @EventListener
     public void handleTranslateSubscribeEvent(UserTranslateSubscribeEvent event) {
         handleTranslateEvent(event.userId(), event.messageIds());
     }
 
+    /**
+     * Handles the translation of messages for a specific user.
+     *
+     * @param userId The unique identifier of the user requesting translation
+     * @param messageIds A list of message IDs to be translated
+     *
+     * @throws NullPointerException if translation language or message IDs are null
+     *
+     * Attempts to translate messages for a connected user and send the translated
+     * messages via WebSocket. If translation fails, an error is logged.
+     */
     private void handleTranslateEvent(String userId, List<Long> messageIds) {
         TranslateLanguage translateLanguage = webSocketUserService.isUserConnectedAndTranslate(userId);
         requireNonNull(translateLanguage, "Translate language must be provided");

@@ -28,6 +28,23 @@ public class TranslateService implements MessageTranslateUseCase {
     private final MessageRepository messageRepository;
     private final TranslateMessageRepository translateMessageRepository;
 
+    /**
+     * Translates messages to a specified target language.
+     *
+     * This method handles translation of messages that have not yet been translated.
+     * It retrieves messages by their IDs, checks for existing translations, and performs
+     * translation for messages without a translation using an external translation API.
+     *
+     * @param messageDto Data transfer object containing message IDs and target translation language
+     * @return A list of translated messages, including both pre-existing and newly translated messages
+     *
+     * @throws TranslationException If translation API call fails
+     * @throws RepositoryException If database operations encounter issues
+     *
+     * @see TranslateApi
+     * @see MessageRepository
+     * @see TranslateMessageRepository
+     */
     @Override
     @Transactional
     public List<TranslateMessage> translateMessage(OriginMessageDto messageDto) {

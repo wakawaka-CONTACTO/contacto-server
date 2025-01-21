@@ -30,6 +30,16 @@ public class JwtUtils {
     private SecretKey signingKey;
     private JwtParser jwtParser;
 
+    /**
+     * Initializes the JWT signing key and parser after bean construction.
+     *
+     * This method is automatically called by the Spring container after dependency injection
+     * is complete. It sets up the signing key using the configured JWT secret and creates
+     * a JWT parser with the generated signing key.
+     *
+     * @see PostConstruct
+     * @see Jwts
+     */
     @PostConstruct
     public void init() {
         this.signingKey = getSigningKey();
@@ -38,6 +48,25 @@ public class JwtUtils {
                 .build();
     }
 
+    /**
+     * Validates a JWT token and returns a reactive response indicating its validity.
+     *
+     * This method performs token validation by parsing the token, extracting user details,
+     * and verifying the user's existence in the repository. It handles various JWT-related
+     * exceptions and returns appropriate validation responses.
+     *
+     * @param token The JWT token to validate
+     * @return A {@code Mono<JwtValidResponse>} representing the token's validation status
+     *
+     * @throws RuntimeException If an unexpected error occurs during token processing
+     *
+     * @see JwtValidResponse
+     * @see JwtValidationType
+     *
+     * Caching Strategy:
+     * - Cached with key as the token
+     * - Cache is bypassed if the result is null
+     */
     @Cacheable(value = "token", key ="#token", unless = "#result == null")
     public Mono<JwtValidResponse> validateToken(String token) {
         return Mono.fromCallable(() -> {

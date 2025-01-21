@@ -18,6 +18,18 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 @EnableWebSocketMessageBroker
 @Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    /**
+     * Configures the message broker for WebSocket communication.
+     *
+     * @param config the MessageBrokerRegistry to be configured for message routing
+     *
+     * @see MessageBrokerRegistry
+     *
+     * This method sets up the message broker with the following configurations:
+     * - Enables simple broker for destinations with prefixes "/topic" and "/queue"
+     * - Sets the application destination prefix to "/app"
+     * - Sets the user destination prefix to "/user"
+     */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic", "/queue");
@@ -25,6 +37,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.setUserDestinationPrefix("/user");
     }
 
+    /**
+     * Registers STOMP endpoints for WebSocket communication in the chat application.
+     *
+     * This method configures a WebSocket endpoint at "/chat-websocket" with the following characteristics:
+     * - Allows connections from any origin
+     * - Includes a custom handshake interceptor for authentication and user identification
+     * - Supports SockJS fallback for browsers that do not support WebSocket
+     *
+     * The handshake interceptor performs the following actions:
+     * - Extracts 'userId' and 'accessToken' from the connection query parameters
+     * - Validates the presence of 'userId' in the connection attributes
+     * - Throws a {@link ContactoException} if 'userId' is missing
+     *
+     * @param registry The {@link StompEndpointRegistry} used to register WebSocket endpoints
+     * @throws ContactoException if the user ID is not provided during the WebSocket connection
+     */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/chat-websocket")

@@ -37,6 +37,19 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    /**
+     * Handles Spring's BindException for input validation errors.
+     *
+     * This method is triggered when data binding fails during request processing,
+     * typically due to type conversion or validation constraint violations.
+     *
+     * @param e The BindException containing details about the binding errors
+     * @return A ResponseEntity with a BAD_REQUEST status, including a FailureResponse
+     *         with specific validation error details and trace/span identifiers
+     *
+     * @see BindException
+     * @see FailureResponse
+     */
     @ContinueSpan(log = "Error")
     @ExceptionHandler(BindException.class)
     protected ResponseEntity<FailureResponse> handleBindException(final BindException e) {
@@ -49,6 +62,15 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    /**
+     * Handles Feign client exceptions by creating an appropriate HTTP response.
+     *
+     * This method processes {@link FeignClientException} instances, logging the error
+     * and constructing a response with the original failure response's status code.
+     *
+     * @param e The Feign client exception to be handled
+     * @return A {@link ResponseEntity} containing the failure response with trace and span headers
+     */
     @ContinueSpan(log="Error")
     @ExceptionHandler(FeignClientException.class)
     public ResponseEntity<FailureResponse> handleFeignClientException(FeignClientException e) {
@@ -60,6 +82,17 @@ public class GlobalExceptionHandler {
                 .body(e.getFailureResponse());
     }
 
+    /**
+     * Handles type mismatch exceptions during method argument binding.
+     *
+     * This method is triggered when a method argument cannot be converted to the expected type.
+     * It logs the error, creates a detailed failure response with field-level error information,
+     * and returns a BAD REQUEST (400) HTTP response.
+     *
+     * @param e The {@link MethodArgumentTypeMismatchException} representing the type conversion error
+     * @return A {@link ResponseEntity} containing a {@link FailureResponse} with error details
+     *         and HTTP status BAD REQUEST
+     */
     @ContinueSpan(log = "Error")
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<FailureResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {

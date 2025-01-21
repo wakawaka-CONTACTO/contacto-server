@@ -25,6 +25,13 @@ public class MessageResponse {
     @NotNull
     private Boolean readStatus;
 
+    /**
+     * Converts a Message entity to a MessageResponse DTO.
+     *
+     * @param message The source Message object to be transformed
+     * @return A MessageResponse object with details copied from the input Message
+     * @throws NullPointerException if the input message is null
+     */
     public static MessageResponse fromMessage(Message message) {
         return MessageResponse.builder()
                 .id(message.getId())

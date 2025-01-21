@@ -11,6 +11,14 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 @EnableFeignClients
 public class ChatServiceApplication {
+    /**
+     * Entry point for the Chat Service Spring Boot application.
+     *
+     * Launches the Spring Boot application with the specified command-line arguments.
+     * Initializes the application context, configures components, and starts the embedded server.
+     *
+     * @param args Command-line arguments passed to the application during startup
+     */
     public static void main(String[] args) {
         SpringApplication.run(ChatServiceApplication.class, args);
     }

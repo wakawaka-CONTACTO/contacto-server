@@ -24,6 +24,12 @@ public class WebSocketEventListener {
     private final ApplicationEventPublisher eventPublisher;
     private static final String TRANSLATION_QUEUE_PREFIX = "/queue/translate";
 
+    /**
+     * Handles WebSocket connection events and updates the user's connection status.
+     *
+     * @param event The WebSocket session connect event containing connection details
+     * @throws NullPointerException if the user ID cannot be extracted from session attributes
+     */
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -32,6 +38,12 @@ public class WebSocketEventListener {
         log.info("User connected >>>: {}", userId);
     }
 
+    /**
+     * Handles WebSocket disconnection events for a user.
+     *
+     * @param event The {@link SessionDisconnectEvent} representing the WebSocket disconnection
+     * @throws NullPointerException if the user ID cannot be retrieved from session attributes
+     */
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -40,6 +52,26 @@ public class WebSocketEventListener {
         log.info("User disconnected >>> : {}", userId);
     }
 
+    /**
+     * Handles WebSocket subscription events for translation services.
+     *
+     * This method processes subscription events specifically for translation queues. It validates
+     * and extracts necessary information such as target language, user ID, and message IDs from
+     * the WebSocket session headers.
+     *
+     * @param event The WebSocket session subscribe event to be processed
+     * @throws NullPointerException if target language, user ID, or message IDs are not provided
+     *
+     * When a subscription to a translation queue is detected, this method:
+     * 1. Validates the presence of required headers
+     * 2. Converts comma-separated message IDs to a list of Long
+     * 3. Updates the user's translation language preference
+     * 4. Publishes a {@link UserTranslateSubscribeEvent}
+     * 5. Logs the subscription details
+     *
+     * @see WebSocketUserService
+     * @see UserTranslateSubscribeEvent
+     */
     @EventListener
     public void handleSubscribeEvent(SessionSubscribeEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());

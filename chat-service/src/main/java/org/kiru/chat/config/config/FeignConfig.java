@@ -19,6 +19,12 @@ public class FeignConfig {
     @Value("${translate.api.host}")
     private String host;
 
+    /**
+     * Creates a Feign request interceptor to add custom headers to outgoing HTTP requests.
+     *
+     * @return A {@link RequestInterceptor} that sets standard headers for API requests
+     * @see RequestInterceptor
+     */
     @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
@@ -28,6 +34,15 @@ public class FeignConfig {
         };
     }
 
+    /**
+     * Validates the configuration of the Feign client by checking the API key.
+     *
+     * This method is automatically called after dependency injection and ensures
+     * that a valid API key is present for the translation service configuration.
+     *
+     * @throws InvalidValueException if the API key is null or blank, 
+     *         indicating an invalid configuration
+     */
     @PostConstruct
     public void validateConfiguration() {
         if (apiKey == null || apiKey.isBlank()) {

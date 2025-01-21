@@ -49,6 +49,13 @@ public class MessageJpaEntity extends BaseTimeEntity {
                 .build();
     }
 
+    /**
+     * Converts a JPA message entity to a domain Message object.
+     *
+     * @param messageJpaEntity The JPA entity representing a message in the database
+     * @return A Message domain object with properties mapped from the JPA entity
+     * @throws IllegalArgumentException if messageJpaEntity is null
+     */
     public static Message fromEntity(MessageJpaEntity messageJpaEntity) {
         return Message.builder()
                 .id(messageJpaEntity.getId())
