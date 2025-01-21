@@ -35,6 +35,7 @@ subprojects {
 	}
 }
 
+
 project(':chat-service') {
 	dependencies {
 		implementation project(':core')
