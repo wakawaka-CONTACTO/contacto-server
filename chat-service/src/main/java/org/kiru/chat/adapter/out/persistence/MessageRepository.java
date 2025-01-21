@@ -2,6 +2,7 @@ package org.kiru.chat.adapter.out.persistence;
 
 import jakarta.persistence.QueryHint;
 import java.util.List;
+import org.kiru.chat.adapter.out.persistence.dto.MessageWithTranslationDto;
 import org.kiru.core.chat.message.entity.MessageJpaEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -22,6 +23,9 @@ public interface MessageRepository extends JpaRepository<MessageJpaEntity, Long>
     })
     Slice<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable);
 
-    @Query("SELECT m,mt FROM MessageJpaEntity m LEFT JOIN TranslateMessageJpaEntity mt ON m.id = mt.messageId WHERE m.id IN :messageIds")
-    List<Object[]> findAllByMessageIds(List<Long> messageIds);
+    @Query(value = "SELECT m as message,mt as translateMessage FROM MessageJpaEntity m "
+            + "LEFT JOIN TranslateMessageJpaEntity mt "
+            + "ON m.id = mt.messageId "
+            + "WHERE m.id IN :messageIds")
+    List<MessageWithTranslationDto> findAllByMessageIds(List<Long> messageIds);
 }

@@ -1,5 +1,7 @@
 package org.kiru.chat.event;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 public class WebSocketEventListener {
     private final WebSocketUserService webSocketUserService;
     private final ApplicationEventPublisher eventPublisher;
+    private static final String TRANSLATION_QUEUE_PREFIX = "/queue/translate";
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
@@ -42,12 +45,14 @@ public class WebSocketEventListener {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String destination = headerAccessor.getDestination();
         // 번역 구독인 경우에만 처리
-        if (destination != null && destination.contains("/queue/translate")) {
-            String targetLanguage = headerAccessor.getFirstNativeHeader("targetLanguage");
-            String userId = (String) headerAccessor.getSessionAttributes().get("userId");
-            String messageIds = headerAccessor.getFirstNativeHeader("messageIds");
-            log.info(messageIds);
-            if (messageIds != null && !messageIds.isEmpty()) {
+        if (destination != null && destination.contains(TRANSLATION_QUEUE_PREFIX)) {
+            String targetLanguage = requireNonNull(headerAccessor.getFirstNativeHeader("targetLanguage"),
+                    "Target language must be provided");
+            String userId = requireNonNull((String) headerAccessor.getSessionAttributes().get("userId"),
+                    "User ID must be provided");
+            String messageIds = requireNonNull(headerAccessor.getFirstNativeHeader("messageIds")
+                    , "Message IDs must be provided");
+            if (!messageIds.isEmpty()) {
                 // 쉼표로 구분된 메시지 ID 문자열을 리스트로 변환
                 List<Long> messageIdList = Arrays.stream(messageIds.split(","))
                         .map(Long::parseLong)
@@ -57,7 +62,8 @@ public class WebSocketEventListener {
                 eventPublisher.publishEvent(
                         new UserTranslateSubscribeEvent(userId, TranslateLanguage.valueOf(targetLanguage),
                                 messageIdList));
-                log.info("----- User {} subscribed to translation service with {} -----", userId, targetLanguage);
+                log.info("User subscribed to translation service | userId={} | language={} | messageCount={}",
+                        userId, targetLanguage, messageIdList.size());
             }
         }
     }

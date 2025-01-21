@@ -77,8 +77,8 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     }
 
     @Transactional
-    public Message sendMessage(Long roomId, Message message, boolean isUserConnected,
-                               TranslateLanguage translateLanguage) {
+    public Message sendMessage(final Long roomId,Message message,final boolean isUserConnected,
+                               final TranslateLanguage translateLanguage) {
         ChatRoom chatRoom = getChatRoomQuery.findAndSetVisible(roomId);
         if (chatRoom == null) {
             throw new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND);
@@ -87,8 +87,8 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
             message.chatRoom(roomId);
             Objects.requireNonNull(chatRoom.getMessages()).add(message);
             Message saveMessage = saveMessagePort.save(message);
-            if(isUserConnected&&translateLanguage!=null){
-                applicationEventPublisher.publishEvent(MessageCreateEvent.of(saveMessage.getId(),message.getSendedId(),message.getContent()));
+            if(isUserConnected && translateLanguage != null && message.getSendedId() != null) {
+                applicationEventPublisher.publishEvent(MessageCreateEvent.of(saveMessage.getId(),message.getSendedId().toString(),message.getContent()));
             }
             return saveMessage;
         } catch (Exception e) {

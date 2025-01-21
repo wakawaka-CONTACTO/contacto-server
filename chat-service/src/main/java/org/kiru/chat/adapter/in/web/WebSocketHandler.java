@@ -1,5 +1,7 @@
 package org.kiru.chat.adapter.in.web;
 
+import static java.util.Optional.ofNullable;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.chat.application.port.in.SendMessageUseCase;
@@ -11,6 +13,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,8 +29,9 @@ public class WebSocketHandler {
 
     @MessageMapping("/chat.send/{roomId}")
     @SendTo("/topic/{roomId}")
-    public Message sendMessage(@DestinationVariable Long roomId, @Payload Message message) {
-        log.info("Message received: {}", message.toString());
+    public Message sendMessage(@DestinationVariable @Validated Long roomId, @Validated @Payload Message message) {
+        ofNullable(message).orElseThrow(() -> new IllegalArgumentException("Message must be provided"));
+        ofNullable(message.getSendedId()).orElseThrow(() -> new IllegalArgumentException("Receiver(Sended) ID must be provided"));
         Long receiverId = message.getSendedId();
         boolean isUserConnected = webSocketUserService.isUserConnected(receiverId.toString());
         TranslateLanguage translateLanguage = webSocketUserService.isUserConnectedAndTranslate(receiverId.toString());

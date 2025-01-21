@@ -1,18 +1,16 @@
 package org.kiru.core.chat.message.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
 import org.kiru.core.chat.message.entity.TranslateMessageJpaEntity;
+import org.kiru.core.exception.InvalidValueException;
+import org.kiru.core.exception.code.FailureCode;
 
-@AllArgsConstructor
 @Builder
-@Getter
-public class TranslateMessage {
-    private final Long id;
-    private final String message;
-
+public record TranslateMessage(Long id, String message) {
     public static TranslateMessage of(final TranslateMessageJpaEntity entity) {
+        if (entity == null) {
+            throw new InvalidValueException(FailureCode.ENTITY_NOT_FOUND);
+        }
         return TranslateMessage.builder()
                 .id(entity.getMessageId())
                 .message(entity.getMessage())

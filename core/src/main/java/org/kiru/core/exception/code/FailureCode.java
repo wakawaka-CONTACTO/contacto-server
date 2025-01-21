@@ -97,8 +97,8 @@ public enum FailureCode {
     DISCORD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "e5004", "디스코드 로그 전송 내용이 존재하지 않습니다."), RESOURCE_NOT_FOUND(
             HttpStatus.NOT_FOUND,"e4404" , "요청한 리소스를 찾을수 없습니다." ),
     INVALID_USER_LIKE(HttpStatus.BAD_REQUEST,"e402" ,"좋아요하는 userID가 같습니다." ),
-    SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "e5005", "서비스가 이용 불가능합니다.");
-
+    SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "e5005", "서비스가 이용 불가능합니다."),
+    INVALID_CONFIGURATION(HttpStatus.INTERNAL_SERVER_ERROR, "e5006", "yaml 설정이 로드되지 않았습니다"),;
 
     private final HttpStatus httpStatus;
     private final String code;
