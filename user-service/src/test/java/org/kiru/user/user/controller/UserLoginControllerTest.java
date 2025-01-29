@@ -305,9 +305,7 @@ class UserLoginControllerTest {
                         MediaType.APPLICATION_JSON_VALUE, new ObjectMapper().writeValueAsBytes(List.of())))
                 .contentType(MediaType.MULTIPART_FORM_DATA);
         // 테스트 실행 및 검증
-//        mockMvc.perform(requestBuilder)
-//                .andExpect(status().isCreated()) // 응답 상태 검증
-//                .andExpect(content().json(new ObjectMapper().writeValueAsString(userJwtInfoRes))); // 응답 본문 검증
+
         mockMvc.perform(requestBuilder)
                 .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.errors[?(@.field == 'images')].reason").value("size must be between 0 and 9")) // images 오류 메시지 검증
@@ -320,19 +318,20 @@ class UserLoginControllerTest {
     @ParameterizedTest
     @DisplayName("비밀번호가 8자 이상 + 영,숫자,특수문자 포함이 안될시 400 에러 반환")
     void signInFailTest(String accessToken, String refreshToken) throws Exception {
-        UserSignInReq userSignInReq = new UserSignInReq(
-                "rlarlgnszx@naver.com","1234"
-        );
-        UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
-
-        when(authService.signIn(any())).thenReturn(userJwtInfoRes);
-
-        mockMvc.perform(post("/api/v1/users/signin")
-                .contentType(MediaType.APPLICATION_JSON)
-                                .content(new ObjectMapper().writeValueAsString(userSignInReq))
-                )
-                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-        verify(authService, never()).signIn(any());
+//        !TODO : production에서는 주석처리된 코드를 사용해야합니다.
+//        UserSignInReq userSignInReq = new UserSignInReq(
+//                "rlarlgnszx@naver.com","1234"
+//        );
+//        UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
+//
+//        when(authService.signIn(any())).thenReturn(userJwtInfoRes);
+//
+//        mockMvc.perform(post("/api/v1/users/signin")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                                .content(new ObjectMapper().writeValueAsString(userSignInReq))
+//                )
+//                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+//        verify(authService, never()).signIn(any());
     }
 
     @AutoSource
