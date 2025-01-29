@@ -15,5 +15,5 @@ public interface GetAlreadyLikedUserIdsQuery {
 
     }
     )
-    List<AdminUserResponse> getMatchedUsers(Long userId); 
+    List<AdminUserResponse> getMatchedUsers(Long userId);
 }

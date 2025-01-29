@@ -18,12 +18,17 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
 
     @Override
     public Message save(Message message) {
-        return MessageJpaEntity.fromEntity(messageRepository.save(MessageJpaEntity.of(message)));
+        return MessageJpaEntity.fromEntity(messageRepository.save(MessageJpaEntity.withId(message)));
     }
 
     @Override
+    public List<Message> saveAll(List<MessageJpaEntity> messages) {
+       return messageRepository.saveAll(messages)
+                .stream().map(MessageJpaEntity::fromEntity).toList();
+    }
+
     @Transactional
-    public List<Message> findAllByChatRoomId(Long chatRoomId, Long userId, Boolean isUserAdmin) {
+    public List<Message> findAllByChatRoomIdWithMessageToRead(Long chatRoomId, Long userId, Boolean isUserAdmin) {
         return messageRepository.findAllByChatRoomIdOrderByCreatedAt(chatRoomId).stream()
                 .map(messageJpaEntity -> {
                     if (!messageJpaEntity.getSenderId().equals(userId) & isUserAdmin.equals(false)) {

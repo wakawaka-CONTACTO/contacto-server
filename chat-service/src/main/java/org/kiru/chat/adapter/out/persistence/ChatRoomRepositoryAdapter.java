@@ -11,6 +11,7 @@ import org.kiru.chat.adapter.out.persistence.dto.ChatRoomWithDetails;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
+import org.kiru.chat.application.port.out.SaveMessagePort;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
@@ -18,7 +19,9 @@ import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.chat.message.entity.MessageJpaEntity;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
 import org.kiru.core.exception.EntityNotFoundException;
+import org.kiru.core.exception.ForbiddenException;
 import org.kiru.core.exception.code.FailureCode;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +34,14 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         GetAlreadyLikedUserIdsQuery {
     private final ChatRoomRepository chatRoomRepository;
     private final UserJoinChatRoomRepository userJoinChatRoomRepository;
+    private final SaveMessagePort saveMessagePort;
 
     @Transactional
     public ChatRoom save(ChatRoom chatRoom, Long userId, Long userId2) {
         Optional<UserJoinChatRoom> alreadyRoom = userJoinChatRoomRepository.findAlreadyRoomByUserIds(userId, userId2);
         if (alreadyRoom.isPresent()) {
             return chatRoomRepository.findById(alreadyRoom.get().getChatRoomId())
-                    .map(ChatRoom::fromEntity)
+                    .map(ChatRoomJpaEntity::toModel)
                     .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
         }
         ChatRoomJpaEntity entity = ChatRoomJpaEntity.of(chatRoom);
@@ -51,28 +55,27 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
                 .userId(userId2)
                 .build();
         userJoinChatRoomRepository.saveAll(List.of(userFirst, userSecond));
-        return ChatRoom.fromEntity(chatRoomJpa);
+        return ChatRoomJpaEntity.toModel(chatRoomJpa);
     }
 
     public Optional<ChatRoom> findById(Long id, boolean isUserAdmin) {
         if (isUserAdmin) {
             return chatRoomRepository.findById(id)
-                    .map(ChatRoom::fromEntity);
+                    .map(ChatRoomJpaEntity::toModel);
         }
         return chatRoomRepository.findById(id)
                 .filter(ChatRoomJpaEntity::getVisible)
-                .map(ChatRoom::fromEntity);
+                .map(ChatRoomJpaEntity::toModel);
     }
 
     public List<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
         return userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(
-                userId, pageable).stream().parallel().map(result -> {
-            ChatRoomJpaEntity chatRoomJpa = (ChatRoomJpaEntity) result[0];
-            ChatRoom chatRoom = ChatRoom.fromEntity(chatRoomJpa);
-            int unreadMessageCount = ((Number) result[1]).intValue();
-            String latestMessageContent = (String) result[2];
+                userId, pageable).getContent().stream().parallel().map(result -> {
+            ChatRoom chatRoom = ChatRoomJpaEntity.toModel(result.getChatRoom());
+            int unreadMessageCount = result.getUnreadMessageCount();
+            String latestMessageContent = result.getLatestMessageContent();
             List<Long> participants = Pattern.compile(",")
-                    .splitAsStream((String) result[3])
+                    .splitAsStream(result.getParticipants())
                     .mapToLong(Long::parseLong)
                     .filter(participantId -> participantId != userId)
                     .boxed()
@@ -89,7 +92,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         List<UserJoinChatRoom> userChatRoomExist = userJoinChatRoomRepository.findByUserIdAndAdminId(userId, adminId);
         if (!userChatRoomExist.isEmpty()) {
             return chatRoomRepository.findById(userChatRoomExist.getFirst().getChatRoomId())
-                    .map(ChatRoom::fromEntity)
+                    .map(ChatRoomJpaEntity::toModel)
                     .orElseThrow(() -> new IllegalStateException("Chat room not found"));
         } else {
             ChatRoom chatRoom = ChatRoom.of("CONTACTO MANAGER", ChatRoomType.PRIVATE);
@@ -106,38 +109,64 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
                                     .build()
                     )
             );
-            return ChatRoom.fromEntity(chatRoomJpa);
+            return ChatRoomJpaEntity.toModel(chatRoomJpa);
         }
     }
 
     @Override
+    @Cacheable(value = "chatRoom", key = "#roomId", unless = "#result == null")
     public ChatRoom findAndSetVisible(Long roomId) {
         ChatRoomJpaEntity chatRoomJpaEntity = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
         chatRoomJpaEntity.setVisible(true);
-        return ChatRoom.fromEntity(chatRoomJpaEntity);
+        return ChatRoomJpaEntity.toModel(chatRoomJpaEntity);
     }
 
+    @Transactional
     public ChatRoom findRoomWithMessagesAndParticipants(Long roomId, Long userId, boolean isUserAdmin) {
         List<ChatRoomWithDetails> results = isUserAdmin ?
                 chatRoomRepository.findRoomWithMessagesAndParticipantsByAdmin(roomId)
                         .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND)) :
                 chatRoomRepository.findRoomWithMessagesAndParticipants(roomId)
-                    .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
+                        .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
         if (results.isEmpty()) {
             throw new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND);
         }
-        ChatRoom chatRoom = ChatRoom.fromEntity(results.getFirst().chatRoom());
-        List<Message> messages = results.stream()
-                .map(ChatRoomWithDetails::message)
-                .distinct()
-                .filter(Objects::nonNull)
-                .map(MessageJpaEntity::fromEntity)
-                .toList();
+        return getChatRoomByUserIdAndisUserAdmin(userId, isUserAdmin, results, ChatRoomJpaEntity.toModel(results.getFirst().chatRoom()));
+    }
+
+    private ChatRoom getChatRoomByUserIdAndisUserAdmin(Long userId, boolean isUserAdmin,
+                                                       List<ChatRoomWithDetails> results, ChatRoom chatRoom) {
         List<Long> participants = results.stream()
                 .map(ChatRoomWithDetails::userId)
                 .toList();
+        if(!isUserAdmin && !participants.contains(userId)){
+            throw new ForbiddenException(FailureCode.CHAT_ROOM_ACCESS_DENIED);
+        }
         chatRoom.addParticipants(participants);
+        List<Message> messages;
+        if(participants.contains(userId)){
+            List<MessageJpaEntity> resultsMessages = results.stream()
+                    .map(ChatRoomWithDetails::message)
+                    .map(messageJpaEntity -> {
+                                if (!userId.equals(messageJpaEntity.getSenderId())) {
+                                    messageJpaEntity.setReadStatus(true);
+                                }
+                                return messageJpaEntity;
+                            }
+                    )
+                    .distinct()
+                    .toList();
+            messages = saveMessagePort.saveAll(resultsMessages);
+            chatRoom.removeParticipant(userId);
+        }else{
+            messages = results.stream()
+                    .map(ChatRoomWithDetails::message)
+                    .map(MessageJpaEntity::fromEntity)
+                    .distinct()
+                    .filter(Objects::nonNull)
+                    .toList();
+        }
         chatRoom.addMessage(messages);
         return chatRoom;
     }

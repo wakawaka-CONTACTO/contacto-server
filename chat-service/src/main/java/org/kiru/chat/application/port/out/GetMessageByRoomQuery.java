@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 public interface GetMessageByRoomQuery {
-    List<Message> findAllByChatRoomId(Long chatRoomId,Long userId, Boolean isUserAdmin);
+    List<Message> findAllByChatRoomIdWithMessageToRead(Long chatRoomId, Long userId, Boolean isUserAdmin);
+
     Slice<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin, Pageable pageable);
 }

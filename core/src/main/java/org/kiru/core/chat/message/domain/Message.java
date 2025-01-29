@@ -1,39 +1,41 @@
 package org.kiru.core.chat.message.domain;
-import jakarta.annotation.Nonnull;
-import lombok.AllArgsConstructor;
+
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 @RequiredArgsConstructor
 @Getter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class Message {
     private Long id;
 
-    @Nonnull
+    @NotNull
     private String content;
 
-    @Nonnull
+    @NotNull
     private Long senderId;
 
+    @NotNull
     private Long sendedId;
-    @Nonnull
+
     private Long chatRoomId;
 
     private LocalDateTime createdAt;
 
-    @Setter
-    private Boolean readStatus; // 읽음 상태 추가
+    @Builder.Default
+    private Boolean readStatus = false; // 읽음 상태 추가
 
     public void chatRoom(Long chatRoomId){
         this.chatRoomId = chatRoomId;
     }
+
     public static Message of(Long id, String content, Long senderId, LocalDateTime createdAt, Long chatRoomId,Long sendedId, boolean readStatus) {
         return Message.builder()
                 .id(id)
@@ -44,6 +46,34 @@ public class Message {
                 .readStatus(readStatus) // 읽음 상태 추가
                 .sendedId(sendedId)
                 .build();
+    }
+
+    public static Message of(Map<String,String> map) {
+        return Message.builder()
+                .id(map.get("id") == null ? null : Long.parseLong(map.get("id")))
+                .content(map.get("content"))
+                .senderId(map.get("senderId") == null ? null : Long.parseLong(map.get("senderId")))
+                .createdAt(map.get("createdAt") == null ? null : LocalDateTime.parse(map.get("createdAt")))
+                .chatRoomId(map.get("chatRoomId") == null ? null : Long.parseLong(map.get("chatRoomId")))
+                .readStatus(true) // 읽음 상태 추가
+                .sendedId(map.get("receiverId") == null ? null : Long.parseLong(map.get("receiverId")))
+                .build();
+    }
+
+    public Map<String,String> toMap(String receiverId) {
+        Map<String,String> map = new HashMap<>();
+        map.put("id", id.toString());
+        map.put("content", content);
+        map.put("senderId", senderId.toString());
+        map.put("receiverId", receiverId);
+        map.put("chatRoomId", chatRoomId.toString());
+        map.put("createdAt", createdAt.toString());
+        map.put("readStatus", readStatus.toString());
+        return map;
+    }
+
+    public void toRead(){
+        this.readStatus = true;
     }
 }
 

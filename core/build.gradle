@@ -12,11 +12,13 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework:spring-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     testImplementation 'io.projectreactor:reactor-test'// spring-web 의존성 추가
+    testImplementation 'io.github.autoparams:autoparams-mockito:9.0.0'
+    testImplementation 'io.github.autoparams:autoparams:9.0.0'
+
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
