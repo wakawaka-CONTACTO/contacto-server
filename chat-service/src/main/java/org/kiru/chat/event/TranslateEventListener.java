@@ -25,7 +25,11 @@ public class TranslateEventListener {
 
     @TransactionalEventListener
     public void handleMessageCreatedEvent(MessageCreateEvent event) {
-        handleTranslateEvent(event.userId(), List.of(event.messageId()));
+        boolean isUserConnected = webSocketUserService.isUserConnected(event.userId());
+        TranslateLanguage translateLanguage = webSocketUserService.isUserConnectedAndTranslate(event.userId());
+        if (isUserConnected && translateLanguage != null && event.userId() != null) {
+            handleTranslateEvent(event.userId(), List.of(event.messageId()));
+        }
     }
 
     @EventListener

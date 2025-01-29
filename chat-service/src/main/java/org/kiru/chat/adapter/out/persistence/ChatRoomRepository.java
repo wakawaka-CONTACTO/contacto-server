@@ -20,10 +20,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomJpaEntity, Lon
             "LEFT JOIN MessageJpaEntity m ON m.chatRoomId = cr.id " +
             "WHERE cr.id = :roomId AND cr.visible = true")
     @QueryHints(value = {
-            @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
-
     })
     Optional<List<ChatRoomWithDetails>> findRoomWithMessagesAndParticipants(@Param("roomId") Long roomId);
 

@@ -1,7 +1,6 @@
 package org.kiru.chat.application.service;
 
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
@@ -12,37 +11,29 @@ import org.kiru.chat.application.port.in.CreateRoomUseCase;
 import org.kiru.chat.application.port.in.GetAlreadyLikedUserIdsUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
 import org.kiru.chat.application.port.in.GetMessageUseCase;
-import org.kiru.chat.application.port.in.SendMessageUseCase;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.GetMessageByRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
-import org.kiru.chat.application.port.out.SaveMessagePort;
-import org.kiru.chat.event.MessageCreateEvent;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
-import org.kiru.core.chat.message.domain.TranslateLanguage;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.ForbiddenException;
 import org.kiru.core.exception.code.FailureCode;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetChatRoomUseCase , AddParticipantUseCase ,
+public class ChatService implements CreateRoomUseCase, GetChatRoomUseCase , AddParticipantUseCase ,
         GetAlreadyLikedUserIdsUseCase, GetMessageUseCase {
     private final GetChatRoomQuery getChatRoomQuery;
     private final SaveChatRoomPort saveChatRoomPort;
-    private final SaveMessagePort saveMessagePort;
     private final GetMessageByRoomQuery getMessageByRoomQuery;
     private final GetOtherParticipantQuery getOtherParticipantQuery;
     private final GetAlreadyLikedUserIdsQuery getAlreadyLikedUserIdsQuery;
-    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ChatRoom createRoom(CreateChatRoomRequest createChatRoomRequest) {
             ChatRoom chatRoom = ChatRoom.of(createChatRoomRequest.getTitle(), createChatRoomRequest.getChatRoomType());
@@ -50,12 +41,7 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
     }
 
     public ChatRoom findRoomById(Long roomId, Long userId, boolean isUserAdmin) {
-        ChatRoom chatRoom = getChatRoomQuery.findRoomWithMessagesAndParticipants(roomId, userId, isUserAdmin);
-        if (isUserAdmin || Objects.requireNonNull(chatRoom.getParticipants()).contains(userId)) {
-            chatRoom.removeParticipant(userId);
-            return chatRoom;
-        }
-        throw new ForbiddenException(FailureCode.CHAT_ROOM_ACCESS_DENIED);
+        return getChatRoomQuery.findRoomWithMessagesAndParticipants(roomId, userId, isUserAdmin);
     }
 
     @Override
@@ -69,33 +55,14 @@ public class ChatService implements SendMessageUseCase, CreateRoomUseCase, GetCh
         Long otherUserId = getOtherParticipantQuery.getOtherParticipantId(chatRoom.getId(), userId);
         if (otherUserId != null) {
             chatRoom.addParticipant(otherUserId);
-            List<Message> messages = getMessageByRoomQuery.findAllByChatRoomId(chatRoom.getId(), userId, true);
+            List<Message> messages = getMessageByRoomQuery.findAllByChatRoomIdWithMessageToRead(chatRoom.getId(), userId, true);
             chatRoom.addMessage(messages);
             return chatRoom;
         }
         return chatRoom;
     }
 
-    @Transactional
-    public Message sendMessage(final Long roomId,Message message,final boolean isUserConnected,
-                               final TranslateLanguage translateLanguage) {
-        ChatRoom chatRoom = getChatRoomQuery.findAndSetVisible(roomId);
-        if (chatRoom == null) {
-            throw new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND);
-        }
-        try {
-            message.chatRoom(roomId);
-            Objects.requireNonNull(chatRoom.getMessages()).add(message);
-            Message saveMessage = saveMessagePort.save(message);
-            if(isUserConnected && translateLanguage != null && message.getSendedId() != null) {
-                applicationEventPublisher.publishEvent(MessageCreateEvent.of(saveMessage.getId(),message.getSendedId().toString(),message.getContent()));
-            }
-            return saveMessage;
-        } catch (Exception e) {
-            log.error("Failed to send message", e);
-            throw new ForbiddenException(FailureCode.CHAT_MESSAGE_SEND_FAILED);
-        }
-    }
+
 
     @Override
     public boolean addParticipant(Long roomId, Long userId) {
