@@ -11,7 +11,6 @@ import org.kiru.chat.adapter.out.persistence.dto.ChatRoomWithDetails;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
-import org.kiru.chat.application.port.out.SaveMessagePort;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
@@ -34,7 +33,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         GetAlreadyLikedUserIdsQuery {
     private final ChatRoomRepository chatRoomRepository;
     private final UserJoinChatRoomRepository userJoinChatRoomRepository;
-    private final SaveMessagePort saveMessagePort;
+    private final MessageRepository messageRepository;
 
     @Transactional
     public ChatRoom save(ChatRoom chatRoom, Long userId, Long userId2) {
@@ -157,12 +156,12 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
                     )
                     .distinct()
                     .toList();
-            messages = saveMessagePort.saveAll(resultsMessages);
+            messages = messageRepository.saveAll(resultsMessages).stream().map(MessageJpaEntity::toModel).toList();
             chatRoom.removeParticipant(userId);
         }else{
             messages = results.stream()
                     .map(ChatRoomWithDetails::message)
-                    .map(MessageJpaEntity::fromEntity)
+                    .map(MessageJpaEntity::toModel)
                     .distinct()
                     .filter(Objects::nonNull)
                     .toList();

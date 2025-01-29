@@ -25,10 +25,24 @@ public class TranslateEventListener {
 
     @TransactionalEventListener
     public void handleMessageCreatedEvent(MessageCreateEvent event) {
-        boolean isUserConnected = webSocketUserService.isUserConnected(event.userId());
-        TranslateLanguage translateLanguage = webSocketUserService.isUserConnectedAndTranslate(event.userId());
-        if (isUserConnected && translateLanguage != null && event.userId() != null) {
+        if (event.userId() == null) {
+            log.warn("Translation event ignored: userId is null");
+            return;
+        }
+        try {
+            boolean isUserConnected = webSocketUserService.isUserConnected(event.userId());
+            if (!isUserConnected) {
+                log.info("User {} is not connected, skipping translation", event.userId());
+                return;
+            }
+            TranslateLanguage translateLanguage = webSocketUserService.isUserConnectedAndTranslate(event.userId());
+            if (translateLanguage == null) {
+                log.info("No translation language set for user {}", event.userId());
+                return;
+            }
             handleTranslateEvent(event.userId(), List.of(event.messageId()));
+        } catch (Exception e) {
+            log.error("Failed to process translation event for user {}: {}", event.userId(), e.getMessage());
         }
     }
 

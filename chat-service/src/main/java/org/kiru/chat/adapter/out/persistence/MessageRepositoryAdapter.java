@@ -18,13 +18,12 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
 
     @Override
     public Message save(Message message) {
-        return MessageJpaEntity.fromEntity(messageRepository.save(MessageJpaEntity.withId(message)));
+        return MessageJpaEntity.toModel(messageRepository.save(MessageJpaEntity.withId(message)));
     }
 
-    @Override
     public List<Message> saveAll(List<MessageJpaEntity> messages) {
        return messageRepository.saveAll(messages)
-                .stream().map(MessageJpaEntity::fromEntity).toList();
+                .stream().map(MessageJpaEntity::toModel).toList();
     }
 
     @Transactional
@@ -34,7 +33,7 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
                     if (!messageJpaEntity.getSenderId().equals(userId) & isUserAdmin.equals(false)) {
                         messageJpaEntity.setReadStatus(true);
                     }
-                    return MessageJpaEntity.fromEntity(messageJpaEntity);
+                    return MessageJpaEntity.toModel(messageJpaEntity);
                 }).toList();
     }
 
@@ -44,7 +43,7 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
             if (!messageJpaEntity.getSenderId().equals(userId) && !isUserAdmin) {
                 messageJpaEntity.setReadStatus(true);
             }
-            return MessageJpaEntity.fromEntity(messageJpaEntity);
+            return MessageJpaEntity.toModel(messageJpaEntity);
         });
     }
 }
