@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kiru.core.exception.EntityNotFoundException;
+import org.kiru.core.exception.code.FailureCode;
 import org.kiru.core.jwt.JwtTokenParser;
 import org.kiru.gateway.common.UserGatewayRepository;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,7 +29,7 @@ public class JwtUtils {
             String email = jwtTokenParser.getEmailFromClaims(jwt);
             return userGatewayRepository.findByIdAndEmail(userId, email)
                     .map(JwtValidResponse::of)
-                    .switchIfEmpty(Mono.error(new IllegalArgumentException("User not found")));
+                    .switchIfEmpty(Mono.error(new EntityNotFoundException(FailureCode.USER_NOT_FOUND)));
         }).flatMap(mono -> mono);
     }
 }

@@ -1,5 +1,6 @@
 package org.kiru.user.portfolio.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -15,10 +16,10 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class PortfolioService {
-        private final GetUserPortfoliosQuery getUserPortfoliosQuery;
-        private final GetUserLikeQuery getUserLikeQuery;
-        private final Executor virtualThreadExecutor;
-        private final GetRecommendUserIdsQuery getRecommendUserIdsQuery;
+    private final GetUserPortfoliosQuery getUserPortfoliosQuery;
+    private final GetUserLikeQuery getUserLikeQuery;
+    private final Executor virtualThreadExecutor;
+    private final GetRecommendUserIdsQuery getRecommendUserIdsQuery;
 
 
     public PortfolioService(GetUserPortfoliosQuery getUserPortfoliosQuery,
@@ -54,8 +55,13 @@ public class PortfolioService {
     private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyMatchedUserFuture,
                                                               List<Long> recommendUserIds) {
         return alreadyMatchedUserFuture.thenApplyAsync(matchedUserIds -> {
-            recommendUserIds.removeAll(matchedUserIds);
-            return recommendUserIds;
-        });
+                    List<Long> recommendUserIdList = new ArrayList<>(recommendUserIds);
+                    recommendUserIdList.removeAll(matchedUserIds);
+                    return recommendUserIdList;
+                }, virtualThreadExecutor)
+                .exceptionally(throwable -> {
+                    log.error("사용자 포트폴리오 ID 필터링 중 오류 발생", throwable);
+                    return new ArrayList<>();
+                });
     }
 }

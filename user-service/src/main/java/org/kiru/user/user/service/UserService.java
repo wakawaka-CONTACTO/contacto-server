@@ -122,7 +122,7 @@ public class UserService implements GetUserMainPageUseCase {
             return userPortfolio;
         });
         CompletableFuture.allOf(purposesFuture, talentsFuture, userPortfolioFuture).join();
-        userQueryWithCache.saveUser(user);
+        userQueryWithCache.saveExistUser(user);
         user.getUserPortfolio().sort();
         return user;
     }
@@ -160,6 +160,4 @@ public class UserService implements GetUserMainPageUseCase {
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }
-
-    
 }

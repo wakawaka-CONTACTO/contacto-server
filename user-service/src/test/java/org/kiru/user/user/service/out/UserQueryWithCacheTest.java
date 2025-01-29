@@ -76,7 +76,7 @@
          when(userRepository.save(any(UserJpaEntity.class)))
                  .thenReturn(existUserEntity);
          // When
-         User result = userQueryWithCache.saveUser(existUser);
+         User result = userQueryWithCache.saveExistUser(existUser);
 
          //Then
          assertThat(result).isNotNull();
@@ -94,7 +94,7 @@
          // Given
          when(userRepository.existsById(anyLong())).thenReturn(false);
          // When & Then
-         assertThatThrownBy(() -> userQueryWithCache.saveUser(existUser))
+         assertThatThrownBy(() -> userQueryWithCache.saveExistUser(existUser))
              .isInstanceOf(EntityNotFoundException.class);
      }
  }

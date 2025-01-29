@@ -1,5 +1,6 @@
 package org.kiru.user.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
@@ -24,7 +25,7 @@ public class UserUpdateController {
 
     // 유저 정보 수정
     @PutMapping(value = "/me", consumes = {"multipart/form-data"})
-    public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(@UserId Long userId, @ModelAttribute UserUpdateDto updatedUser) {
+    public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(@UserId Long userId, @Valid @ModelAttribute UserUpdateDto updatedUser) {
         User user = userService.updateUser(
                 userId,
                 updatedUser

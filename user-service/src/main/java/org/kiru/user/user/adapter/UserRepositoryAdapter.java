@@ -49,7 +49,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
 
     @Override
     @CachePut(value = "user", key = "#user.id", unless = "#result == null")
-    public User saveUser(User user) {
+    public User saveExistUser(User user) {
       if(!userRepository.existsById(user.getId())){
              throw new EntityNotFoundException(FailureCode.ENTITY_NOT_FOUND);
       }

@@ -13,7 +13,10 @@ public class AccessTokenGenerator implements TokenGenerator {
     private final JwtProperties jwtProperties;
 
     @Override
-    public String generateToken(final long userId, final String email, Date now){
+    public String generateToken(final long userId, final String email, final Date now){
+        if (email == null || email.isEmpty()) {
+            throw new IllegalArgumentException("이메일은 null이거나 비어있을 수 없습니다");
+        }
         final Date expireDate = generateExpirationDate(now);
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)

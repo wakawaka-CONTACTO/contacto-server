@@ -2,7 +2,7 @@ package org.kiru.user.external.s3;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +39,7 @@ public class ImageService {
 
     @Transactional
     public List<UserPortfolioItem> saveImages(final List<MultipartFile> images, final Long userId, String userName) {
-        List<UserPortfolioItem> savedImages = new ArrayList<>();
+        List<UserPortfolioItem> savedImages = Collections.synchronizedList(new ArrayList<>());
         Long portfolioId = portfolioIdGenerator.generatePortfolioId();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             List<CompletableFuture<Void>> futures = IntStream.range(0, images.size())
@@ -77,7 +77,7 @@ public class ImageService {
     @Transactional
     public List<UserPortfolioItem> saveImagesS3WithSequence(final Map<Integer, Object> changedPortfolioImages , UserPortfolio userPortfolio, String username) {
         Map<Integer,MultipartFile> images = UserPortfolio.findUpdateItem(changedPortfolioImages);
-        List<UserPortfolioItem> savedImages = new LinkedList<>();
+        List<UserPortfolioItem> savedImages = Collections.synchronizedList(new ArrayList<>());
         Long portfolioId = userPortfolio.getPortfolioId() == null ? portfolioIdGenerator.generatePortfolioId() : userPortfolio.getPortfolioId();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             List<CompletableFuture<Void>> futures = images.entrySet().stream()

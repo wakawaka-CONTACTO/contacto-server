@@ -29,7 +29,7 @@ public record UserWithAdditionalInfoResponse(
                 UserPortfolioResponse.of(user.getUserPortfolio()),
                 user.getUserPurposes(),
                 user.getUserTalents().stream().map(
-                        i -> UserTalent.builder().id(user.getId()).talentType(i).build()).toList()
+                        talentType -> UserTalent.builder().userId(user.getId()).talentType(talentType).build()).toList()
         );
     }
 

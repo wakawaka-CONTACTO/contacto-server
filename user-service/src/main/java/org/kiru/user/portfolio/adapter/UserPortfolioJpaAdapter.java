@@ -48,6 +48,7 @@ public class UserPortfolioJpaAdapter implements GetUserPortfoliosQuery , GetMatc
     }
 
     @Override
+    @Transactional
     public void saveAll(List<UserPortfolioItem> userPortfolioItems) {
         userPortfolioRepository.saveAll(userPortfolioItems.stream().map(UserPortfolioImg::toEntity).toList());
     }

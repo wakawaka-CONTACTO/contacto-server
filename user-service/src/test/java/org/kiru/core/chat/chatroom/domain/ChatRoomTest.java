@@ -26,10 +26,8 @@ class ChatRoomTest {
     private ChatRoom chatRoom;
 
     @BeforeEach
-    @ParameterizedTest
-    @AutoSource
     void setUp() {
-        Set<Long> participants = new HashSet<>(Arrays.asList(2L));
+        Set<Long> participants = new HashSet<>(List.of(2L));
         chatRoom = ChatRoom.builder().id(1L).chatRoomThumbnail(null)
                 .participants(participants).type(ChatRoomType.PRIVATE).build();
     }
@@ -43,14 +41,32 @@ class ChatRoomTest {
     }
 
     @Test
-    void loadMessagesAndParticipants() {
-        List<Message> messages = Arrays.asList(new Message(), new Message());
-        chatRoom.addMessage(messages);
-        assertEquals(2, chatRoom.getMessages().size());
+    void 메시지_추가시_정상적으로_추가되는지_확인() {
+        // given
+        List<Message> messages = Arrays.asList(
+                Message.builder().content("안녕하세요").senderId(1L).build(),
+                Message.builder().content("반갑습니다").senderId(2L).build()
+        );
 
+        // when
+        chatRoom.addMessage(messages);
+
+        // then
+        assertEquals(2, chatRoom.getMessages().size());
+        assertEquals("안녕하세요", chatRoom.getMessages().get(0).getContent());
+        assertEquals("반갑습니다", chatRoom.getMessages().get(1).getContent());
+    }
+
+    @Test
+    void 참가자_추가시_정상적으로_추가되는지_확인() {
+        // given
         List<Long> participants = Arrays.asList(1L, 2L, 3L);
+        // when
         chatRoom.addParticipants(participants);
+
+        // then
         assertEquals(3, chatRoom.getParticipants().size());
+        assertTrue(chatRoom.getParticipants().containsAll(participants));
     }
 
     @Test

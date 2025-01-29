@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kiru.core.user.userPortfolioItem.entity.UserPortfolioImg;
@@ -105,46 +106,30 @@ class UserPortfolioTest {
 
     }
 
+    private void assertPortfolioItemEquals(UserPortfolioItem expected, UserPortfolioItem actual) {
+        assertEquals(expected.getUserId(), actual.getUserId());
+        assertEquals(expected.getPortfolioId(), actual.getPortfolioId());
+        assertEquals(expected.getItemUrl(), actual.getItemUrl());
+        assertEquals(expected.getSequence(), actual.getSequence());
+        assertEquals(expected.getUserName(), actual.getUserName());
+    }
+
     @Test
     void 사용자ID와_포트폴리오_아이템_맵_생성() {
-        // 준비
-        UserPortfolioItem item1 = manyUserPortfolioItems.stream()
-                .filter(i -> i.getUserId() == 1L && i.getSequence() == 1)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("user1 item not found"));
-        UserPortfolioItem item2 = manyUserPortfolioItems.stream()
-                .filter(i -> i.getUserId() == 2L && i.getSequence() == 1)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("user2 item not found"));
-        UserPortfolioItem item3 = manyUserPortfolioItems.stream()
-                .filter(i -> i.getUserId() == 3L && i.getSequence() == 1)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("user3 item not found"));
+        Map<Long, UserPortfolioItem> expectedItems = manyUserPortfolioItems.stream()
+                .filter(item -> item.getSequence() == 1)
+                .collect(Collectors.toMap(
+                        UserPortfolioItem::getUserId,
+                        item -> item
+                ));
 
         // 실행
         Map<Long, UserPortfolioItem> resultMap = UserPortfolio.getUserIdAndUserPortfolioItemMap(manyUserPortfolioItems);
 
         // 값 비교
-        UserPortfolioItem resultItem1 = resultMap.get(1L);
-        assertEquals(item1.getUserId(), resultItem1.getUserId());
-        assertEquals(item1.getPortfolioId(), resultItem1.getPortfolioId());
-        assertEquals(item1.getItemUrl(), resultItem1.getItemUrl());
-        assertEquals(item1.getSequence(), resultItem1.getSequence());
-        assertEquals(item1.getUserName(), resultItem1.getUserName());
-
-        UserPortfolioItem resultItem2 = resultMap.get(2L);
-        assertEquals(item2.getUserId(), resultItem2.getUserId());
-        assertEquals(item2.getPortfolioId(), resultItem2.getPortfolioId());
-        assertEquals(item2.getItemUrl(), resultItem2.getItemUrl());
-        assertEquals(item2.getSequence(), resultItem2.getSequence());
-        assertEquals(item2.getUserName(), resultItem2.getUserName());
-
-        UserPortfolioItem resultItem3 = resultMap.get(3L);
-        assertEquals(item3.getUserId(), resultItem3.getUserId());
-        assertEquals(item3.getPortfolioId(), resultItem3.getPortfolioId());
-        assertEquals(item3.getItemUrl(), resultItem3.getItemUrl());
-        assertEquals(item3.getSequence(), resultItem3.getSequence());
-        assertEquals(item3.getUserName(), resultItem3.getUserName());
+        assertEquals(expectedItems.keySet(), resultMap.keySet());
+        expectedItems.forEach((userId, expectedItem) ->
+                assertPortfolioItemEquals(expectedItem, resultMap.get(userId)));
     }
 
     @Test

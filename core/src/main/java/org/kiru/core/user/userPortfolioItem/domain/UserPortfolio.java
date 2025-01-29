@@ -58,6 +58,12 @@ public class UserPortfolio {
     }
 
     public void addOrUpdatePortfolioItems(List<UserPortfolioItem> updateItems) {
+        if (updateItems == null) {
+            throw new IllegalArgumentException("updateItem이 Null입니다.");
+        }
+        if (updateItems.stream().anyMatch(item -> item.getSequence() > 10)) {
+            throw new IllegalArgumentException("Sequence number는 1~10까지 가능합니다.");
+        }
         if (this.portfolioItems.isEmpty()) {
             this.portfolioItems.addAll(updateItems);
         } else {

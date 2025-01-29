@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.kiru.core.exception.ForbiddenException;
+import org.kiru.core.exception.code.FailureCode;
 import org.kiru.core.user.talent.domain.Talent.TalentType;
 import org.kiru.core.user.user.entity.UserR2dbcEntity;
 import org.kiru.core.user.userPortfolioItem.domain.UserPortfolio;
@@ -46,22 +48,6 @@ public class User {
 
     private List<TalentType> userTalents;
 
-    public void userPortfolio(UserPortfolio userPortfolio){
-        this.userPortfolio = userPortfolio;
-    }
-
-    public void userPurposes(List<PurposeType> userPurposes){
-        this.userPurposes = userPurposes.stream().map(PurposeType::getIndex).toList();
-    }
-
-    public void userTalents(List<TalentType> userTalents){
-        this.userTalents = userTalents;
-    }
-
-    public void password(String password){
-        this.password = password;
-    }
-
     public static User of(UserR2dbcEntity user) {
         return User.builder()
                 .id(user.getId())
@@ -73,5 +59,24 @@ public class User {
                 .instagramId(user.getInstagramId())
                 .webUrl(user.getWebUrl())
                 .build();
+    }
+
+    public void userPortfolio(UserPortfolio userPortfolio) {
+        this.userPortfolio = userPortfolio;
+    }
+
+    public void userPurposes(List<PurposeType> userPurposes) {
+        this.userPurposes = userPurposes.stream().map(PurposeType::getIndex).toList();
+    }
+
+    public void userTalents(List<TalentType> userTalents) {
+        this.userTalents = userTalents;
+    }
+
+    public void password(String password) {
+        if (password == null || password.isEmpty()) {
+            throw new ForbiddenException(FailureCode.INVALID_PASSWORD);
+        }
+        this.password = password;
     }
 }

@@ -88,10 +88,10 @@ public class AuthService {
     @Transactional
     public UserJwtInfoRes reissue(final Long userId) {
         Date now = new Date();
-        refreshTokenRepository.deleteByUserId(userId)
-                .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE));
         UserJpaEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+        refreshTokenRepository.deleteByUserId(userId)
+                .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE));
         Token newToken = jwtProvider.issueToken(userId, user.getEmail(),now);
         return UserJwtInfoRes.of(userId, newToken.accessToken(), newToken.refreshToken());
     }

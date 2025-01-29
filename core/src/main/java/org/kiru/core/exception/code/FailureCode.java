@@ -50,7 +50,7 @@ public enum FailureCode {
     PASSWORD_MISMATCH(HttpStatus.UNAUTHORIZED, "e4020", "비밀번호가 일치하지 않습니다."),
     SOCIAL_LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "e4021", "소셜 로그인이 필요한 계정입니다."),
     EMAIL_LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "e4022", "이메일 로그인이 필요한 계정입니다."),
-
+    INVALID_PASSWORD(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS,"e4023" ,"userPassword 값이 잘못되었습니다." ),
     /**
      * 403 Forbidden
      */
@@ -98,7 +98,9 @@ public enum FailureCode {
             HttpStatus.NOT_FOUND,"e4404" , "요청한 리소스를 찾을수 없습니다." ),
     INVALID_USER_LIKE(HttpStatus.BAD_REQUEST,"e402" ,"좋아요하는 userID가 같습니다." ),
     SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "e5005", "서비스가 이용 불가능합니다."),
-    INVALID_CONFIGURATION(HttpStatus.INTERNAL_SERVER_ERROR, "e5006", "yaml 설정이 로드되지 않았습니다"),;
+    INVALID_CONFIGURATION(HttpStatus.INTERNAL_SERVER_ERROR, "e5006", "yaml 설정이 로드되지 않았습니다"),
+    PORTFOLIO_ID_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "e5007", "포트폴리오 ID 생성에 실패했습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
