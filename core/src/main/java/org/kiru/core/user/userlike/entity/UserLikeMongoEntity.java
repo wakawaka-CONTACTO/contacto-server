@@ -44,10 +44,9 @@ public class UserLikeMongoEntity implements UserLike {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public boolean isMatched(boolean likeOrDislike) {
+    public void setMatched(boolean likeOrDislike) {
         this.isMatched = likeOrDislike;
         this.updatedAt = LocalDateTime.now();
-        return this.isMatched;
     }
 
     public static UserLikeMongoEntity of(Long userId, Long likedUserId, LikeStatus likeStatus, boolean isMatched) {

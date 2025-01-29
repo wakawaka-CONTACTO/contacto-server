@@ -2,11 +2,14 @@ package org.kiru.user.portfolio.repository;
 
 import jakarta.persistence.QueryHint;
 import java.util.List;
-import org.kiru.core.user.userPortfolioImg.entity.UserPortfolioImg;
+import org.kiru.core.user.userPortfolioItem.entity.UserPortfolioImg;
+import org.kiru.user.portfolio.adapter.dto.UserPortfolioProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg, Long> {
     @Query("SELECT upi FROM UserPortfolioImg upi WHERE upi.userId = :userId ORDER BY upi.sequence LIMIT 10")
     List<UserPortfolioImg> findAllByUserId(Long userId);
@@ -22,14 +25,14 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
-    List<UserPortfolioImg> findAllByUserIdInWithMinSequence(List<Long> userIds);
+    List<UserPortfolioImg> findAllByUserIdInWithItemUrlMinSequence(List<Long> userIds);
 
     @Query("""
     SELECT 
-        upi.portfolioId,
-        upi.userId,
-        upi.userName,
-        STRING_AGG(upi.portfolioImageUrl,',')
+        upi.portfolioId as portfolioId,
+        upi.userId as userId,
+        upi.userName as userName,
+        STRING_AGG(upi.portfolioImageUrl,',') as portfolioImageUrl
     FROM 
        UserPortfolioImg upi
     WHERE 
@@ -43,5 +46,5 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
-    List<Object[]> findAllPortfoliosByUserIds(List<Long> userIds);
+    List<UserPortfolioProjection> findAllPortfoliosByUserIds(List<Long> userIds);
 }

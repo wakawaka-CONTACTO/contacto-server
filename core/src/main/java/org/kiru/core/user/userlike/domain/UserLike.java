@@ -9,5 +9,5 @@ public interface UserLike {
     boolean isMatched();
     LocalDateTime getCreatedAt();
     void likeStatus(LikeStatus likeStatus);
-    boolean isMatched(boolean b);
+    void setMatched(boolean b);
 }

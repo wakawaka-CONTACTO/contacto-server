@@ -1,4 +1,4 @@
-package org.kiru.user.user.service;
+package org.kiru.user.user.event;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
-public class UserPurposeService {
+public class UserPurposeEventService {
     private final UserPurposeRepository userPurposeRepository;
 
     @TransactionalEventListener

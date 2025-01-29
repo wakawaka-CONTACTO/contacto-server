@@ -5,7 +5,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.entity.QUserJpaEntity;
-import org.kiru.core.user.userPortfolioImg.entity.QUserPortfolioImg;
+import org.kiru.core.user.userPortfolioItem.entity.QUserPortfolioImg;
 import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.domain.UserLike;
 import org.kiru.core.user.userlike.entity.QUserLikeJpaEntity;
@@ -30,7 +30,8 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
     private final JPAQueryFactory queryFactory;
 
     @Transactional
-    public UserLike sendOrDislike(Long userId, Long likedUserId, LikeStatus status) {
+    @Override
+    public UserLike sendLikeOrDislike(Long userId, Long likedUserId, LikeStatus status) {
         // 현재 `userId -> likedUserId` 관계 조회 또는 생성
         UserLike userLike = userLikeRepository.findByUserIdAndLikedUserId(userId, likedUserId)
                 .orElseGet(() -> UserLikeJpaEntity.of(userId, likedUserId, status, false));
@@ -42,12 +43,13 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
         userLike.likeStatus(status);
         // 3. 상대방이 나를 이미 `LIKE`했다면 상호 매칭으로 처리
         if (oppositeLike != null && status == LikeStatus.LIKE) {
-            userLike.isMatched(true);
-            oppositeLike.isMatched(true);
+            userLike.setMatched(true);
+            oppositeLike.setMatched(true);
             userLikeRepository.save(oppositeLike); // 상대방 기록도 업데이트
         }
         // 4. 최종적으로 현재 관계 저장 후 반환
-        return userLikeRepository.save(userLike);
+        userLikeRepository.save(userLike);
+        return userLike;
     }
 
     @Override

@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class PortfolioService {
-    private final GetUserPortfoliosQuery getUserPortfoliosQuery;
-    private final GetUserLikeQuery getUserLikeQuery;
-    private final Executor virtualThreadExecutor;
-    private final GetRecommendUserIdsQuery getRecommendUserIdsQuery;
+        private final GetUserPortfoliosQuery getUserPortfoliosQuery;
+        private final GetUserLikeQuery getUserLikeQuery;
+        private final Executor virtualThreadExecutor;
+        private final GetRecommendUserIdsQuery getRecommendUserIdsQuery;
 
 
     public PortfolioService(GetUserPortfoliosQuery getUserPortfoliosQuery,
@@ -36,7 +36,7 @@ public class PortfolioService {
         return getUserPortfoliosQuery.findAllPortfoliosByUserIds(distinctUserIds);
     }
 
-    public List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
+    private List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
 //         이미 매칭된 유저
         CompletableFuture<List<Long>> alreadyMatchedUserFuture = getAlreadyMatchedUserFuture(userId,
                 virtualThreadExecutor);
@@ -53,7 +53,7 @@ public class PortfolioService {
 
     private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyMatchedUserFuture,
                                                               List<Long> recommendUserIds) {
-        return alreadyMatchedUserFuture.thenApply(matchedUserIds -> {
+        return alreadyMatchedUserFuture.thenApplyAsync(matchedUserIds -> {
             recommendUserIds.removeAll(matchedUserIds);
             return recommendUserIds;
         });

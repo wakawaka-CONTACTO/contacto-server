@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
+
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.portfolio.service.out.GetRecommendUserIdsQuery;
-import org.kiru.user.portfolio.service.out.GetUserPurposeQuery;
+
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.userlike.service.out.GetUserLikeQuery;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,15 +19,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRecommendAdapter implements GetRecommendUserIdsQuery {
     private final Executor virtualThreadExecutor;
-    private final GetUserPurposeQuery getUserPurposeQuery;
     private final GetUserLikeQuery getUserLikeQuery;
     private final UserPurposeRepository userPurposeRepository;
 
-    public UserRecommendAdapter(Executor virtualThreadExecutor, GetUserPurposeQuery getUserPurposeQuery,
+    public UserRecommendAdapter(Executor virtualThreadExecutor,
                                 @Qualifier("userLikeJpaAdapter")
                                 GetUserLikeQuery getUserLikeQuery, UserPurposeRepository userPurposeRepository) {
         this.virtualThreadExecutor = virtualThreadExecutor;
-        this.getUserPurposeQuery = getUserPurposeQuery;
         this.getUserLikeQuery = getUserLikeQuery;
         this.userPurposeRepository = userPurposeRepository;
     }
@@ -65,8 +64,8 @@ public class UserRecommendAdapter implements GetRecommendUserIdsQuery {
     }
 
     private List<Long> getMatchingUserIdsByPurpose(Long userId, Pageable pageable) {
-        return getUserPurposeQuery.findUserIdByPurposeType(userId,
+        return userPurposeRepository.findUserIdsByPurposeTypesOrderByCount(
                 userPurposeRepository.findAllByUserId(userId).stream()
-                        .map(UserPurpose::getPurposeType).toList(), pageable);
+                        .map(UserPurpose::getPurposeType).toList(), pageable).getContent();
     }
 }

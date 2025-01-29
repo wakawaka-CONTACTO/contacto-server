@@ -12,17 +12,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
+
+
 @Repository
 public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
     @QueryHints(value = {
-            @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
     Optional<UserJpaEntity> findByEmail(String email);
 
-    @Query("SELECT new org.kiru.user.user.dto.UserIdUsername(u.id, u.username) " +
+    @Query("SELECT u.id as id, u.username as userName " +
             "FROM UserJpaEntity u " +
             "WHERE u.id IN :userIds")
     @QueryHints(value = {

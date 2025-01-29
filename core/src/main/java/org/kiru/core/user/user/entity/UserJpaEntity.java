@@ -80,6 +80,19 @@ public class UserJpaEntity {
                 .build();
     }
 
+    public static User toModel(UserJpaEntity entity) {
+        return User.builder()
+                .id(entity.getId())
+                .username(entity.getUsername())
+                .loginType(entity.getLoginType())
+                .socialId(entity.getSocialId())
+                .email(entity.getEmail())
+                .description(entity.getDescription())
+                .instagramId(entity.getInstagramId())
+                .webUrl(entity.getWebUrl())
+                .build();
+    }
+
     public void updateDetails(User user) {
         if (user.getUsername() != null) {
             this.username = user.getUsername();

@@ -1,4 +1,4 @@
-package org.kiru.user.user.service;
+package org.kiru.user.user.event;
 
 import lombok.RequiredArgsConstructor;
 import org.kiru.user.external.s3.ImageService;
@@ -10,8 +10,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
-public class UserPortfolioService {
-
+public class UserPortfolioEventService {
     private final ImageService imageService;
 
     @TransactionalEventListener

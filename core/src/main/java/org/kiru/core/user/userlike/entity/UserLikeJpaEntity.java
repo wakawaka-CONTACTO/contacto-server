@@ -42,10 +42,11 @@ public class UserLikeJpaEntity extends BaseTimeEntity implements UserLike {
     private LikeStatus likeStatus;
 
     @Column(name = "is_matched")
-    private boolean isMatched;
+    @Builder.Default
+    private boolean isMatched = false;
 
-    public boolean isMatched(boolean likeOrDislike) {
-        return this.isMatched = likeOrDislike;
+    public void setMatched(boolean likeOrDislike) {
+        this.isMatched = likeOrDislike;
     }
 
     public static UserLikeJpaEntity of(Long userId, Long likedUserId, LikeStatus likeStatus, boolean isMatched) {

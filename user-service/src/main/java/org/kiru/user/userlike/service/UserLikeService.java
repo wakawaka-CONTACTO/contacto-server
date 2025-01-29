@@ -34,7 +34,7 @@ public class UserLikeService {
     }
 
     public LikeResponse sendLikeOrDislike(Long userId, Long likedUserId, LikeStatus status) {
-        boolean isMatched = sendLikeOrDislikeUseCase.sendOrDislike(userId, likedUserId, status).isMatched();
+        boolean isMatched = sendLikeOrDislikeUseCase.sendLikeOrDislike(userId, likedUserId, status).isMatched();
         if (isMatched) {
             CompletableFuture<List<UserPortfolioResDto>> portfolioFuture = CompletableFuture.supplyAsync(
                     () -> getMatchedUserPortfolioQuery.findByUserIds(List.of(userId, likedUserId)),
@@ -44,7 +44,7 @@ public class UserLikeService {
                                     CreateChatRoomRequest.of("CONTACTO MANAGER", ChatRoomType.PRIVATE, userId,
                                             likedUserId)),
                     virtualThreadExecutor);
-            return CompletableFuture.allOf(portfolioFuture, chatRoomIdFuture).thenApply(v -> LikeResponse.of(
+            return CompletableFuture.allOf(portfolioFuture, chatRoomIdFuture).thenApplyAsync(v -> LikeResponse.of(
                     true, portfolioFuture.join(), chatRoomIdFuture.join().getChatRoomId()
             )).join();
         }

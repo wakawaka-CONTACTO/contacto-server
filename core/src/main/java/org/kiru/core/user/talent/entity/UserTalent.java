@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.kiru.core.user.talent.domain.Talent;
+import org.kiru.core.user.talent.domain.Talent.TalentType;
 
 @Entity
 @AllArgsConstructor
@@ -33,5 +33,5 @@ public class UserTalent {
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "talent_type")
-    private Talent.TalentType talentType;
+    private TalentType talentType;
 }
