@@ -1,20 +1,23 @@
 package org.kiru.core.chat.chatroom.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.kiru.core.chat.chatroom.entity.ChatRoomJpaEntity;
 import org.kiru.core.chat.message.domain.Message;
-import java.util.HashSet;
+import org.kiru.core.user.userPortfolioItem.domain.UserPortfolioItem;
 
 @Getter
 @AllArgsConstructor
@@ -25,7 +28,6 @@ public class ChatRoom {
     private Long id;
 
     @NotNull
-    @Setter
     private String title;
 
     @Nullable
@@ -36,9 +38,9 @@ public class ChatRoom {
     private ChatRoomType type;
 
     @Nullable
-    private final Set<Long> participants; // Set으로 변경
+    @Builder.Default
+    private final Set<Long> participants = new HashSet<>(); // Set으로 변경
 
-    @Setter
     private String chatRoomThumbnail;
 
     @Setter
@@ -51,27 +53,16 @@ public class ChatRoom {
         Objects.requireNonNull(this.messages).addAll(message);
     }
 
-    public void addMessage(final Message message) {
-        Objects.requireNonNull(this.messages).add(message);
-    }
-
     public boolean addParticipant(final Long userId) {
-        if (this.participants != null && this.type == ChatRoomType.PRIVATE) {
-            return this.participants.add(userId);
-        }
-        return false;
-    }
-
-    public boolean removeParticipant(final Long userId) {
-        if (this.participants != null && this.type == ChatRoomType.PRIVATE) {
-            return this.participants.remove(userId);
+        if (this.type == ChatRoomType.PRIVATE) {
+            return Objects.requireNonNull(this.participants).add(userId);
         }
         return false;
     }
 
     public void addParticipants(final List<Long> userIds) {
-        if (this.participants != null && this.type == ChatRoomType.PRIVATE) {
-            this.participants.addAll(userIds);
+        if (this.type == ChatRoomType.PRIVATE) {
+            Objects.requireNonNull(this.participants).addAll(userIds);
         }
     }
 
@@ -84,13 +75,36 @@ public class ChatRoom {
                 .build();
     }
 
-    public static ChatRoom fromEntity(ChatRoomJpaEntity chatRoomJpa){
-        return ChatRoom.builder()
-                .id(chatRoomJpa.getId())
-                .title(chatRoomJpa.getTitle())
-                .type(chatRoomJpa.getType())
-                .messages(new ArrayList<>())
-                .participants(new HashSet<>())
-                .build();
+    public void removeParticipant(Long userId) {
+        Objects.requireNonNull(this.participants).remove(userId);
+    }
+
+    @JsonIgnore
+    public void setThumbnailAndRoomTitle(Map<Long, UserPortfolioItem> userPortfolioImgMap) {
+        Optional<UserPortfolioItem> userPortfolioItem = this.getParticipants().stream()
+                .map(userPortfolioImgMap::get)
+                .filter(Objects::nonNull)
+                .min(Comparator.comparingInt(UserPortfolioItem::getSequence));
+        userPortfolioItem.ifPresent(userPortfolioImg -> this.chatRoomThumbnail = userPortfolioImg.getItemUrl());
+        userPortfolioItem.ifPresent(userPortfolioImg -> this.title = userPortfolioImg.getUserName());
+    }
+
+    @JsonIgnore
+    public void setThumbnailAndRoomTitle(UserPortfolioItem userPortfolioItem) {
+        this.chatRoomThumbnail = userPortfolioItem.getItemUrl();
+        this.title = userPortfolioItem.getUserName();
+    }
+
+    @JsonIgnore
+    public static List<Long> getAllParticipantIds(List<ChatRoom> chatRooms) {
+        return chatRooms.stream()
+                .flatMap(chatRoom -> Objects.requireNonNull(chatRoom.getParticipants()).stream())
+                .distinct()
+                .toList();
+    }
+
+    @JsonIgnore
+    public List<Long> getParticipantsIds() {
+        return new ArrayList<>(Objects.requireNonNull(this.participants));
     }
 }

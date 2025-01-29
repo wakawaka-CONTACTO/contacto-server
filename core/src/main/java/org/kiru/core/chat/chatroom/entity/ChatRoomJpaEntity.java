@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.HashSet;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -58,6 +60,16 @@ public class ChatRoomJpaEntity extends BaseTimeEntity {
                 .title(chatRoom.getTitle())
                 .type(chatRoom.getType())
                 .visible(visible)
+                .build();
+    }
+
+    public static ChatRoom toModel(ChatRoomJpaEntity entity) {
+        return ChatRoom.builder()
+                .id(entity.getId())
+                .title(entity.getTitle())
+                .type(entity.getType())
+                .messages(new ArrayList<>())
+                .participants(new HashSet<>())
                 .build();
     }
 }
