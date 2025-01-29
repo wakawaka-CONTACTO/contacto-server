@@ -10,33 +10,30 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.kiru.user.portfolio.adapter.UserPortfolioJpaAdapter;
+import org.kiru.user.portfolio.adapter.dto.UserPortfolioProjection;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
+import org.kiru.user.portfolio.repository.UserPortfolioRepository;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class GetMatchedUserPortfolioQueryTest {
 
-    @Mock
-    private GetMatchedUserPortfolioQuery getMatchedUserPortfolioQuery;
+    @InjectMocks
+    private UserPortfolioJpaAdapter getMatchedUserPortfolioQuery;
 
-    private List<UserPortfolioResDto> testMatchedPortfolios;
+    @Mock
+    private UserPortfolioRepository userPortfolioRepository;
+
+    private  List<UserPortfolioProjection> testMatchedPortfoliosProjection;
 
     @BeforeEach
     void setUp() {
-        testMatchedPortfolios = Arrays.asList(
-            UserPortfolioResDto.builder()
-                .userId(1L)
-                .username("matchedUser1")
-                .portfolioId(1L)
-                .portfolioImageUrl(Arrays.asList("match1.jpg", "match2.jpg"))
-                .build(),
-            UserPortfolioResDto.builder()
-                .userId(2L)
-                .username("matchedUser2")
-                .portfolioId(2L)
-                .portfolioImageUrl(Arrays.asList("match3.jpg", "match4.jpg"))
-                .build()
+        testMatchedPortfoliosProjection = Arrays.asList(
+                new UserIdAndName(1L, 1L, "matchedUser1", "match1.jpg,match2.jpg"),
+                new UserIdAndName(2L, 2L, "matchedUser2", "match3.jpg,match4.jpg")
         );
     }
 
@@ -45,48 +42,69 @@ class GetMatchedUserPortfolioQueryTest {
     void findByUserIds_Success() {
         // Given
         List<Long> matchedUserIds = Arrays.asList(1L, 2L);
-        when(getMatchedUserPortfolioQuery.findByUserIds(matchedUserIds)).thenReturn(testMatchedPortfolios);
+        when(userPortfolioRepository.findAllPortfoliosByUserIds(matchedUserIds)).thenReturn(testMatchedPortfoliosProjection);
 
         // When
         List<UserPortfolioResDto> result = getMatchedUserPortfolioQuery.findByUserIds(matchedUserIds);
-
         // Then
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getUserId()).isEqualTo(1L);
+        assertThat(result.get(0).getUsername()).isEqualTo("matchedUser1");
         assertThat(result.get(0).getPortfolioImageUrl()).hasSize(2);
+        assertThat(result.get(0).getPortfolioImageUrl().contains("match1.jpg")).isTrue();
+        assertThat(result.get(0).getPortfolioImageUrl().contains("match2.jpg")).isTrue();
+
         assertThat(result.get(1).getUserId()).isEqualTo(2L);
         assertThat(result.get(1).getPortfolioImageUrl()).hasSize(2);
+        assertThat(result.get(1).getUsername()).isEqualTo("matchedUser2");
+        assertThat(result.get(1).getPortfolioImageUrl().contains("match3.jpg")).isTrue();
+        assertThat(result.get(1).getPortfolioImageUrl().contains("match4.jpg")).isTrue();
     }
 
     @Test
     @DisplayName("매칭된 사용자 포트폴리오 조회 - 빈 결과")
     void findByUserIds_EmptyResult() {
         // Given
-        List<Long> unmatchedUserIds = Arrays.asList(999L);
-        when(getMatchedUserPortfolioQuery.findByUserIds(unmatchedUserIds)).thenReturn(Collections.emptyList());
-
+        List<Long> unmatchedUserIds = List.of(1L,2L);
+        when(userPortfolioRepository.findAllPortfoliosByUserIds(unmatchedUserIds)).thenReturn(Collections.emptyList());
         // When
         List<UserPortfolioResDto> result = getMatchedUserPortfolioQuery.findByUserIds(unmatchedUserIds);
-
         // Then
         assertThat(result).isEmpty();
     }
 
-    @Test
-    @DisplayName("매칭된 사용자 포트폴리오 조회 - 단일 사용자")
-    void findByUserIds_SingleUser() {
-        // Given
-        List<Long> singleUserId = Arrays.asList(1L);
-        List<UserPortfolioResDto> singleUserPortfolio = Arrays.asList(testMatchedPortfolios.get(0));
-        when(getMatchedUserPortfolioQuery.findByUserIds(singleUserId)).thenReturn(singleUserPortfolio);
+    public class UserIdAndName implements UserPortfolioProjection {
+        private final Long portfolioId;
+        private final Long userId;
+        private final String username;
+        private final String portfolioImageUrl;
 
-        // When
-        List<UserPortfolioResDto> result = getMatchedUserPortfolioQuery.findByUserIds(singleUserId);
+        public UserIdAndName(Long portfolioId, Long userId, String username, String portfolioImageUrl) {
+            this.portfolioId = portfolioId;
+            this.userId = userId;
+            this.username = username;
+            this.portfolioImageUrl = portfolioImageUrl;
+        }
 
-        // Then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getUserId()).isEqualTo(1L);
-        assertThat(result.get(0).getUsername()).isEqualTo("matchedUser1");
-        assertThat(result.get(0).getPortfolioImageUrl()).hasSize(2);
+        @Override
+        public Long getPortfolioId() {
+            return this.portfolioId;
+        }
+
+        @Override
+        public Long getUserId() {
+            return this.userId;
+        }
+
+        @Override
+        public String getUsername() {
+            return this.username;
+        }
+
+        @Override
+        public String getPortfolioImageUrl() {
+            return this.portfolioImageUrl;
+        }
+
     }
 }
