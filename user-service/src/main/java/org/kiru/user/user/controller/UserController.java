@@ -7,7 +7,9 @@ import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.response.ChatRoomListResponse;
 import org.kiru.user.user.dto.response.ChatRoomResponse;
+import org.kiru.user.user.dto.response.UserWithAdditionalInfoResponse;
 import org.kiru.user.user.service.UserService;
+import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabledTracing;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,12 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
+@ConditionalOnEnabledTracing
 public class UserController {
     private final UserService userService;
     @GetMapping("/me")
-    public ResponseEntity<User> getUser(@UserId Long userId){
+    public ResponseEntity<UserWithAdditionalInfoResponse> getUser(@UserId Long userId){
         User user = userService.getUserFromIdToMainPage(userId);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
     }
 
     @GetMapping("/me/chatroom")

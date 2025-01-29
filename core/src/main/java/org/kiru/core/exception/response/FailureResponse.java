@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.kiru.core.exception.code.FailureCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Getter
@@ -66,6 +67,7 @@ public class FailureResponse {
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Builder
     public static class FieldError {
         private String field;
         private String value;
@@ -99,6 +101,15 @@ public class FailureResponse {
                             error.getField(),
                             error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
                             error.getDefaultMessage()))
+                    .toList();
+        }
+
+        public static List<FieldError> to(List<ParameterValidationResult> errors) {
+            return errors.stream()
+                    .map(error -> new FieldError(
+                            error.getMethodParameter().getParameterName(),
+                            error.getArgument() == null ? "" : error.getArgument().toString(),
+                            error.getResolvableErrors().getFirst().getDefaultMessage()))
                     .toList();
         }
     }

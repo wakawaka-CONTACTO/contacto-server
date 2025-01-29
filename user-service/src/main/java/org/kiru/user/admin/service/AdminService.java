@@ -19,7 +19,6 @@ import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.out.AdminUserQuery;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.dto.UserIdUsername;
-import org.kiru.user.user.repository.UserRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ import org.springframework.stereotype.Service;
 public class AdminService {
     private final AdminUserQuery adminUserQuery;
     private final ChatApiClient chatApiClient;
-    private final UserRepository userRepository;
 
     public List<AdminUserDto> getUsers(Pageable pageable) {
         List<UserDto> users = adminUserQuery.findAll(pageable);
@@ -50,12 +48,12 @@ public class AdminService {
         List<Long> userIds = chatApiClientMatchedUsers.stream()
                 .map(MatchedUserResponse::userId)
                 .toList();
-        List<UserIdUsername> userNames = userRepository.findUsernamesByIds(userIds);
+        List<UserIdUsername> userNames = adminUserQuery.findUsernamesByIds(userIds);
         List<AdminMatchedUserResponse> adminMatchedUserResponses =  chatApiClientMatchedUsers.stream()
                 .map(matchedUser -> {
                     String name = userNames.stream()
-                            .filter(user -> user.id().equals(matchedUser.userId()))
-                            .map(UserIdUsername::name)
+                            .filter(user -> user.getId().equals(matchedUser.userId()))
+                            .map(UserIdUsername::getUsername)
                             .findFirst()
                             .orElse(null);
                     return new AdminMatchedUserResponse(matchedUser.userId(), name, matchedUser.matchedAt());

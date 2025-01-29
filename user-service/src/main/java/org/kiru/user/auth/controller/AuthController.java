@@ -20,6 +20,7 @@ public class AuthController {
     private final KakaoAuthService kakaoAuthService;
     private final AuthService authService;
 
+    @Deprecated
     @GetMapping("/login/kakao")
     public ResponseEntity<KaKaoDto.KakaoUserInfoResponse> kakaoLogin(
             @RequestParam(value = "code") String code

@@ -1,11 +1,13 @@
 package org.kiru.user.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
 import org.kiru.user.user.dto.response.UpdatePwdResponse;
+import org.kiru.user.user.dto.response.UserWithAdditionalInfoResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -23,12 +25,12 @@ public class UserUpdateController {
 
     // 유저 정보 수정
     @PutMapping(value = "/me", consumes = {"multipart/form-data"})
-    public ResponseEntity<User> updateUser(@UserId Long userId, @ModelAttribute UserUpdateDto updatedUser) {
+    public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(@UserId Long userId, @Valid @ModelAttribute UserUpdateDto updatedUser) {
         User user = userService.updateUser(
                 userId,
                 updatedUser
         );
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
     }
 
     @PatchMapping(value = "/me/pwd")

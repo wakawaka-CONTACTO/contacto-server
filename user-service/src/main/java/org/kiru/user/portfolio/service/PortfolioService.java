@@ -1,5 +1,6 @@
 package org.kiru.user.portfolio.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -36,7 +37,7 @@ public class PortfolioService {
         return getUserPortfoliosQuery.findAllPortfoliosByUserIds(distinctUserIds);
     }
 
-    public List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
+    private List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
 //         이미 매칭된 유저
         CompletableFuture<List<Long>> alreadyMatchedUserFuture = getAlreadyMatchedUserFuture(userId,
                 virtualThreadExecutor);
@@ -53,9 +54,14 @@ public class PortfolioService {
 
     private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyMatchedUserFuture,
                                                               List<Long> recommendUserIds) {
-        return alreadyMatchedUserFuture.thenApply(matchedUserIds -> {
-            recommendUserIds.removeAll(matchedUserIds);
-            return recommendUserIds;
-        });
+        return alreadyMatchedUserFuture.thenApplyAsync(matchedUserIds -> {
+                    List<Long> recommendUserIdList = new ArrayList<>(recommendUserIds);
+                    recommendUserIdList.removeAll(matchedUserIds);
+                    return recommendUserIdList;
+                }, virtualThreadExecutor)
+                .exceptionally(throwable -> {
+                    log.error("사용자 포트폴리오 ID 필터링 중 오류 발생", throwable);
+                    return new ArrayList<>();
+                });
     }
 }

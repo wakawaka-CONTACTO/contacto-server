@@ -7,6 +7,7 @@ import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
 import org.kiru.user.portfolio.service.PortfolioService;
+import org.kiru.user.user.dto.response.UserWithAdditionalInfoResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,8 @@ public class PortfolioController {
     }
 
     @GetMapping("/{portfolioUserId}")
-    public ResponseEntity<User> getOtherPortfolio(@PathVariable Long portfolioUserId) {
+    public ResponseEntity<UserWithAdditionalInfoResponse> getOtherPortfolio(@PathVariable Long portfolioUserId) {
         User user = userService.getUserFromIdToMainPage(portfolioUserId);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
     }
 }

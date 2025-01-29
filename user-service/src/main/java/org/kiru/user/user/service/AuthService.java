@@ -1,18 +1,19 @@
 package org.kiru.user.user.service;
 
+import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kiru.core.user.user.domain.LoginType;
-import org.kiru.core.user.user.entity.UserJpaEntity;
-import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
-import org.kiru.core.user.user.domain.User;
-import org.kiru.user.auth.jwt.JwtProvider;
-import org.kiru.user.auth.jwt.Token;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.InvalidValueException;
 import org.kiru.core.exception.UnauthorizedException;
 import org.kiru.core.exception.code.FailureCode;
+import org.kiru.core.user.user.domain.LoginType;
+import org.kiru.core.user.user.domain.User;
+import org.kiru.core.user.user.entity.UserJpaEntity;
+import org.kiru.user.auth.jwt.JwtProvider;
+import org.kiru.user.auth.jwt.Token;
+import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
 import org.kiru.user.user.dto.event.UserCreateEvent;
 import org.kiru.user.user.dto.request.SignHelpDto;
 import org.kiru.user.user.dto.request.UserPurposesReq;
@@ -56,7 +57,8 @@ public class AuthService {
         }
         User newUser = newUserBuilder.build();
         UserJpaEntity user = userRepository.save(UserJpaEntity.of(newUser));
-        Token issuedToken = issueToken(user.getId(), user.getEmail());
+        Date now = new Date();
+        Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(),now);
         applicationEventPublisher.publishEvent(
                 UserCreateEvent.builder()
                         .userName(user.getUsername())
@@ -72,11 +74,12 @@ public class AuthService {
     // 로그인
     @Transactional
     public UserJwtInfoRes signIn(final UserSignInReq userSignInReq) {
+        Date now = new Date();
         return userRepository.findByEmail(userSignInReq.email())
-                .filter(user -> matchesPassword(userSignInReq.password(), user.getPassword()))
+                .filter(user -> checkPassword(userSignInReq.password(), user.getPassword()))
                 .map(user -> {
-                    deleteRefreshToken(user.getId());
-                    Token issuedToken = issueToken(user.getId(), user.getEmail());
+                    refreshTokenRepository.deleteByUserId(user.getId());
+                    Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(),now);
                     return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
                 })
                 .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_USER_CREDENTIALS));
@@ -84,29 +87,21 @@ public class AuthService {
 
     @Transactional
     public UserJwtInfoRes reissue(final Long userId) {
-        refreshTokenRepository.deleteByUserId(userId)
-                .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE));
+        Date now = new Date();
         UserJpaEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
-        Token newToken = issueToken(userId, user.getEmail());
+        refreshTokenRepository.deleteByUserId(userId)
+                .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE));
+        Token newToken = jwtProvider.issueToken(userId, user.getEmail(),now);
         return UserJwtInfoRes.of(userId, newToken.accessToken(), newToken.refreshToken());
     }
 
-    private Token issueToken(final Long userId, final String email) {
-        return jwtProvider.issueToken(userId, email);
-    }
-
-    // 리프레시 토큰 삭제
-    private void deleteRefreshToken(final Long userId) {
-        refreshTokenRepository.deleteRefreshTokenByUserId(userId);
-    }
-
-    public String encodePassword(String rawPassword) {
+    private String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }
 
     // 비밀번호 비교 로직
-    public boolean matchesPassword(String rawPassword, String encodedPassword) {
+    public boolean checkPassword(String rawPassword, String encodedPassword) {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new UnauthorizedException(FailureCode.PASSWORD_MISMATCH);
         }
@@ -157,5 +152,4 @@ public class AuthService {
         }
         return maskedLocalPart + "@" + maskedDomainPart;
     }
-
 }

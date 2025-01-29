@@ -4,5 +4,5 @@ import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.domain.UserLike;
 
 public interface SendLikeOrDislikeUseCase {
-    UserLike sendOrDislike(Long userId, Long likedUserID, LikeStatus status);
+    UserLike sendLikeOrDislike(Long userId, Long likedUserID, LikeStatus status);
 }

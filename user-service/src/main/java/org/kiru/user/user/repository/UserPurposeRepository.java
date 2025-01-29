@@ -38,6 +38,7 @@ public interface UserPurposeRepository extends JpaRepository<UserPurpose, Long> 
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
+    @Cacheable(value = "userPurpose", key = "#purposes" +'-'+"#pageable.pageNumber", unless = "#result == null")
     Slice<Long> findUserIdsByPurposeTypesOrderByCount(@Param("purposes") List<PurposeType> purposes, Pageable pageable);
 
     void deleteAllByUserId(Long userId);

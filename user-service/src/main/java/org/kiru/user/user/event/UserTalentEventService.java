@@ -1,4 +1,4 @@
-package org.kiru.user.user.service;
+package org.kiru.user.user.event;
 
 
 import java.util.List;
@@ -13,7 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
-public class UserTalentService {
+public class UserTalentEventService {
     private final UserTalentRepository userTalentRepository;
 
     @TransactionalEventListener

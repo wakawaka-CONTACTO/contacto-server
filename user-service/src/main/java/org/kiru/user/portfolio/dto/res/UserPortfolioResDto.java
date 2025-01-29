@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.kiru.user.portfolio.adapter.dto.UserPortfolioProjection;
 
 @Getter
 @Builder
@@ -30,6 +31,15 @@ public class UserPortfolioResDto {
                 .userId(userId)
                 .portfolioId(portfolioId)
                 .username(username)
+                .build();
+    }
+
+    public static UserPortfolioResDto of(UserPortfolioProjection userPortfolio) {
+        return UserPortfolioResDto.builder()
+                .portfolioImageUrl(Arrays.asList(userPortfolio.getPortfolioImageUrl().split(",")))
+                .userId(userPortfolio.getUserId())
+                .portfolioId(userPortfolio.getPortfolioId())
+                .username(userPortfolio.getUsername())
                 .build();
     }
 

@@ -39,7 +39,7 @@ public class UserLikeMongoAdapter implements SendLikeOrDislikeUseCase, GetUserLi
     private final UserRepository userRepository;
 
     @Transactional
-    public UserLike sendOrDislike(Long userId, Long likedUserId, LikeStatus status) {
+    public UserLike sendLikeOrDislike(Long userId, Long likedUserId, LikeStatus status) {
         // 1. Check if opposite like exists
         Query oppositeLikeQuery = new Query(
                 Criteria.where("userId").is(likedUserId).and("likedUserId").is(userId).and("likeStatus")
@@ -51,7 +51,7 @@ public class UserLikeMongoAdapter implements SendLikeOrDislikeUseCase, GetUserLi
         userLike.likeStatus(status);
         // 3. Check for mutual match
         if (oppositeLike != null && status == LIKE) {
-            userLike.isMatched(true);
+            userLike.setMatched(true);
             // Update opposite like
             Query updateQuery = new Query(Criteria.where("userId").is(likedUserId).and("likedUserId").is(userId));
             Update update = new Update().set("isMatched", true);

@@ -7,10 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.kiru.core.user.talent.entity.UserTalent;
-import org.kiru.core.user.user.entity.UserJpaEntity;
+import org.kiru.core.exception.ForbiddenException;
+import org.kiru.core.exception.code.FailureCode;
+import org.kiru.core.user.talent.domain.Talent.TalentType;
 import org.kiru.core.user.user.entity.UserR2dbcEntity;
-import org.kiru.core.user.userPortfolioImg.domain.UserPortfolio;
+import org.kiru.core.user.userPortfolioItem.domain.UserPortfolio;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 
 @Getter
@@ -20,6 +21,7 @@ import org.kiru.core.user.userPurpose.domain.PurposeType;
 public class User {
     @NotNull
     private Long id;
+
     @NotNull
     private String username;
 
@@ -29,8 +31,10 @@ public class User {
     @NotNull
     @Email
     private String email;
+
     @NotNull
     private String description;
+
     @NotNull
     private String instagramId;
 
@@ -42,30 +46,7 @@ public class User {
 
     private List<Integer> userPurposes;
 
-    private List<UserTalent> userTalents;
-
-    public void userPortfolio(UserPortfolio userPortfolio){
-        this.userPortfolio = userPortfolio;
-    }
-    public void userPurposes(List<PurposeType> userPurposes){
-        this.userPurposes = userPurposes.stream().map(PurposeType::getIndex).toList();
-    }
-    public void userTalents(List<UserTalent> userTalents){
-        this.userTalents = userTalents;
-    }
-
-    public static User of(UserJpaEntity user) {
-        return User.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .loginType(user.getLoginType())
-                .socialId(user.getSocialId())
-                .email(user.getEmail())
-                .description(user.getDescription())
-                .instagramId(user.getInstagramId())
-                .webUrl(user.getWebUrl())
-                .build();
-    }
+    private List<TalentType> userTalents;
 
     public static User of(UserR2dbcEntity user) {
         return User.builder()
@@ -78,5 +59,24 @@ public class User {
                 .instagramId(user.getInstagramId())
                 .webUrl(user.getWebUrl())
                 .build();
+    }
+
+    public void userPortfolio(UserPortfolio userPortfolio) {
+        this.userPortfolio = userPortfolio;
+    }
+
+    public void userPurposes(List<PurposeType> userPurposes) {
+        this.userPurposes = userPurposes.stream().map(PurposeType::getIndex).toList();
+    }
+
+    public void userTalents(List<TalentType> userTalents) {
+        this.userTalents = userTalents;
+    }
+
+    public void password(String password) {
+        if (password == null || password.isEmpty()) {
+            throw new ForbiddenException(FailureCode.INVALID_PASSWORD);
+        }
+        this.password = password;
     }
 }

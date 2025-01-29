@@ -1,101 +1,116 @@
 package org.kiru.user.userlike.service.out;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.domain.UserLike;
 import org.kiru.core.user.userlike.entity.UserLikeJpaEntity;
+import org.kiru.user.userlike.adapter.UserLikeJpaAdapter;
+import org.kiru.user.userlike.repository.UserLikeJpaRepository;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class SendLikeOrDislikeUseCaseTest {
 
+    @InjectMocks
+    private UserLikeJpaAdapter sendLikeOrDislikeUseCase;
+
     @Mock
-    private SendLikeOrDislikeUseCase sendLikeOrDislikeUseCase;
+    private UserLikeJpaRepository userLikeRepository;
 
-    private UserLikeJpaEntity testUserLike;
+    private UserLikeJpaEntity existingLikeFromOtherUser; // 상대방의 기록
+    private UserLikeJpaEntity userLikeJpaEntity; // 현재 유저의 기록
 
-    @BeforeEach
-    void setUp() {
-        testUserLike = UserLikeJpaEntity.builder()
-            .userId(1L)
-            .likedUserId(2L)
-            .likeStatus(LikeStatus.LIKE)
-            .isMatched(false)
-            .build();
+    @Test
+    @DisplayName("상대방이 나를 좋아한 상태에서 내가 좋아요를 누른 경우")
+    void whenOtherUserLikedMeAndILikeThem_ThenMatchIsCreated() {
+        // given
+        existingLikeFromOtherUser =  UserLikeJpaEntity.of(2L, 1L, LikeStatus.LIKE, false);
+        userLikeJpaEntity = UserLikeJpaEntity.of(1L, 2L, LikeStatus.DISLIKE, false);
+
+        when(userLikeRepository.findByUserIdAndLikedUserId(1L, 2L))
+                .thenReturn(Optional.of(userLikeJpaEntity));
+        when(userLikeRepository.findOppositeLike(2L, 1L, LikeStatus.LIKE))
+                .thenReturn(existingLikeFromOtherUser);
+        // when
+        UserLike result = sendLikeOrDislikeUseCase.sendLikeOrDislike(1L, 2L, LikeStatus.LIKE);
+        // then
+        AssertionsForClassTypes.assertThat(result.isMatched()).isTrue();
+        AssertionsForClassTypes.assertThat(result.getLikeStatus()).isEqualTo(LikeStatus.LIKE);
+        verify(userLikeRepository, times(1)).save(result);
+        verify(userLikeRepository, times(1)).save((UserLike) existingLikeFromOtherUser);
     }
 
     @Test
-    @DisplayName("좋아요 보내기 - 성공")
-    void sendOrDislike_Like_Success() {
-        // Given
-        when(sendLikeOrDislikeUseCase.sendOrDislike(1L, 2L, LikeStatus.LIKE))
-            .thenReturn(testUserLike);
+    @DisplayName("상대방이 나를 좋아하지 않은 상태에서 내가 좋아요를 누른 경우")
+    void whenOtherUserDidNotLikeMeAndILikeThem_ThenNoMatch() {
+        // given
+        userLikeJpaEntity = UserLikeJpaEntity.of(1L, 2L, LikeStatus.DISLIKE, false);
 
-        // When
-        UserLike result = sendLikeOrDislikeUseCase.sendOrDislike(1L, 2L, LikeStatus.LIKE);
+        when(userLikeRepository.findByUserIdAndLikedUserId(1L, 2L))
+                .thenReturn(Optional.of(userLikeJpaEntity));
+        when(userLikeRepository.findOppositeLike(2L, 1L, LikeStatus.LIKE))
+                .thenReturn(null);
 
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getUserId()).isEqualTo(1L);
-        assertThat(result.getLikedUserId()).isEqualTo(2L);
-        assertThat(result.getLikeStatus()).isEqualTo(LikeStatus.LIKE);
-        assertThat(result.isMatched()).isFalse();
+        // when
+        UserLike result = sendLikeOrDislikeUseCase.sendLikeOrDislike(1L, 2L, LikeStatus.LIKE);
+
+        // then
+        AssertionsForClassTypes.assertThat(result.isMatched()).isFalse();
+        AssertionsForClassTypes.assertThat(result.getLikeStatus()).isEqualTo(LikeStatus.LIKE);
+        verify(userLikeRepository, times(1)).save(result);
     }
 
     @Test
-    @DisplayName("싫어요 보내기 - 성공")
-    void sendOrDislike_Dislike_Success() {
-        // Given
-        UserLikeJpaEntity dislikeUserLike = UserLikeJpaEntity.builder()
-            .userId(1L)
-            .likedUserId(2L)
-            .likeStatus(LikeStatus.DISLIKE)
-            .isMatched(false)
-            .build();
+    @DisplayName("상대방이 나를 좋아한 상태에서 내가 싫어요를 누른 경우")
+    void whenOtherUserLikedMeAndIDislikeThem_ThenNoMatch() {
+        // given
+        existingLikeFromOtherUser = UserLikeJpaEntity.of(2L, 1L, LikeStatus.LIKE, false);
+        userLikeJpaEntity = UserLikeJpaEntity.of(1L, 2L, LikeStatus.DISLIKE, false);
 
-        when(sendLikeOrDislikeUseCase.sendOrDislike(1L, 2L, LikeStatus.DISLIKE))
-            .thenReturn(dislikeUserLike);
+        when(userLikeRepository.findByUserIdAndLikedUserId(1L, 2L))
+                .thenReturn(Optional.of(userLikeJpaEntity));
+        when(userLikeRepository.findOppositeLike(2L, 1L, LikeStatus.LIKE))
+                .thenReturn(existingLikeFromOtherUser);
 
-        // When
-        UserLike result = sendLikeOrDislikeUseCase.sendOrDislike(1L, 2L, LikeStatus.DISLIKE);
+        // when
+        UserLike result = sendLikeOrDislikeUseCase.sendLikeOrDislike(1L, 2L, LikeStatus.DISLIKE);
 
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getUserId()).isEqualTo(1L);
-        assertThat(result.getLikedUserId()).isEqualTo(2L);
-        assertThat(result.getLikeStatus()).isEqualTo(LikeStatus.DISLIKE);
-        assertThat(result.isMatched()).isFalse();
+        // then
+        AssertionsForClassTypes.assertThat(result.isMatched()).isFalse();
+        AssertionsForClassTypes.assertThat(result.getLikeStatus()).isEqualTo(LikeStatus.DISLIKE);
+        verify(userLikeRepository, times(1)).save(result);
+        verify(userLikeRepository, never()).save((UserLike) existingLikeFromOtherUser);
     }
 
     @Test
-    @DisplayName("매칭된 좋아요 - 성공")
-    void sendOrDislike_Matched_Success() {
-        // Given
-        UserLike matchedUserLike = UserLikeJpaEntity.builder()
-            .userId(1L)
-            .likedUserId(2L)
-            .likeStatus(LikeStatus.LIKE)
-            .isMatched(true)
-            .build();
+    @DisplayName("서로 좋아하지 않은 경우")
+    void whenNeitherUserLikesEachOther_ThenNoMatch() {
+        // given
+        userLikeJpaEntity = UserLikeJpaEntity.of(1L, 2L, LikeStatus.DISLIKE, false);
+        existingLikeFromOtherUser = UserLikeJpaEntity.of(2L, 1L, LikeStatus.DISLIKE, false);
+        when(userLikeRepository.findByUserIdAndLikedUserId(1L, 2L))
+                .thenReturn(Optional.of(userLikeJpaEntity));
+        when(userLikeRepository.findOppositeLike(2L, 1L, LikeStatus.LIKE))
+                .thenReturn(existingLikeFromOtherUser);
 
-        when(sendLikeOrDislikeUseCase.sendOrDislike(1L, 2L, LikeStatus.LIKE))
-            .thenReturn(matchedUserLike);
+        // when
+        UserLike result = sendLikeOrDislikeUseCase.sendLikeOrDislike(1L, 2L, LikeStatus.DISLIKE);
 
-        // When
-        UserLike result = sendLikeOrDislikeUseCase.sendOrDislike(1L, 2L, LikeStatus.LIKE);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getUserId()).isEqualTo(1L);
-        assertThat(result.getLikedUserId()).isEqualTo(2L);
-        assertThat(result.getLikeStatus()).isEqualTo(LikeStatus.LIKE);
-        assertThat(result.isMatched()).isTrue();
+        // then
+        AssertionsForClassTypes.assertThat(result.isMatched()).isFalse();
+        AssertionsForClassTypes.assertThat(result.getLikeStatus()).isEqualTo(LikeStatus.DISLIKE);
+        verify(userLikeRepository, times(1)).save(result);
     }
 }
