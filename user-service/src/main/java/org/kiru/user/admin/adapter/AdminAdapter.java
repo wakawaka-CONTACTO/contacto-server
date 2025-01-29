@@ -5,6 +5,7 @@ import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
 import org.kiru.user.admin.service.out.AdminUserQuery;
 import org.kiru.user.admin.service.out.UserLikeAdminUseCase;
+import org.kiru.user.user.dto.UserIdUsername;
 import org.kiru.user.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
@@ -54,5 +55,10 @@ public class AdminAdapter implements AdminUserQuery {
     @Override
     public List<AdminLikeUserDto> findUserLikedByName(Pageable pageable, Long userId, String name) {
         return findUserLikesInternal(pageable, userId, name, true);
+    }
+
+    @Override
+    public List<UserIdUsername> findUsernamesByIds(List<Long> userIds) {
+        return userRepository.findUsernamesByIds(userIds);
     }
 }

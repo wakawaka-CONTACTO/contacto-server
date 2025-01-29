@@ -2,9 +2,13 @@ package org.kiru.user.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import org.kiru.core.user.user.domain.LoginType;
 
+@Builder
+@NotEmpty(message = "userSignUpReq가 필요합니다")
 public record UserSignUpReq(
         @NotBlank(message = "이메일은 필수입니다")
         @Email(message = "올바른 이메일 형식이 아닙니다")

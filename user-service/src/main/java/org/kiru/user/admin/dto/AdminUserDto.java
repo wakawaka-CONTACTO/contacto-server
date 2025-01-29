@@ -10,7 +10,6 @@ public record AdminUserDto(
             String portfolioImageUrl
     ) {
     }
-
     public static AdminUserDto of(UserDto userDto, Boolean isConnected) {
         return new AdminUserDto(userDto, isConnected);
     }

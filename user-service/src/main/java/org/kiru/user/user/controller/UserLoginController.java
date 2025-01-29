@@ -1,5 +1,6 @@
 package org.kiru.user.user.controller;
 
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -16,7 +17,6 @@ import org.kiru.user.user.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-@Validated
 public class UserLoginController {
     private final AuthService authService;
 
@@ -35,9 +34,9 @@ public class UserLoginController {
             MediaType.APPLICATION_JSON_VALUE}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserJwtInfoRes> signUp(
             @RequestPart("userSignUpReq") @Valid final UserSignUpReq userSignUpReq,
-            @Valid @Size(max = 10) @RequestPart("portfolioImgs") final List<MultipartFile> images,
-            @Valid @NotEmpty @RequestPart("purpose") final List<UserPurposesReq> purposes,
-            @Valid @NotEmpty @RequestPart("talent") final List<UserTalentsReq> talents
+            @RequestPart("portfolioImgs") @Valid @Size(max = 9) final List<MultipartFile> images,
+            @RequestPart("purpose")  @Valid @NotEmpty final List<UserPurposesReq> purposes,
+            @RequestPart("talent") @Valid @NotEmpty  final List<UserTalentsReq> talents
     ) {
         UserJwtInfoRes userSignUpRes = authService.signUp(userSignUpReq, images, purposes, talents);
         return ResponseEntity.status(HttpStatus.CREATED).body(userSignUpRes);

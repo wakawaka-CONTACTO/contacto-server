@@ -3,6 +3,7 @@ package org.kiru.user.admin.service.out;
 import java.util.List;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
+import org.kiru.user.user.dto.UserIdUsername;
 import org.springframework.data.domain.Pageable;
 
 public interface AdminUserQuery {
@@ -17,4 +18,6 @@ public interface AdminUserQuery {
     List<AdminLikeUserDto> findUserLikesByName(Pageable pageable, Long userId, String name);
 
     List<AdminLikeUserDto> findUserLikedByName(Pageable pageable, Long userId, String name);
+
+    List<UserIdUsername> findUsernamesByIds(List<Long> userIds) ;
 }
