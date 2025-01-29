@@ -44,6 +44,10 @@ dependencies {
     implementation 'io.github.openfeign:feign-micrometer'
     // ResilienceJ 의존성 추가
 
+    testImplementation 'io.github.autoparams:autoparams-mockito:9.0.0'
+    testImplementation 'io.github.autoparams:autoparams:9.0.0'
+
+
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
     compileOnly 'org.projectlombok:lombok'
