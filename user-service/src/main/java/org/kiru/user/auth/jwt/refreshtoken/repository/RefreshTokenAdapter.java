@@ -7,8 +7,10 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.refreshtoken.QRefreshToken;
 import org.kiru.core.user.refreshtoken.RefreshToken;
+import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
+@Repository
 public class RefreshTokenAdapter implements RefreshTokenRepositoryCustom{
     private final JPAQueryFactory queryFactory;
     private final EntityManager entityManager;

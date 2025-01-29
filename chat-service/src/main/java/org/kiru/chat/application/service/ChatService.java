@@ -62,8 +62,6 @@ public class ChatService implements CreateRoomUseCase, GetChatRoomUseCase , AddP
         return chatRoom;
     }
 
-
-
     @Override
     public boolean addParticipant(Long roomId, Long userId) {
         ChatRoom chatRoom = getChatRoomQuery.findById(roomId, false)

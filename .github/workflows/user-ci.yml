@@ -1,4 +1,4 @@
-name: User Service CICD
+name: User Service CI
 
 on:
   pull_request:

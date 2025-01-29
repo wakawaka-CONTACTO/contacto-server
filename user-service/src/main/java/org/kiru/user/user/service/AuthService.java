@@ -90,8 +90,7 @@ public class AuthService {
         Date now = new Date();
         UserJpaEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
-        refreshTokenRepository.deleteByUserId(userId)
-                .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE));
+        refreshTokenRepository.deleteRefreshTokenByUserId(userId);
         Token newToken = jwtProvider.issueToken(userId, user.getEmail(),now);
         return UserJwtInfoRes.of(userId, newToken.accessToken(), newToken.refreshToken());
     }
