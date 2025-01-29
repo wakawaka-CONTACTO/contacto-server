@@ -5,36 +5,44 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.kiru.core.exception.ContactoException;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.UnauthorizedException;
 import org.kiru.core.user.refreshtoken.RefreshToken;
+import org.kiru.core.user.talent.domain.Talent.TalentType;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.entity.UserJpaEntity;
+import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.user.auth.jwt.JwtProvider;
 import org.kiru.user.auth.jwt.Token;
 import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
+import org.kiru.user.user.dto.event.UserCreateEvent;
 import org.kiru.user.user.dto.request.SignHelpDto;
+import org.kiru.user.user.dto.request.UserPurposesReq;
 import org.kiru.user.user.dto.request.UserSignInReq;
 import org.kiru.user.user.dto.request.UserSignUpReq;
+import org.kiru.user.user.dto.request.UserTalentsReq;
 import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.service.AuthService;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -52,26 +60,29 @@ class AuthServiceTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    private PasswordEncoder passwordEncoder;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private UserSignUpReq testSignUpReq;
     private UserJpaEntity testUser;
+    private List<UserTalentsReq> talentTypeRequest;
+    private List<UserPurposesReq> purposeTypeRequest;
     private Token testToken;
+    private List<MultipartFile> images;
 
     @BeforeEach
     void setUp() {
         testSignUpReq = new UserSignUpReq(
             "test@example.com",
             "password123",
+            "password123",
             "Test User",
             "Test Description",
             "testuser",
             "http://example.com",
-            "kiru.day",
-                LoginType.LOCAL
+            LoginType.LOCAL
         );
 
         testUser = UserJpaEntity.builder()
@@ -83,6 +94,15 @@ class AuthServiceTest {
             .build();
 
         testToken = new Token("testAccessToken", "testRefreshToken");
+
+        talentTypeRequest = List.of(new UserTalentsReq(TalentType.ARCHITECTURE), new UserTalentsReq(TalentType.ADVERTISING));
+        purposeTypeRequest = List.of(new UserPurposesReq(PurposeType.ART_RESIDENCY), new UserPurposesReq(PurposeType.GROUP_EXHIBITION));
+        images = List.of(
+                new MockMultipartFile("image1", "image1.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("image2", "image2.jpg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("image3", "image3.jpg", "image/jpeg", new byte[0])
+        )
+        ;
     }
 
     @Test
@@ -91,15 +111,25 @@ class AuthServiceTest {
         // Given
         when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(userRepository.save(any())).thenReturn(testUser);
-        when(jwtProvider.issueToken(anyLong(), anyString())).thenReturn(testToken);
-
+        when(jwtProvider.issueToken(anyLong(), anyString(),any())).thenReturn(testToken);
         // When
-        UserJwtInfoRes result = authService.signUp(testSignUpReq, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        UserJwtInfoRes result = authService.signUp(testSignUpReq, images, purposeTypeRequest, talentTypeRequest);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.accessToken()).isNotNull();
         verify(userRepository).save(any());
+        // publishEvent 호출 검증
+        ArgumentCaptor<UserCreateEvent> eventCaptor = ArgumentCaptor.forClass(UserCreateEvent.class);
+        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture());
+
+        UserCreateEvent capturedEvent = eventCaptor.getValue();
+        assertThat(capturedEvent).isNotNull();
+        assertThat(capturedEvent.userId()).isEqualTo(testUser.getId());
+        assertThat(capturedEvent.userName()).isEqualTo(testUser.getUsername());
+        assertThat(capturedEvent.images()).isEqualTo(images);
+        assertThat(capturedEvent.purposes()).isEqualTo(purposeTypeRequest);
+        assertThat(capturedEvent.talents()).isEqualTo(talentTypeRequest);
     }
 
     @Test
@@ -109,7 +139,7 @@ class AuthServiceTest {
         UserSignInReq signInReq = new UserSignInReq("test@example.com", "password123");
         when(userRepository.findByEmail(signInReq.email())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(any(), any())).thenReturn(true);
-        when(jwtProvider.issueToken(anyLong(), anyString())).thenReturn(testToken);
+        when(jwtProvider.issueToken(anyLong(), anyString(),any())).thenReturn(testToken);
 
         // When
         UserJwtInfoRes result = authService.signIn(signInReq);
@@ -138,7 +168,7 @@ class AuthServiceTest {
         // Given
         when(refreshTokenRepository.deleteByUserId(1L)).thenReturn(Optional.of(new RefreshToken()));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(jwtProvider.issueToken(anyLong(), anyString())).thenReturn(testToken);
+        when(jwtProvider.issueToken(anyLong(), anyString(),any())).thenReturn(testToken);
 
         // When
         UserJwtInfoRes result = authService.reissue(1L);
