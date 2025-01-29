@@ -23,12 +23,12 @@ public record MessageDto(
 
     public Map<String, String> toMap() {
         Map<String, String> fieldMap = new HashMap<>();
+        fieldMap.put("content", message.getContent() != null ? message.getContent() : "");
+        fieldMap.put("senderId", String.valueOf(message.getSenderId()));
+        fieldMap.put("receiverId", String.valueOf(message.getSendedId()));
+        fieldMap.put("chatRoomId", String.valueOf(message.getChatRoomId()));
+        fieldMap.put("createdAt", message.getCreatedAt() != null ? message.getCreatedAt().toString() : "");
         fieldMap.put("userId", userId);
-        fieldMap.put("content", message.getContent());
-        fieldMap.put("senderId", message.getSenderId().toString());
-        fieldMap.put("receiverId", message.getSendedId().toString());
-        fieldMap.put("chatRoomId", message.getChatRoomId().toString());
-        fieldMap.put("createdAt", message.getCreatedAt().toString());
         return fieldMap;
     }
 }

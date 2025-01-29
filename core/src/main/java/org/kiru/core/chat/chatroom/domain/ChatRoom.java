@@ -91,6 +91,7 @@ public class ChatRoom {
 
     @JsonIgnore
     public void setThumbnailAndRoomTitle(UserPortfolioItem userPortfolioItem) {
+        Objects.requireNonNull(userPortfolioItem, "userPortfolioItem이 필요합니다.");
         this.chatRoomThumbnail = userPortfolioItem.getItemUrl();
         this.title = userPortfolioItem.getUserName();
     }

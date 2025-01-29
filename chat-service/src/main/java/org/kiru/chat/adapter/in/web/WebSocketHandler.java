@@ -36,11 +36,11 @@ public class WebSocketHandler {
         message.chatRoom(roomId);
         // 1. 상대방이 접속 중인지 확인
         boolean isUserConnected = webSocketUserService.isUserConnected(receiverId.toString());
-        // 2. 상대방이 접속중이 아니면 읽지 않음 상태로 메시지 저장
-        if(!isUserConnected) {
+        // 2. 상대방이 접속중이면 읽음 처리 후 메시지 전송
+        if(isUserConnected) {
             message.toRead();
-            return saveMessageUseCase.saveMessage(roomId, message);
+            return  sendMessageUseCase.sendMessage(roomId, message);
         }
-        return  sendMessageUseCase.sendMessage(roomId, message);
+        return saveMessageUseCase.saveMessage(roomId, message);
     }
 }

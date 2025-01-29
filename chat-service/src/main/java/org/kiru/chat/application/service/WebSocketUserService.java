@@ -11,10 +11,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.chat.message.domain.TranslateLanguage;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WebSocketUserService {
@@ -47,8 +49,12 @@ public class WebSocketUserService {
     public List<Long> getConnectedUserIds() {
         List<Long> list = new ArrayList<>();
         for (String s : Optional.of(redisTemplateForOne.keys("*")).orElse(Set.of())) {
-            Long parseLong = Long.parseLong(s);
-            list.add(parseLong);
+            try{
+                Long parseLong = Long.parseLong(s);
+                list.add(parseLong);
+            }catch (NumberFormatException e){
+                log.error("Failed to parse user id from redis key: {}", s);
+            }
         }
         return list;
     }

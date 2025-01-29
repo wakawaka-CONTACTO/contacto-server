@@ -27,7 +27,10 @@ public class RedisSingleConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactoryForOne() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
+        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(redisConfig);
+        factory.afterPropertiesSet();
+        return factory;
     }
 
     @Bean

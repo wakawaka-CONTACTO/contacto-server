@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,16 +51,15 @@ public class MessageJpaEntity extends BaseTimeEntity {
 
     public static MessageJpaEntity withId(Message message) {
         return MessageJpaEntity.builder()
-                .id(Optional.of(message.getId()).orElse(null))
+                .id(message.getId())
                 .chatRoomId(message.getChatRoomId())
                 .content(message.getContent())
                 .senderId(message.getSenderId())
-                .content(message.getContent())
                 .readStatus(message.getReadStatus()) // 읽음 상태 추가
                 .build();
     }
 
-    public static Message fromEntity(MessageJpaEntity messageJpaEntity) {
+    public static Message toModel(MessageJpaEntity messageJpaEntity) {
         return Message.builder()
                 .id(messageJpaEntity.getId())
                 .chatRoomId(messageJpaEntity.getChatRoomId())

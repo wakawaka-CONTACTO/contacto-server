@@ -55,20 +55,20 @@ public class Message {
                 .senderId(map.get("senderId") == null ? null : Long.parseLong(map.get("senderId")))
                 .createdAt(map.get("createdAt") == null ? null : LocalDateTime.parse(map.get("createdAt")))
                 .chatRoomId(map.get("chatRoomId") == null ? null : Long.parseLong(map.get("chatRoomId")))
-                .readStatus(true) // 읽음 상태 추가
+                .readStatus(map.get("readStatus") != null) // 읽음 상태 추가
                 .sendedId(map.get("receiverId") == null ? null : Long.parseLong(map.get("receiverId")))
                 .build();
     }
 
     public Map<String,String> toMap(String receiverId) {
         Map<String,String> map = new HashMap<>();
-        map.put("id", id.toString());
+        map.put("id", id != null ? id.toString() : null);
         map.put("content", content);
-        map.put("senderId", senderId.toString());
+        map.put("senderId", senderId != null ? senderId.toString() : null);
         map.put("receiverId", receiverId);
-        map.put("chatRoomId", chatRoomId.toString());
-        map.put("createdAt", createdAt.toString());
-        map.put("readStatus", readStatus.toString());
+        map.put("chatRoomId", chatRoomId != null ? chatRoomId.toString() : null);
+        map.put("createdAt", createdAt != null ? createdAt.toString() : null);
+        map.put("readStatus", readStatus != null ? readStatus.toString() : "false");
         return map;
     }
 

@@ -18,6 +18,7 @@ public record MessageCreateEvent(
     }
 
     public static MessageCreateEvent of(String userId, Message message) {
+        requireNonNull(message, "message가 필요합니다.");
         return MessageCreateEvent.builder()
                 .messageId(message.getId())
                 .userId(userId)
@@ -27,6 +28,7 @@ public record MessageCreateEvent(
 
 
     public static MessageCreateEvent of(Message message) {
+        requireNonNull(message, "message가 필요합니다.");
         return MessageCreateEvent.builder()
                 .messageId(message.getId())
                 .userId(message.getSendedId().toString())
