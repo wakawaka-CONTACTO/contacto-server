@@ -16,10 +16,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @ControllerAdvice
@@ -33,6 +35,20 @@ public class GlobalExceptionHandler {
         final BindingResult bindingResult = e.getBindingResult();
         log.error(">>> handle: MethodArgumentNotValidException ", e);
         final List<FailureResponse.FieldError> errors = FailureResponse.FieldError.of(bindingResult);
+        FailureResponse response = new FailureResponse(FailureCode.INVALID_TYPE_VALUE, errors);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .header("X-Trace-Id", getCurrentTraceId())
+                .header("X-Span-Id", getCurrentSpanId(e))
+                .body(response);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    @ContinueSpan(log="Error")
+    public ResponseEntity<FailureResponse> handleMethodValidationExceptions(HandlerMethodValidationException e) {
+        final List<ParameterValidationResult> bindingResult = e.getAllValidationResults();
+        log.error(">>> handle: HandlerMethodValidationException ", e);
+        final List<FailureResponse.FieldError> errors = FailureResponse.FieldError.to(bindingResult);
         FailureResponse response = new FailureResponse(FailureCode.INVALID_TYPE_VALUE, errors);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)

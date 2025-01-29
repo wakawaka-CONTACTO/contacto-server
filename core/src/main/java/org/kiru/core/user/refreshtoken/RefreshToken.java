@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(name = "refresh_token")
-public class RefreshToken {
+public class RefreshToken  {
     @Id
     @Column(name = "refresh_token_id")
     private String token;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", unique = true)
     private Long userId;
 
     @Column(name = "expired_at")

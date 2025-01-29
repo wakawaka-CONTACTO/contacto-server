@@ -36,31 +36,23 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Config> {
                 if (token != null) {
                     return jwtUtils.validateToken(token)
                             .flatMap(jwtValidResponse -> {
-                                try {
-                                    if (jwtValidResponse.getStatus() == JwtValidationType.VALID_JWT) {
-                                        HttpHeaders writableHeaders = HttpHeaders.writableHttpHeaders(
-                                                request.getHeaders());
-                                        writableHeaders.add("X-User-Id",
-                                                String.valueOf(jwtValidResponse.getUserId()));
-                                        ServerHttpRequest modifiedRequest = new ServerHttpRequestDecorator(request) {
-                                            @Override
-                                            public HttpHeaders getHeaders() {
-                                                return writableHeaders;
-                                            }
-                                        };
-                                        return chain.filter(exchange.mutate()
-                                                .request(modifiedRequest)
-                                                .build());
-                                    }
-                                } catch (Exception e) {
-                                    log.error("Error processing JWT token", e);
+                                if (jwtValidResponse.getStatus() == JwtValidationType.VALID_JWT) {
+                                    HttpHeaders writableHeaders = HttpHeaders.writableHttpHeaders(
+                                            request.getHeaders());
+                                    writableHeaders.add("X-User-Id",
+                                            String.valueOf(jwtValidResponse.getUserId()));
+                                    ServerHttpRequest modifiedRequest = new ServerHttpRequestDecorator(request) {
+                                        @Override
+                                        public HttpHeaders getHeaders() {
+                                            return writableHeaders;
+                                        }
+                                    };
+                                    return chain.filter(exchange.mutate()
+                                            .request(modifiedRequest)
+                                            .build());
                                 }
-                                return Mono.error(new RuntimeException("Invalid JWT token: " + token + " : " + jwtValidResponse.getStatus()));
-                            })
-                            .onErrorResume(e -> {
-                                log.error("Error processing JWT token", e);
-                                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                                return exchange.getResponse().setComplete();
+                                return Mono.error(new RuntimeException(
+                                        "Invalid JWT token: " + token + " : " + jwtValidResponse.getStatus()));
                             });
                 }
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
