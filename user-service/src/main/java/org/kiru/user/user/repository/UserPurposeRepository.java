@@ -4,7 +4,6 @@ import jakarta.persistence.QueryHint;
 import java.util.List;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional(readOnly = true)
 public interface UserPurposeRepository extends JpaRepository<UserPurpose, Long> {
-    @Cacheable(value = "userPurpose", key = "#userId")
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
@@ -38,7 +36,6 @@ public interface UserPurposeRepository extends JpaRepository<UserPurpose, Long> 
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
-    @Cacheable(value = "userPurpose", key = "#purposes" +'-'+"#pageable.pageNumber", unless = "#result == null")
     Slice<Long> findUserIdsByPurposeTypesOrderByCount(@Param("purposes") List<PurposeType> purposes, Pageable pageable);
 
     void deleteAllByUserId(Long userId);

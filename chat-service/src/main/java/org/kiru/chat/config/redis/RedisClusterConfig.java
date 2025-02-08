@@ -27,7 +27,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @Slf4j
-@Profile("docker")
+@Profile("test")
 public class RedisClusterConfig {
 
     @Value("${redis.ip}")

@@ -23,11 +23,12 @@ public class WebSocketEventListener {
     private final WebSocketUserService webSocketUserService;
     private final ApplicationEventPublisher eventPublisher;
     private static final String TRANSLATION_QUEUE_PREFIX = "/queue/translate";
-
+    private static final String CONNECT_ID = "userId";
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String userId = (String) headerAccessor.getSessionAttributes().get("userId");
+        String userId = (String) requireNonNull(headerAccessor.getSessionAttributes()).get(CONNECT_ID);
+        //1. 사용자 Local 연결 상태 업데이트
         webSocketUserService.updateUserConnectionStatus(userId, true);
         log.info("User connected >>>: {}", userId);
     }
@@ -35,7 +36,7 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String userId = (String) headerAccessor.getSessionAttributes().get("userId");
+        String userId = (String) requireNonNull(headerAccessor.getSessionAttributes()).get(CONNECT_ID);
         webSocketUserService.updateUserConnectionStatus(userId, false);
         log.info("User disconnected >>> : {}", userId);
     }
@@ -48,7 +49,7 @@ public class WebSocketEventListener {
         if (destination != null && destination.contains(TRANSLATION_QUEUE_PREFIX)) {
             String targetLanguage = requireNonNull(headerAccessor.getFirstNativeHeader("targetLanguage"),
                     "Target language must be provided");
-            String userId = requireNonNull((String) headerAccessor.getSessionAttributes().get("userId"),
+            String userId = requireNonNull((String) headerAccessor.getSessionAttributes().get(CONNECT_ID),
                     "User ID must be provided");
             String messageIds = requireNonNull(headerAccessor.getFirstNativeHeader("messageIds")
                     , "Message IDs must be provided");

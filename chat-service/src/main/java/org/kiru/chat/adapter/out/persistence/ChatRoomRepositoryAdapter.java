@@ -131,10 +131,10 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         if (results.isEmpty()) {
             throw new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND);
         }
-        return getChatRoomByUserIdAndisUserAdmin(userId, isUserAdmin, results, ChatRoomJpaEntity.toModel(results.getFirst().chatRoom()));
+        return getChatRoomByUserIdAndIsUserAdmin(userId, isUserAdmin, results, ChatRoomJpaEntity.toModel(results.getFirst().chatRoom()));
     }
 
-    private ChatRoom getChatRoomByUserIdAndisUserAdmin(Long userId, boolean isUserAdmin,
+    private ChatRoom getChatRoomByUserIdAndIsUserAdmin(Long userId, boolean isUserAdmin,
                                                        List<ChatRoomWithDetails> results, ChatRoom chatRoom) {
         List<Long> participants = results.stream()
                 .map(ChatRoomWithDetails::userId)
@@ -147,6 +147,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
         if(participants.contains(userId)){
             List<MessageJpaEntity> resultsMessages = results.stream()
                     .map(ChatRoomWithDetails::message)
+                    .filter(Objects::nonNull)
                     .map(messageJpaEntity -> {
                                 if (!userId.equals(messageJpaEntity.getSenderId())) {
                                     messageJpaEntity.setReadStatus(true);
