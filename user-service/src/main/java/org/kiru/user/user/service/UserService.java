@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.exception.ContactoException;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.code.FailureCode;
 import org.kiru.core.user.talent.domain.Talent.TalentType;
