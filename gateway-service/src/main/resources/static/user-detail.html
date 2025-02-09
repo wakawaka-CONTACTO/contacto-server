@@ -1610,7 +1610,7 @@
     }
 
     let currentImageIndex = 0;
-    let portfolioImages = [];
+    let portfolioItems = [];
     let currentChatRoom = null;
 
     // Global variables for pagination and search
@@ -1699,13 +1699,13 @@
             const talents = user.userTalents.map(talent => talent.talentType).join(', ');
 
             // 포트폴리오 이미지 배열 저장
-            portfolioImages = user.userPortfolio?.portfolioImages || [];
+            portfolioItems = user.userPortfolio?.portfolioItems || [];
 
             // 포트폴리오 이미지 처리
             const portfolioList = document.getElementById('portfolioList');
-            if (portfolioImages.length > 0) {
+            if (portfolioItems.length > 0) {
                 portfolioList.innerHTML = `
-                        ${portfolioImages.map((image, index) => `
+                        ${portfolioItems.map((image, index) => `
                             <div class="portfolio-item" onclick="showImage(${index})">
                                 <img src="${image}" alt="포트폴리오 이미지">
                             </div>
@@ -1780,7 +1780,7 @@
                     <div class="profile-section">
                         <div class="profile-header">
                             <div class="profile-left">
-                                <img src="${user.userPortfolio?.portfolioImages[0] || 'default-profile.png'}" alt="Profile" class="profile-image">
+                                <img src="${user.userPortfolio?.portfolioItems[0] || 'default-profile.png'}" alt="Profile" class="profile-image">
                                 <div class="profile-name">${user.username || 'No Name'}</div>
                                 <div class="profile-email">${user.email || 'None'}</div>
                             </div>
@@ -1833,7 +1833,6 @@
                 }
             });
             const matches = await response.json();
-
             displayMatches(matches);
         } catch (error) {
             console.error('Error loading matching:', error);
@@ -2361,19 +2360,19 @@
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
         modal.style.display = "block";
-        modalImg.src = portfolioImages[currentImageIndex];
+        modalImg.src = portfolioItems[currentImageIndex];
 
         // 이전/다음 버튼 표시 여부 설정
         document.querySelector('.modal-prev').style.display = currentImageIndex > 0 ? 'flex' : 'none';
-        document.querySelector('.modal-next').style.display = currentImageIndex < portfolioImages.length - 1 ? 'flex' : 'none';
+        document.querySelector('.modal-next').style.display = currentImageIndex < portfolioItems.length - 1 ? 'flex' : 'none';
     }
 
     function changeImage(direction) {
         currentImageIndex += direction;
-        if (currentImageIndex >= portfolioImages.length) {
+        if (currentImageIndex >= portfolioItems.length) {
             currentImageIndex = 0;
         } else if (currentImageIndex < 0) {
-            currentImageIndex = portfolioImages.length - 1;
+            currentImageIndex = portfolioItems.length - 1;
         }
         showImage(currentImageIndex);
     }
