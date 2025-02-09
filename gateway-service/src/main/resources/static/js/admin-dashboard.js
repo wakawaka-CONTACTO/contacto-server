@@ -16,7 +16,7 @@ window.onload = () => {
 // 유저 목록 로드
 async function loadUsers(page) {
     try {
-        console.log('Loading users with token:', token); // API 요청 전 토큰 확인
+        document.getElementById('loadingSpinner').style.display = 'flex';
         const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/users/admin/users?page=${page}&size=${pageSize}`, {
             headers: {
                 'Authorization': token
@@ -35,13 +35,15 @@ async function loadUsers(page) {
         const data = await response.json();
         console.log('Users loaded:', data); // 응답 데이터 확인
         if (Array.isArray(data)) {
-            displayUsers(data); // 배열을 displayUsers에 전달
+            displayUsers(data);
         } else {
             console.error('Expected an array but got:', data);
         }
         updatePagination(data.totalPages);
     } catch (error) {
         console.error('Error loading users:', error);
+    } finally {
+        document.getElementById('loadingSpinner').style.display = 'none';
     }
 }
 

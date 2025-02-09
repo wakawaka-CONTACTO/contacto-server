@@ -4,41 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>관리자 대시보드</title>
-    <link href="css/admin-dashboard.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
 </head>
 <body>
-    <div class="dashboard">
-        <div class="header">
-            <h1>관리자 대시보드</h1>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="유저 이름 검색...">
-                <button onclick="searchUser()">검색</button>
-            </div>
+<div class="dashboard">
+    <header class="header">
+        <h1>관리자 대시보드</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="유저 이름을 입력하세요...">
+            <button id="searchButton">
+                <i class="fas fa-search"></i> 검색
+            </button>
         </div>
-        
-        <div class="users-table">
-            <table>
+    </header>
+
+    <main class="main-content">
+        <div class="users-table-container">
+            <table class="users-table">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>이름</th>
-                        <th>프로필 이미지</th>
-                        <th>연결 상태</th>
-                        <th>액션</th>
-                    </tr>
+                <tr>
+                    <th>ID</th>
+                    <th>이름</th>
+                    <th>프로필 이미지</th>
+                    <th>연결 상태</th>
+                    <th>액션</th>
+                </tr>
                 </thead>
                 <tbody id="usersTableBody">
-                    <!-- 여기에 유저 데이터가 동적으로 추가됩니다 -->
+                <!-- 유저 데이터가 여기에 동적으로 추가됩니다 -->
                 </tbody>
             </table>
         </div>
-        
+    </main>
+
+    <footer class="footer">
         <div class="pagination" id="pagination">
             <!-- 페이지네이션 버튼이 동적으로 추가됩니다 -->
         </div>
-    </div>
+    </footer>
+</div>
 
-    <script src="js/config.js"></script>
-    <script src="js/admin-dashboard.js"></script>
+<div id="loadingSpinner" class="loading-spinner" style="display: none;">
+    <i class="fas fa-spinner fa-spin"></i> 로딩 중...
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/admin-dashboard.js"></script>
 </body>
 </html>
+
