@@ -36,8 +36,8 @@ public class AdminController {
     }
 
     @GetMapping("/users/search")
-    public ResponseEntity<List<AdminUserDto>> findUserByName(@RequestParam String name ) {
-        List<AdminUserDto> users = adminService.findUserByName(name);
+    public ResponseEntity<List<AdminUserDto>> findUserByName(@RequestParam String name ,Pageable pageable) {
+        List<AdminUserDto> users = adminService.findUserByName(name,pageable);
         return ResponseEntity.ok(users);
     }
 
@@ -48,8 +48,8 @@ public class AdminController {
     }
 
     @GetMapping("/users/{userId}/matched")
-    public ResponseEntity<List<AdminMatchedUserResponse>> getMatchedUsers(@PathVariable Long userId) {
-        List<AdminMatchedUserResponse> matchedUsers = adminService.getMatchedUsers(userId);
+    public ResponseEntity<List<AdminMatchedUserResponse>> getMatchedUsers(@PathVariable Long userId, Pageable pageable) {
+        List<AdminMatchedUserResponse> matchedUsers = adminService.getMatchedUsers(userId,pageable);
         return  ResponseEntity.ok(matchedUsers);
     }
 

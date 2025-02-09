@@ -36,11 +36,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Config> {
                 if (token != null) {
                     return jwtUtils.validateToken(token)
                             .flatMap(jwtValidResponse -> {
-                                if (jwtValidResponse.getStatus() == JwtValidationType.VALID_JWT) {
+                                if (jwtValidResponse.status() == JwtValidationType.VALID_JWT) {
                                     HttpHeaders writableHeaders = HttpHeaders.writableHttpHeaders(
                                             request.getHeaders());
                                     writableHeaders.add("X-User-Id",
-                                            String.valueOf(jwtValidResponse.getUserId()));
+                                            String.valueOf(jwtValidResponse.userId()));
                                     ServerHttpRequest modifiedRequest = new ServerHttpRequestDecorator(request) {
                                         @Override
                                         public HttpHeaders getHeaders() {
@@ -52,7 +52,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Config> {
                                             .build());
                                 }
                                 return Mono.error(new RuntimeException(
-                                        "Invalid JWT token: " + token + " : " + jwtValidResponse.getStatus()));
+                                        "Invalid JWT token: " + token + " : " + jwtValidResponse.status()));
                             });
                 }
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

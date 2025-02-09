@@ -28,11 +28,8 @@ public class UserPortfolioJpaAdapter implements GetUserPortfoliosQuery , GetMatc
     public List<UserPortfolioResDto> findAllPortfoliosByUserIds(List<Long> userIds) {
         Map<Long, Integer> userIdOrderMap = userIds.stream()
                 .collect(Collectors.toMap(id -> id, userIds::indexOf));
-        List<UserPortfolioResDto> userPortfolioResDtos = userPortfolioRepository.findAllPortfoliosByUserIds(userIds)
-                .stream().map(UserPortfolioResDto::of).toList();
-        return userPortfolioResDtos.stream()
-                .sorted(Comparator.comparing(dto -> userIdOrderMap.get(dto.getUserId())))
-                .toList();
+        return userPortfolioRepository.findAllPortfoliosByUserIds(userIds)
+                .parallelStream().map(UserPortfolioResDto::of).sorted(Comparator.comparing(portfolio -> userIdOrderMap.get(portfolio.getUserId()))).toList();
     }
 
     @Override

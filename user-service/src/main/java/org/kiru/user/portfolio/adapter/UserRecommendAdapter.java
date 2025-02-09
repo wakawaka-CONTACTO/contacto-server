@@ -5,11 +5,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
-
-import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.portfolio.service.out.GetRecommendUserIdsQuery;
-
-import org.kiru.user.user.repository.UserPurposeRepository;
+import org.kiru.user.portfolio.service.out.UserPurposePort;
 import org.kiru.user.userlike.service.out.GetUserLikeQuery;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,18 +17,18 @@ import org.springframework.stereotype.Repository;
 public class UserRecommendAdapter implements GetRecommendUserIdsQuery {
     private final Executor virtualThreadExecutor;
     private final GetUserLikeQuery getUserLikeQuery;
-    private final UserPurposeRepository userPurposeRepository;
-
+    private final UserPurposePort userPurposePort;
     public UserRecommendAdapter(Executor virtualThreadExecutor,
                                 @Qualifier("userLikeJpaAdapter")
-                                GetUserLikeQuery getUserLikeQuery, UserPurposeRepository userPurposeRepository) {
+                                GetUserLikeQuery getUserLikeQuery,
+                                UserPurposePort userPurposePort) {
         this.virtualThreadExecutor = virtualThreadExecutor;
         this.getUserLikeQuery = getUserLikeQuery;
-        this.userPurposeRepository = userPurposeRepository;
+        this.userPurposePort = userPurposePort;
     }
 
     @Override
-    @Cacheable(value = "recommendUserIds", key = "#userId" +'-'+ "#pageable.pageNumber")
+    @Cacheable(value = "recommendUserIds", key = "#userId +'_'+ #pageable.pageNumber")
     public List<Long> getRecommendUserIds(Long userId, Pageable pageable) {
         //            목적에 따른 매칭된 유저
         CompletableFuture<List<Long>> matchingUserIdsByPurposeFuture = getMatchingUserIdsByPurposeFuture(userId,
@@ -51,7 +48,8 @@ public class UserRecommendAdapter implements GetRecommendUserIdsQuery {
     }
 
     private CompletableFuture<List<Long>> getMatchingUserIdsByPurposeFuture(Long userId, Pageable pageable, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> getMatchingUserIdsByPurpose(userId, pageable), executor);
+        return CompletableFuture.supplyAsync(() -> userPurposePort.findAllPurposeTypeByUserId(userId), executor)
+                .thenApply(purposeTypes -> userPurposePort.getMatchingUserIdsByPurpose(purposeTypes.purposeTypes(), pageable).longs());
     }
 
     private CompletableFuture<List<Long>> getLikedUserIdsFuture(Long userId, Pageable pageable, Executor executor) {
@@ -63,9 +61,4 @@ public class UserRecommendAdapter implements GetRecommendUserIdsQuery {
         return CompletableFuture.supplyAsync(() -> getUserLikeQuery.getPopularUserId(pageable).longs(), executor);
     }
 
-    private List<Long> getMatchingUserIdsByPurpose(Long userId, Pageable pageable) {
-        return userPurposeRepository.findUserIdsByPurposeTypesOrderByCount(
-                userPurposeRepository.findAllByUserId(userId).stream()
-                        .map(UserPurpose::getPurposeType).toList(), pageable).getContent();
-    }
 }

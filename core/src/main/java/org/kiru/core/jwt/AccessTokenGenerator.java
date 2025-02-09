@@ -5,12 +5,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
+import org.kiru.core.jwt.JwtProperties.TokenExpireTimeProperty;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
 public class AccessTokenGenerator implements TokenGenerator {
-    private final JwtProperties jwtProperties;
+    private final TokenSecret tokenSecret;
+    private final TokenExpireTimeProperty tokenExpireTimeProperty;
 
     @Override
     public String generateToken(final long userId, final String email, final Date now){
@@ -24,12 +26,12 @@ public class AccessTokenGenerator implements TokenGenerator {
                 .claim("email", email) // email 정보를 Claim에 추가
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
-                .signWith(jwtProperties.getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(tokenSecret.getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     @Override
     public Date generateExpirationDate(final Date now) {
-        return new Date(now.getTime() + jwtProperties.getAccessTokenExpireTime());
+        return new Date(now.getTime() + tokenExpireTimeProperty.getAccessTokenExpireTime());
     }
 }

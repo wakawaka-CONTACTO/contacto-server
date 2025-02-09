@@ -15,6 +15,7 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.user.userPortfolioItem.domain.UserPortfolioItem;
@@ -23,6 +24,7 @@ import org.kiru.core.user.userPortfolioItem.domain.UserPortfolioItem;
 @AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
 public class ChatRoom {
     @NotNull
     private Long id;

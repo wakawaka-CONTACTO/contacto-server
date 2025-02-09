@@ -48,4 +48,7 @@ public interface UserLikeJpaRepository extends JpaRepository<UserLikeJpaEntity, 
     List<Long> findPopularUserId(Pageable pageable);
 
     UserLikeJpaEntity save(UserLike userLike);
+
+    @Query("SELECT ul FROM UserLikeJpaEntity ul WHERE ul.userId = :userId AND ul.isMatched = true")
+     List<UserLikeJpaEntity> findAllMatchedUsersWithMatchedTime(Long userId, Pageable pageable);
 }

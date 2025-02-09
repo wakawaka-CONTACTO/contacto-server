@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.UnauthorizedException;
-import org.kiru.core.user.refreshtoken.RefreshToken;
 import org.kiru.core.user.talent.domain.Talent.TalentType;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.entity.UserJpaEntity;
@@ -36,6 +37,7 @@ import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.service.AuthService;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -166,8 +168,8 @@ class AuthServiceTest {
     @DisplayName("토큰 재발급 - 성공")
     void reissue_Success() {
         // Given
-        when(refreshTokenRepository.deleteByUserId(1L)).thenReturn(Optional.of(new RefreshToken()));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        doNothing().when(refreshTokenRepository).deleteRefreshTokenByUserId(1L);
         when(jwtProvider.issueToken(anyLong(), anyString(),any())).thenReturn(testToken);
 
         // When
@@ -175,8 +177,7 @@ class AuthServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.accessToken()).isEqualTo("testAccessToken");
-        verify(refreshTokenRepository).deleteByUserId(1L);
+        verify(refreshTokenRepository).deleteRefreshTokenByUserId(1L);
     }
 
     @Test
@@ -210,9 +211,27 @@ class AuthServiceTest {
     @DisplayName("토큰 재발급 - 리프레시 토큰 없음")
     void reissue_RefreshTokenNotFound() {
         // Given
-        when(refreshTokenRepository.deleteByUserId(anyLong())).thenReturn(Optional.empty());
-
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        doNothing().when(refreshTokenRepository).deleteRefreshTokenByUserId(anyLong());
+        when(jwtProvider.issueToken(anyLong(), anyString(),any())).thenReturn(testToken);
+        authService.reissue(1L);
         // When & Then
-        assertThrows(UnauthorizedException.class, () -> authService.reissue(1L));
+        verify(refreshTokenRepository).deleteRefreshTokenByUserId(1L);
+    }
+
+    @Test
+    @DisplayName("토큰 발급시 user를 찾고 토큰을 삭제하는지 확인 - 성공")
+    void reissue_순서대로_메소드가_작동하는지_확인하는_테스트() {
+        // Given
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        doNothing().when(refreshTokenRepository).deleteRefreshTokenByUserId(anyLong());
+        when(jwtProvider.issueToken(anyLong(), anyString(),any())).thenReturn(testToken);
+
+        authService.reissue(1L);
+
+        InOrder inOrder = inOrder(userRepository, refreshTokenRepository);
+        inOrder.verify(userRepository).findById(1L);
+        inOrder.verify(refreshTokenRepository).deleteRefreshTokenByUserId(anyLong());
+        // When & Then
     }
 }

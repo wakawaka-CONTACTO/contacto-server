@@ -8,6 +8,7 @@ import org.kiru.user.admin.dto.AdminUserDto.UserDto;
 import org.kiru.user.user.dto.UserIdUsername;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -23,15 +24,15 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
     })
     Optional<UserJpaEntity> findByEmail(String email);
 
-    @Query("SELECT u.id as id, u.username as userName " +
-            "FROM UserJpaEntity u " +
-            "WHERE u.id IN :userIds")
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
+    @Query("SELECT u.id as id, u.username as username " +
+            "FROM UserJpaEntity u " +
+            "WHERE u.id IN :userIds")
     List<UserIdUsername> findUsernamesByIds(List<Long> userIds);
 
     @Query("SELECT u.email " +
@@ -54,8 +55,8 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
     @Query("SELECT new org.kiru.user.admin.dto.AdminUserDto$UserDto(u.id, u.username, p.portfolioImageUrl) " +
             "FROM UserJpaEntity u " +
             "INNER JOIN UserPortfolioImg p ON u.id = p.userId " +
-            "WHERE u.username LIKE %:name%")
-    List<UserDto> findSimpleUserByName(String name);
+            "WHERE p.sequence = 1 AND u.username LIKE %:name% ")
+    Slice<UserDto> findSimpleUserByName(String name, Pageable pageable);
 
     boolean existsByEmail(String email);
 }

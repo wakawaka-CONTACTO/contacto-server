@@ -6,6 +6,7 @@ import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.jwt.TokenGenerator;
 import org.kiru.user.user.dto.event.TokenCreateEvent;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @ComponentScan(basePackages = "org.kiru.core.jwt")
+@ConfigurationPropertiesScan(basePackages = {"org.kiru.core.jwt"})
 public class JwtProvider {
     private final TokenGenerator accessTokenGenerator;
     private final TokenGenerator refreshTokenGenerator;

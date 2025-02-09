@@ -18,12 +18,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtTokenParser {
     private JwtParser jwtParser;
-    private final JwtProperties jwtProperties;
+    private final TokenSecret tokenSecret;
 
     @PostConstruct
     public void getJwtParser() {
         this.jwtParser = Jwts.parserBuilder()
-                .setSigningKey(jwtProperties.getSigningKey())
+                .setSigningKey(tokenSecret.getSigningKey())
                 .build();
     }
 
@@ -70,6 +70,4 @@ public class JwtTokenParser {
             throw new IllegalArgumentException(String.valueOf(FailureCode.TOKEN_SUBJECT_NOT_NUMERIC_STRING));
         }
     }
-
-
 }
