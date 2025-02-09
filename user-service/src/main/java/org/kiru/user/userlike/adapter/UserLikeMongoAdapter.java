@@ -3,6 +3,7 @@ package org.kiru.user.userlike.adapter;
 import static org.kiru.core.user.userlike.domain.LikeStatus.LIKE;
 
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.kiru.core.user.user.entity.UserJpaEntity;
@@ -10,6 +11,7 @@ import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.domain.UserLike;
 import org.kiru.core.user.userlike.entity.UserLikeMongoEntity;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
+import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.out.UserLikeAdminUseCase;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.userlike.dto.Longs;
@@ -133,5 +135,10 @@ public class UserLikeMongoAdapter implements SendLikeOrDislikeUseCase, GetUserLi
                     );
                 })
                 .toList();
+    }
+
+    @Override
+    public Map<Long, MatchedUserResponse> findAllMatchedUserIdWithMatchedTime(Long userId, Pageable pageable) {
+        return Map.of();
     }
 }

@@ -3,6 +3,8 @@ package org.kiru.user.userlike.adapter;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.entity.QUserJpaEntity;
 import org.kiru.core.user.userPortfolioItem.entity.QUserPortfolioImg;
@@ -11,6 +13,7 @@ import org.kiru.core.user.userlike.domain.UserLike;
 import org.kiru.core.user.userlike.entity.QUserLikeJpaEntity;
 import org.kiru.core.user.userlike.entity.UserLikeJpaEntity;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
+import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.out.UserLikeAdminUseCase;
 import org.kiru.user.userlike.dto.Longs;
 import org.kiru.user.userlike.repository.UserLikeJpaRepository;
@@ -28,6 +31,7 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
 
     private final UserLikeJpaRepository userLikeRepository;
     private final JPAQueryFactory queryFactory;
+    private final UserLikeJpaRepository userLikeJpaRepository;
 
     @Transactional
     @Override
@@ -36,7 +40,7 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
         UserLike userLike = userLikeRepository.findByUserIdAndLikedUserId(userId, likedUserId)
                 .orElseGet(() -> UserLikeJpaEntity.of(userId, likedUserId, status, false));
         // 1. 상대방이 나를 좋아요(`LIKE`)한 기록이 있는지 먼저 조회
-        if(userLike.isMatched() && status == LikeStatus.LIKE) {
+        if (userLike.isMatched() && status == LikeStatus.LIKE) {
             return userLike;
         }
         UserLike oppositeLike = userLikeRepository.findOppositeLike(likedUserId, userId, LikeStatus.LIKE);
@@ -90,5 +94,12 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
                 .limit(pageable.getPageSize())
                 .fetch();
         return likes;
+    }
+
+    @Override
+    public Map<Long, MatchedUserResponse> findAllMatchedUserIdWithMatchedTime(Long userId, Pageable pageable) {
+        return userLikeJpaRepository.findAllMatchedUserIdWithMatchedTime(userId, pageable).stream()
+                .map(MatchedUserResponse::of)
+                .collect(Collectors.toMap(MatchedUserResponse::userId, matchedUser -> matchedUser));
     }
 }

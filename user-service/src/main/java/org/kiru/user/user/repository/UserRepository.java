@@ -23,15 +23,15 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
     })
     Optional<UserJpaEntity> findByEmail(String email);
 
-    @Query("SELECT u.id as id, u.username as userName " +
-            "FROM UserJpaEntity u " +
-            "WHERE u.id IN :userIds")
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
+    @Query("SELECT u.id as id, u.username as username " +
+            "FROM UserJpaEntity u " +
+            "WHERE u.id IN :userIds")
     List<UserIdUsername> findUsernamesByIds(List<Long> userIds);
 
     @Query("SELECT u.email " +

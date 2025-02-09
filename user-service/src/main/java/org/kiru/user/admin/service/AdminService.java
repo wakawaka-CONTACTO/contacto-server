@@ -3,10 +3,10 @@ package org.kiru.user.admin.service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
@@ -43,25 +43,16 @@ public class AdminService {
         return user.stream().map(u -> AdminUserDto.of(u, connectedUserIds.contains(u.id()))).toList();
     }
 
-    public List<AdminMatchedUserResponse> getMatchedUsers(Long userId) {
-        List<MatchedUserResponse> chatApiClientMatchedUsers = chatApiClient.getMatchedUsers(userId);
-        List<Long> userIds = chatApiClientMatchedUsers.stream()
-                .map(MatchedUserResponse::userId)
-                .toList();
+    public List<AdminMatchedUserResponse> getMatchedUsers(Long userId, Pageable pageable) {
+        Map<Long,MatchedUserResponse> matchedUsers = adminUserQuery.findMatchedUsersWithMatchedTime(userId, pageable);
+        List<Long> userIds = matchedUsers.keySet().stream().toList();
         List<UserIdUsername> userNames = adminUserQuery.findUsernamesByIds(userIds);
-        List<AdminMatchedUserResponse> adminMatchedUserResponses =  chatApiClientMatchedUsers.stream()
+        List<AdminMatchedUserResponse> adminMatchedUserResponses =  userNames.stream()
                 .map(matchedUser -> {
-                    String name = userNames.stream()
-                            .filter(user -> user.getId().equals(matchedUser.userId()))
-                            .map(UserIdUsername::getUsername)
-                            .findFirst()
-                            .orElse(null);
-                    return new AdminMatchedUserResponse(matchedUser.userId(), name, matchedUser.matchedAt());
+                    return new AdminMatchedUserResponse(matchedUser.getId(), matchedUser.getUsername(), matchedUsers.get(matchedUser.getId()).matchedAt());
                 })
                 .toList();
         return adminMatchedUserResponses.stream()
-                .collect(Collectors.toMap(AdminMatchedUserResponse::userId, response -> response, (existing, replacement) -> existing))
-                .values().stream()
                 .sorted(Comparator.comparing(AdminMatchedUserResponse::matchedAt).reversed())
                 .toList();
     }
@@ -100,7 +91,7 @@ public class AdminService {
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             CompletableFuture<List<AdminLikeUserDto>> userLikesFuture = CompletableFuture.supplyAsync(() -> getUserLikesInternal(pageable, userId, name, false), executor);
             CompletableFuture<List<AdminLikeUserDto>> userLikedFuture = CompletableFuture.supplyAsync(() -> getUserLikesInternal(pageable, userId, name, true), executor);
-            CompletableFuture<Void> allOf = CompletableFuture.allOf(userLikesFuture, userLikedFuture);
+            CompletableFuture.allOf(userLikesFuture, userLikedFuture);
             return AdminLikeUserResponse.of(userLikesFuture.join(), userLikedFuture.join());
         }
     }

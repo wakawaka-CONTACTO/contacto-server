@@ -1,8 +1,10 @@
 package org.kiru.user.admin.adapter;
 
 import java.util.List;
+import java.util.Map;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
+import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.out.AdminUserQuery;
 import org.kiru.user.admin.service.out.UserLikeAdminUseCase;
 import org.kiru.user.user.dto.UserIdUsername;
@@ -18,7 +20,8 @@ public class AdminAdapter implements AdminUserQuery {
 
     public AdminAdapter(UserRepository userRepository,
                         @Qualifier("userLikeJpaAdapter")
-                        UserLikeAdminUseCase userLikeAdminUseCase) {
+                        UserLikeAdminUseCase userLikeAdminUseCase
+) {
         this.userRepository = userRepository;
         this.userLikeAdminUseCase = userLikeAdminUseCase;
     }
@@ -60,5 +63,10 @@ public class AdminAdapter implements AdminUserQuery {
     @Override
     public List<UserIdUsername> findUsernamesByIds(List<Long> userIds) {
         return userRepository.findUsernamesByIds(userIds);
+    }
+
+    @Override
+    public Map<Long,MatchedUserResponse> findMatchedUsersWithMatchedTime(Long userId, Pageable pageable) {
+        return userLikeAdminUseCase.findAllMatchedUserIdWithMatchedTime(userId, pageable);
     }
 }
