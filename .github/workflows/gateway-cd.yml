@@ -24,6 +24,8 @@ jobs:
           mkdir -p gateway-service/src/main/resources
           touch gateway-service/src/main/resources/application.yml
           echo "${{ secrets.GATEWAY_APPLICATION }}" > gateway-service/src/main/resources/application.yml
+          touch gateway-service/src/main/resources/static/js/config.js
+          echo "${{ secrets.URL_CONFIG }}" > gateway-service/src/main/resources/static/js/config.js
           cat gateway-service/src/main/resources/application.yml
       - name: Build Gateway Service
         run: |
