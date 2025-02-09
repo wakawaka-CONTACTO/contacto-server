@@ -33,13 +33,17 @@ async function loadUsers(page) {
         }
 
         const data = await response.json();
-        console.log('Users loaded:', data); // 응답 데이터 확인
-        if (Array.isArray(data)) {
+        console.log('Users loaded:', data);
+        
+        // 데이터가 있는지 확인
+        if (data) {
             displayUsers(data);
+            // totalPages가 없는 경우 기본값 설정
+            const totalPages = data.totalPages || Math.ceil(data.length / pageSize);
+            updatePagination(totalPages);
         } else {
-            console.error('Expected an array but got:', data);
+            console.error('Invalid data format:', data);
         }
-        updatePagination(data.totalPages);
     } catch (error) {
         console.error('Error loading users:', error);
     } finally {
@@ -64,7 +68,7 @@ function displayUsers(users) {
                     '이미지 없음'
                 }
             </td>
-            <td>${item.isConnected ? '연결됨' : '연결 안됨'}</td>
+            <td data-status="${item.isConnected}">${item.isConnected ? '연결됨' : '연결 안됨'}</td>
             <td>
                 <button onclick="location.href='user-detail.html?userId=${user.id}'">상세보기</button>
             </td>
@@ -78,22 +82,38 @@ function updatePagination(totalPages) {
     const pagination = document.getElementById('pagination');
     pagination.innerHTML = '';
 
-    for (let i = 0; i < totalPages; i++) {
-        const button = document.createElement('button');
-        button.textContent = i + 1;
-        button.onclick = () => {
-            currentPage = i;
-            loadUsers(currentPage);
-        };
-        if (i === currentPage) {
-            button.classList.add('active');
-        }
-        pagination.appendChild(button);
-    }
+    // 이전 페이지 버튼
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '이전';
+    prevButton.disabled = false
+    prevButton.addEventListener('click', function() {
+    currentPage--;
+    loadUsers(currentPage);
+    });
+    pagination.appendChild(prevButton);
+
+    // 현재 페이지 표시
+    const currentPageSpan = document.createElement('span');
+    currentPageSpan.textContent = `${currentPage + 1} / ${totalPages}`;
+    currentPageSpan.style.margin = '0 10px';
+    pagination.appendChild(currentPageSpan);
+
+    // 다음 페이지 버튼
+    const nextButton = document.createElement('button');
+    nextButton.textContent = '다음';
+    nextButton.disabled = false
+    nextButton.addEventListener('click', function() {
+    console.log('다음 버튼 클릭됨');
+    currentPage++;
+    loadUsers(currentPage);
+    });
+    pagination.appendChild(nextButton);
 }
 
 // 유저 검색
-async function searchUser() {
+async function searchUser(event) {
+    event.stopPropagation();
+    console.log('검색 버튼 클릭됨');
     try {
         const searchTerm = document.getElementById('searchInput').value;
         const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/users/admin/users/search?name=${searchTerm}`, {
@@ -142,3 +162,22 @@ document.getElementById('searchInput').addEventListener('keypress', (e) => {
         searchUser();
     }
 });
+
+function prevPage() {
+    if (currentPage > 0) {
+        currentPage--;
+        loadUsers(currentPage);
+        updatePageDisplay();
+    }
+}
+
+function nextPage() {
+    currentPage++;
+    loadUsers(currentPage);
+    updatePageDisplay();
+}
+
+function updatePageDisplay() {
+    const pageDisplay = document.getElementById('currentPage');
+    pageDisplay.textContent = `${currentPage + 1}`;
+}

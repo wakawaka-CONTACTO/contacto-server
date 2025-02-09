@@ -13,7 +13,7 @@
         <h1>관리자 대시보드</h1>
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="유저 이름을 입력하세요...">
-            <button id="searchButton">
+            <button id="searchButton" onclick="searchUser()">
                 <i class="fas fa-search"></i> 검색
             </button>
         </div>
@@ -40,7 +40,9 @@
 
     <footer class="footer">
         <div class="pagination" id="pagination">
-            <!-- 페이지네이션 버튼이 동적으로 추가됩니다 -->
+            <button onclick="prevPage()">이전</button>
+            <span id="currentPage"></span>
+            <button onclick="nextPage()">다음</button>
         </div>
     </footer>
 </div>
