@@ -31,7 +31,6 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
 
     private final UserLikeJpaRepository userLikeRepository;
     private final JPAQueryFactory queryFactory;
-    private final UserLikeJpaRepository userLikeJpaRepository;
 
     @Transactional
     @Override
@@ -98,7 +97,7 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
 
     @Override
     public Map<Long, MatchedUserResponse> findAllMatchedUserIdWithMatchedTime(Long userId, Pageable pageable) {
-        return userLikeJpaRepository.findAllMatchedUserIdWithMatchedTime(userId, pageable).stream()
+        return userLikeRepository.findAllMatchedUsersWithMatchedTime(userId, pageable).stream()
                 .map(MatchedUserResponse::of)
                 .collect(Collectors.toMap(MatchedUserResponse::userId, matchedUser -> matchedUser));
     }

@@ -25,6 +25,6 @@ public class JwtUtils {
             String email = jwtTokenParser.getEmailFromClaims(jwt);
             return getUserPort.getUserFromCache(token)
                     .switchIfEmpty(Mono.defer(() -> getUserPort.getUser(token,userId, email)));
-        }).cache();
+        });
     }
 }

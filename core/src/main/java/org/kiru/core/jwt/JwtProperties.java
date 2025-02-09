@@ -35,12 +35,10 @@ public class JwtProperties {
         private final long accessTokenExpireTime;
 
         public TokenExpireTimeProperty(long refreshTokenExpireTime, long accessTokenExpireTime) {
-            if (refreshTokenExpireTime < 0) {
-                log.info("리프레시 토큰 :{}", refreshTokenExpireTime);
+            if (refreshTokenExpireTime <= 0) {
                 throw new IllegalArgumentException("리프레시 토큰 만료 시간은 0보다 커야 합니다");
             }
-            if (accessTokenExpireTime < 0) {
-                log.info("액세스 토큰 {}", accessTokenExpireTime);
+            if (accessTokenExpireTime <= 0) {
                 throw new IllegalArgumentException("액세스 토큰 만료 시간은 0보다 커야 합니다");
             }
 
