@@ -22,4 +22,4 @@ ENV PATH="$JAVA_HOME/bin:$PATH"
 WORKDIR /app
 COPY --from=builder-jre /custom-jre $JAVA_HOME
 COPY --from=builder /app/app.jar app.jar
-ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar", "-Dspring.profiles.active=docker", "app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar", "-Dspring.profiles.active=dev", "app.jar"]
