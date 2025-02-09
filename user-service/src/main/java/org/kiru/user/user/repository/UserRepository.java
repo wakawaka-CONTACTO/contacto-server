@@ -8,6 +8,7 @@ import org.kiru.user.admin.dto.AdminUserDto.UserDto;
 import org.kiru.user.user.dto.UserIdUsername;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -54,8 +55,8 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
     @Query("SELECT new org.kiru.user.admin.dto.AdminUserDto$UserDto(u.id, u.username, p.portfolioImageUrl) " +
             "FROM UserJpaEntity u " +
             "INNER JOIN UserPortfolioImg p ON u.id = p.userId " +
-            "WHERE u.username LIKE %:name%")
-    List<UserDto> findSimpleUserByName(String name);
+            "WHERE p.sequence = 1 AND u.username LIKE %:name% ")
+    Slice<UserDto> findSimpleUserByName(String name, Pageable pageable);
 
     boolean existsByEmail(String email);
 }

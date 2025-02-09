@@ -37,8 +37,8 @@ public class AdminService {
                 .toList();
     }
 
-    public List<AdminUserDto> findUserByName(String name) {
-        List<UserDto> user = adminUserQuery.findUserByName(name);
+    public List<AdminUserDto> findUserByName(String name, Pageable pageable) {
+        List<UserDto> user = adminUserQuery.findUserByName(name, pageable);
         List<Long> connectedUserIds = chatApiClient.getConnectedUserIds();
         return user.stream().map(u -> AdminUserDto.of(u, connectedUserIds.contains(u.id()))).toList();
     }

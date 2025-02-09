@@ -32,8 +32,8 @@ public class AdminAdapter implements AdminUserQuery {
     }
 
     @Override
-    public List<UserDto> findUserByName(String name) {
-        return userRepository.findSimpleUserByName(name);
+    public List<UserDto> findUserByName(String name, Pageable pageable) {
+        return userRepository.findSimpleUserByName(name,pageable).getContent();
     }
 
     private List<AdminLikeUserDto> findUserLikesInternal(Pageable pageable, Long userId, String name, boolean isLiked) {

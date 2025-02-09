@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 public interface AdminUserQuery {
     List<UserDto> findAll(Pageable pageable);
 
-    List<UserDto> findUserByName(String name);
+    List<UserDto> findUserByName(String name, Pageable pageable);
 
     List<AdminLikeUserDto> findUserLikes(Pageable pageable, Long userId);
 

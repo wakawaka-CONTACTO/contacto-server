@@ -37,7 +37,7 @@ public class AdminController {
 
     @GetMapping("/users/search")
     public ResponseEntity<List<AdminUserDto>> findUserByName(@RequestParam String name ,Pageable pageable) {
-        List<AdminUserDto> users = adminService.findUserByName(name);
+        List<AdminUserDto> users = adminService.findUserByName(name,pageable);
         return ResponseEntity.ok(users);
     }
 
