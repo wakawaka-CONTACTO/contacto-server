@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MessageRepository extends JpaRepository<MessageJpaEntity, Long> {
     List<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId);
+
     List<MessageJpaEntity> findAllByChatRoomIdAndReadStatusFalse(Long chatRoomId);
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
