@@ -40,7 +40,11 @@ public class PortfolioService {
     private List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
 //         이미 매칭된 유저
         CompletableFuture<List<Long>> alreadyMatchedUserFuture = getAlreadyMatchedUserFuture(userId,
-                virtualThreadExecutor);
+                virtualThreadExecutor).thenApply(matchedUserIds ->
+        {
+            matchedUserIds.add(userId);
+            return matchedUserIds;
+        });
 //          추천 로직에 의한 유저
         List<Long> recommendUserIds = getRecommendUserIdsQuery.getRecommendUserIds(userId, pageable);
         CompletableFuture<List<Long>> userPortfolioIds = getUserPortfolioIds(alreadyMatchedUserFuture,

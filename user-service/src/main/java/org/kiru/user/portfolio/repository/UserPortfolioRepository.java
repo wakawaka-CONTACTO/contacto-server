@@ -31,7 +31,7 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
     SELECT 
         upi.portfolioId as portfolioId,
         upi.userId as userId,
-        upi.userName as userName,
+        upi.userName as username,
         STRING_AGG(upi.portfolioImageUrl,',') as portfolioImageUrl
     FROM 
        UserPortfolioImg upi

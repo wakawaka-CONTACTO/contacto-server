@@ -39,12 +39,16 @@ dependencies {
     implementation 'io.github.openfeign:feign-micrometer'
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
