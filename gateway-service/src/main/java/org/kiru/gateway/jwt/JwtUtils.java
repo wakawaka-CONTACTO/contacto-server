@@ -23,6 +23,7 @@ public class JwtUtils {
             Jws<Claims> jwt = jwtTokenParser.parseToken(token);
             Long userId = jwtTokenParser.getUserIdFromClaims(jwt);
             String email = jwtTokenParser.getEmailFromClaims(jwt);
+            
             return getUserPort.getUserFromCache(token)
                     .switchIfEmpty(Mono.defer(() -> getUserPort.getUser(token,userId, email)));
         });
