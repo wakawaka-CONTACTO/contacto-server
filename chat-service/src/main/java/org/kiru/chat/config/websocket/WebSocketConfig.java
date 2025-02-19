@@ -64,7 +64,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             Exception exception) {
                         log.info(">>> afterHandshake OK");
                     }
-                })
-                .withSockJS();
+                }) ;
     }
 }
