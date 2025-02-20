@@ -36,7 +36,7 @@ public record UserWithAdditionalInfoResponse(
     public record UserPortfolioResponse(
             Long portfolioId,
             Long userId,
-            List<String> portfolioUrl
+            List<String> portfolioImageUrl
     ) {
         public static UserPortfolioResponse of(UserPortfolio userPortfolio) {
             if (userPortfolio == null) {
