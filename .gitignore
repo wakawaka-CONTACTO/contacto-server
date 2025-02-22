@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,java,intellij,intellij+all,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,java,intellij,intellij+all,linux
 
+core/src/main/generated/
+
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
@@ -292,3 +294,10 @@ out/
 
 ### Redis Config ###
 redis_conf/
+pg_hba.conf/
+user.sh
+gateway.sh
+discovery.sh
+chat.sh
+all.sh
+
