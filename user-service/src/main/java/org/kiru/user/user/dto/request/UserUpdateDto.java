@@ -4,13 +4,14 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.validator.constraints.URL;
 import org.kiru.core.user.talent.domain.Talent.TalentType;
+
+import java.util.List;
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
