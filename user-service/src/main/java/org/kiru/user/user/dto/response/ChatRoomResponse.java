@@ -25,7 +25,7 @@ public class ChatRoomResponse {
     @Nullable
     private List<MessageResponse> messages;
 
-    private Slice<MessageResponse> slicedMessages;
+    private List<MessageResponse> slicedMessages;
 
     @Nullable
     private Set<Long> participants;
@@ -45,7 +45,7 @@ public class ChatRoomResponse {
                 .build();
     }
 
-    public static ChatRoomResponse of(ChatRoom chatRoom, Slice<MessageResponse> messageResponses){
+    public static ChatRoomResponse of(ChatRoom chatRoom, List<MessageResponse> messageResponses){
         return ChatRoomResponse.builder()
             .id(chatRoom.getId())
             .title(chatRoom.getTitle())

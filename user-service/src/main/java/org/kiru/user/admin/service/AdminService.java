@@ -96,7 +96,7 @@ public class AdminService {
         }
     }
 
-    public Slice<Message> getMessages(Long roomId, Long userId, Boolean isAdmin, Pageable pageable) {
+    public List<Message> getMessages(Long roomId, Long userId, Boolean isAdmin, Pageable pageable) {
         return chatApiClient.getMessages(roomId, userId, isAdmin, pageable);
     }
 }

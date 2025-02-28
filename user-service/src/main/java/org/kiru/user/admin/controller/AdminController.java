@@ -82,8 +82,8 @@ public class AdminController {
     }
 
     @GetMapping("/rooms/{roomId}/messages")
-    public ResponseEntity<Slice<Message>> getMessages(@PathVariable Long roomId, @UserId Long userId, Pageable pageable) {
-        Slice<Message> messages = adminService.getMessages(roomId, userId, true, pageable);
+    public ResponseEntity<List<Message>> getMessages(@PathVariable Long roomId, @UserId Long userId, Pageable pageable) {
+        List<Message> messages = adminService.getMessages(roomId, userId, true, pageable);
         return ResponseEntity.ok(messages);
     }
 }

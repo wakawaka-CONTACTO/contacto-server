@@ -85,8 +85,11 @@ public class UserService implements GetUserMainPageUseCase {
             );
 
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-            CompletableFuture<Slice<MessageResponse>> messageFuture = CompletableFuture.supplyAsync(() -> {
-                return chatApiClient.getMessages(roomId, userId, false, pageable).map(MessageResponse::fromMessage);
+            CompletableFuture<List<MessageResponse>> messageFuture = CompletableFuture.supplyAsync(() -> {
+                return chatApiClient.getMessages(roomId, userId, false, pageable)
+                    .stream()  // List를 Stream으로 변환
+                    .map(MessageResponse::fromMessage)  // Message → MessageResponse 변환
+                    .toList(); // 다시 List로 변환
             }, executor);
 
             return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFutre, (chatRoom, userPortfolioImgMap) -> {

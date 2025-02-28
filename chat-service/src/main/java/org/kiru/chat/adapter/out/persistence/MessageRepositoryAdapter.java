@@ -38,12 +38,18 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
     }
 
     @Override
-    public Slice<Message> getMessages(Long roomId, Long userId,Boolean isUserAdmin, Pageable pageable) {
-        return messageRepository.findAllByChatRoomIdOrderByCreatedAt(roomId, pageable).map(messageJpaEntity -> {
-            if (!messageJpaEntity.getSenderId().equals(userId) && !isUserAdmin) {
-                messageJpaEntity.setReadStatus(true);
-            }
-            return MessageJpaEntity.toModel(messageJpaEntity);
-        });
+    public List<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin, Pageable pageable) {
+        return messageRepository.findAllByChatRoomIdOrderByCreatedAt(roomId, pageable)
+            .getContent()  // Slice → List 변환
+            .stream()
+            .parallel()
+            .map(messageJpaEntity -> {
+                if (!messageJpaEntity.getSenderId().equals(userId) && !isUserAdmin) {
+                    messageJpaEntity.setReadStatus(true);
+                }
+                return MessageJpaEntity.toModel(messageJpaEntity);
+            })
+            .toList();
     }
+
 }
