@@ -43,6 +43,18 @@ public class UserController {
         return ResponseEntity.ok(ChatRoomResponse.of(chatRooms));
     }
 
+    @GetMapping("/me/chatroom/{roomId}/message")
+    public ResponseEntity<ChatRoomResponse> getChatMessages(
+        @PathVariable("roomId") Long roomId,
+        @UserId Long userId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ){
+        ChatRoomResponse response = userService.getChatMessage(roomId, userId, page, size);
+        return ResponseEntity.ok(response);
+
+    }
+
     @GetMapping("/me/email")
     public ResponseEntity<User> getUserByEmail(@RequestParam("email") String email){
         return ResponseEntity.ok(userService.findExistUserByEmail(email));

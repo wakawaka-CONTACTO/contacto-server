@@ -21,6 +21,8 @@ import org.kiru.user.portfolio.service.out.GetUserPortfoliosQuery;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
+import org.kiru.user.user.dto.response.ChatRoomResponse;
+import org.kiru.user.user.dto.response.MessageResponse;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.service.in.GetUserMainPageUseCase;
 import org.kiru.user.user.service.out.GetUserAdditionalInfoQuery;
@@ -28,7 +30,10 @@ import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.kiru.user.user.service.out.UserUpdatePort;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +70,29 @@ public class UserService implements GetUserMainPageUseCase {
                 }
                 return chatRooms;
             }, executor).join();
+        }
+    }
+
+    public ChatRoomResponse getChatMessage(Long roomId, Long userId, int page, int size){
+        try( var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            CompletableFuture<ChatRoom> chatRoomFuture = CompletableFuture.supplyAsync(
+                () -> chatApiClient.getRoom(roomId, userId), executor
+            );
+
+            CompletableFuture<List<UserPortfolioItem>> userPortfolioImgMapFutre= chatRoomFuture.thenApplyAsync(
+                ChatRoom::getParticipantsIds, executor).thenApplyAsync(
+                    getUserPortfoliosQuery::getUserPortfoliosWithMinSequence, executor
+            );
+
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            CompletableFuture<Slice<MessageResponse>> messageFuture = CompletableFuture.supplyAsync(() -> {
+                return chatApiClient.getMessages(roomId, userId, pageable).map(MessageResponse::fromMessage);
+            }, executor);
+
+            return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFutre, (chatRoom, userPortfolioImgMap) -> {
+                chatRoom.setThumbnailAndRoomTitle(userPortfolioImgMap.getFirst());
+                return chatRoom;
+            }, executor).thenCombineAsync(messageFuture, ChatRoomResponse::of, executor).join();
         }
     }
 

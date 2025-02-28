@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.springframework.data.domain.Slice;
 
 @Getter
 @AllArgsConstructor
@@ -23,6 +24,8 @@ public class ChatRoomResponse {
 
     @Nullable
     private List<MessageResponse> messages;
+
+    private Slice<MessageResponse> slicedMessages;
 
     @Nullable
     private Set<Long> participants;
@@ -40,5 +43,16 @@ public class ChatRoomResponse {
                 .participants(chatRoom.getParticipants())
                 .chatRoomThumbnail(chatRoom.getChatRoomThumbnail())
                 .build();
+    }
+
+    public static ChatRoomResponse of(ChatRoom chatRoom, Slice<MessageResponse> messageResponses){
+        return ChatRoomResponse.builder()
+            .id(chatRoom.getId())
+            .title(chatRoom.getTitle())
+            .messages(null)
+            .slicedMessages(messageResponses)
+            .participants(chatRoom.getParticipants())
+            .chatRoomThumbnail(chatRoom.getChatRoomThumbnail())
+            .build();
     }
 }
