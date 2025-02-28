@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
-import org.kiru.core.exception.ContactoException;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.code.FailureCode;
 import org.kiru.core.user.talent.domain.Talent.TalentType;
@@ -32,7 +31,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,9 +85,9 @@ public class UserService implements GetUserMainPageUseCase {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
             CompletableFuture<List<MessageResponse>> messageFuture = CompletableFuture.supplyAsync(() -> {
                 return chatApiClient.getMessages(roomId, userId, false, pageable)
-                    .stream()  // List를 Stream으로 변환
-                    .map(MessageResponse::fromMessage)  // Message → MessageResponse 변환
-                    .toList(); // 다시 List로 변환
+                    .stream()
+                    .map(MessageResponse::fromMessage)
+                    .toList();
             }, executor);
 
             return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFutre, (chatRoom, userPortfolioImgMap) -> {

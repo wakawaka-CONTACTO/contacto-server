@@ -45,7 +45,7 @@ public class UserController {
         return ResponseEntity.ok(ChatRoomResponse.of(chatRooms));
     }
 
-    @GetMapping("/me/test/{roomId}")
+    @GetMapping("/me/chatroom/{roomId}/messages")
     public ResponseEntity<ChatRoomResponse> getChatMessages(@PathVariable("roomId") Long roomId, @UserId Long userId, Pageable pageable){
         ChatRoomResponse response = userService.getChatMessage(roomId, userId, pageable.getPageNumber(), pageable.getPageSize());
         return ResponseEntity.ok(response);

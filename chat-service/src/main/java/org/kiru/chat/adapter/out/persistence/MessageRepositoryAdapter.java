@@ -7,7 +7,6 @@ import org.kiru.chat.application.port.out.SaveMessagePort;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.chat.message.entity.MessageJpaEntity;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +39,7 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
     @Override
     public List<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin, Pageable pageable) {
         return messageRepository.findAllByChatRoomIdOrderByCreatedAtAscIdAsc(roomId, pageable)
-            .getContent()  // Slice → List 변환
+            .getContent()
             .stream()
             .parallel()
             .map(messageJpaEntity -> {
@@ -51,5 +50,4 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
             })
             .toList();
     }
-
 }

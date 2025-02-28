@@ -21,7 +21,6 @@ import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.ForbiddenException;
 import org.kiru.core.exception.code.FailureCode;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 @Slf4j

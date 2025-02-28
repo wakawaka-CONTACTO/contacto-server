@@ -4,13 +4,11 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
-import org.springframework.data.domain.Slice;
 
 @Getter
 @AllArgsConstructor
@@ -24,8 +22,6 @@ public class ChatRoomResponse {
 
     @Nullable
     private List<MessageResponse> messages;
-
-    private List<MessageResponse> slicedMessages;
 
     @Nullable
     private Set<Long> participants;
@@ -45,12 +41,11 @@ public class ChatRoomResponse {
                 .build();
     }
 
-    public static ChatRoomResponse of(ChatRoom chatRoom, List<MessageResponse> messageResponses){
+    public static ChatRoomResponse of(ChatRoom chatRoom, List<MessageResponse> messages){
         return ChatRoomResponse.builder()
             .id(chatRoom.getId())
             .title(chatRoom.getTitle())
-            .messages(null)
-            .slicedMessages(messageResponses)
+            .messages(messages)
             .participants(chatRoom.getParticipants())
             .chatRoomThumbnail(chatRoom.getChatRoomThumbnail())
             .build();
