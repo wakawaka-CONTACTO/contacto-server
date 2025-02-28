@@ -39,10 +39,12 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
     public ChatRoom save(ChatRoom chatRoom, Long userId, Long userId2) {
         Optional<UserJoinChatRoom> alreadyRoom = userJoinChatRoomRepository.findAlreadyRoomByUserIds(userId, userId2);
         if (alreadyRoom.isPresent()) {
+            log.info("Chat room already exist for user {} and user {}", userId, userId2);
             return chatRoomRepository.findById(alreadyRoom.get().getChatRoomId())
                     .map(ChatRoomJpaEntity::toModel)
                     .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
         }
+        log.info("Creating chat room for user {} and user {}", userId, userId2);
         ChatRoomJpaEntity entity = ChatRoomJpaEntity.of(chatRoom);
         ChatRoomJpaEntity chatRoomJpa = chatRoomRepository.save(entity);
         UserJoinChatRoom userFirst = UserJoinChatRoom.builder()
