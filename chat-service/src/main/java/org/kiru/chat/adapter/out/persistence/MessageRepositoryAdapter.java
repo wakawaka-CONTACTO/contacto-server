@@ -39,7 +39,7 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
 
     @Override
     public List<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin, Pageable pageable) {
-        return messageRepository.findAllByChatRoomIdOrderByCreatedAt(roomId, pageable)
+        return messageRepository.findAllByChatRoomIdOrderByCreatedAtAscIdAsc(roomId, pageable)
             .getContent()  // Slice → List 변환
             .stream()
             .parallel()

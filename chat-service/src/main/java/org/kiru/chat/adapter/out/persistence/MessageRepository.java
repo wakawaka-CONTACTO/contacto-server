@@ -22,7 +22,7 @@ public interface MessageRepository extends JpaRepository<MessageJpaEntity, Long>
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
-    Slice<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable);
+    Slice<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAtAscIdAsc(Long chatRoomId, Pageable pageable);
 
     @Query(value = "SELECT m as message,mt as translateMessage FROM MessageJpaEntity m "
             + "LEFT JOIN TranslateMessageJpaEntity mt "
