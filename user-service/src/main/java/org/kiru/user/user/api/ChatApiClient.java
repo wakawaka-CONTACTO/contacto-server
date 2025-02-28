@@ -44,9 +44,9 @@ public interface ChatApiClient {
     @GetMapping("/api/v1/chat/cs/rooms")
     ChatRoom getOrCreateCsChatRoom(@RequestParam Long adminId, @RequestParam Long userId);
 
-    @GetMapping("/api/v1/chat/rooms/{roomId}/message")
-    Slice<Message> getMessages(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);
+    @GetMapping("/api/v1/chat/rooms/{roomId}/messages")
+    Slice<Message> getMessages(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId,@RequestParam Boolean admin, @RequestParam Pageable pageable);
 
-    @GetMapping("/api/v1/chat/rooms/{roomId}/message")
-    Slice<Message> getMessagesByAdmin(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);
+//    @GetMapping("/api/v1/chat/rooms/{roomId}/message")
+//    Slice<Message> getMessagesByAdmin(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);
 }

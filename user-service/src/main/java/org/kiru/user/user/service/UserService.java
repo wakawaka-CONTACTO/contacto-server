@@ -86,7 +86,7 @@ public class UserService implements GetUserMainPageUseCase {
 
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
             CompletableFuture<Slice<MessageResponse>> messageFuture = CompletableFuture.supplyAsync(() -> {
-                return chatApiClient.getMessages(roomId, userId, pageable).map(MessageResponse::fromMessage);
+                return chatApiClient.getMessages(roomId, userId, false, pageable).map(MessageResponse::fromMessage);
             }, executor);
 
             return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFutre, (chatRoom, userPortfolioImgMap) -> {

@@ -13,6 +13,7 @@ RUN $JAVA_HOME/bin/jlink \
 FROM amazoncorretto:21-alpine-jdk AS builder
 ARG SERVICE_NAME
 WORKDIR /app
+RUN echo ${SERVICE_NAME}
 COPY ${SERVICE_NAME}/build/libs/*.jar app.jar
 ENV SPRING_PROFILES_ACTIVE=dev
 # Stage 3: 최종 이미지 (최소화된 JRE와 애플리케이션 포함)
