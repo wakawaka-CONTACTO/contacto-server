@@ -38,11 +38,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
     @Transactional
     public ChatRoom save(ChatRoom chatRoom, Long userId, Long userId2) {
         Optional<UserJoinChatRoom> alreadyRoom = userJoinChatRoomRepository.findAlreadyRoomByUserIds(userId, userId2);
-        if (alreadyRoom.isPresent()) {
-            return chatRoomRepository.findById(alreadyRoom.get().getChatRoomId())
-                    .map(ChatRoomJpaEntity::toModel)
-                    .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
-        }
+
         ChatRoomJpaEntity entity = ChatRoomJpaEntity.of(chatRoom);
         ChatRoomJpaEntity chatRoomJpa = chatRoomRepository.save(entity);
         UserJoinChatRoom userFirst = UserJoinChatRoom.builder()
@@ -53,6 +49,14 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
                 .chatRoomId(chatRoomJpa.getId())
                 .userId(userId2)
                 .build();
+        if (alreadyRoom.isPresent()) {
+            log.info("Chat room already exist for user {} and user {}", userId, userId2);
+            return chatRoomRepository.findById(alreadyRoom.get().getChatRoomId())
+                    .map(ChatRoomJpaEntity::toModel)
+                    .orElseThrow(() -> new EntityNotFoundException(FailureCode.CHATROOM_NOT_FOUND));
+        }
+
+        log.info("Creating chat room for user {} and user {}", userId, userId2);
         userJoinChatRoomRepository.saveAll(List.of(userFirst, userSecond));
         return ChatRoomJpaEntity.toModel(chatRoomJpa);
     }

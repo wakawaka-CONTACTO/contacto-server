@@ -2,6 +2,7 @@ package org.kiru.user.userlike.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.BadRequestException;
 import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.auth.argumentresolve.UserId;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users/likes")
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class UserLikeController {
     public ResponseEntity<LikeResponse> sendLikeOrDislike(
             @UserId Long userId,
             @RequestBody LikeRequest likeRequest) {
+        log.info("User {} sending like or dislike to user {}", userId, likeRequest.likedUserId());
         if(userId.equals(likeRequest.likedUserId())) {
             throw new BadRequestException(FailureCode.INVALID_USER_LIKE);
         }

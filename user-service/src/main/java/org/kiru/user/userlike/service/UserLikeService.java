@@ -3,6 +3,8 @@ package org.kiru.user.userlike.service;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
@@ -15,6 +17,7 @@ import org.kiru.user.userlike.service.out.SendLikeOrDislikeUseCase;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class UserLikeService {
     private final SendLikeOrDislikeUseCase sendLikeOrDislikeUseCase;
@@ -36,6 +39,7 @@ public class UserLikeService {
     public LikeResponse sendLikeOrDislike(Long userId, Long likedUserId, LikeStatus status) {
         boolean isMatched = sendLikeOrDislikeUseCase.sendLikeOrDislike(userId, likedUserId, status).isMatched();
         if (isMatched) {
+            log.info("User matched with userId: {} and likedUserId: {}", userId, likedUserId);
             CompletableFuture<List<UserPortfolioResDto>> portfolioFuture = CompletableFuture.supplyAsync(
                     () -> getMatchedUserPortfolioQuery.findByUserIds(List.of(userId, likedUserId)),
                     virtualThreadExecutor);
