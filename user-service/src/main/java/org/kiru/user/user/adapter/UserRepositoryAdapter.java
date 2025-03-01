@@ -1,5 +1,7 @@
 package org.kiru.user.user.adapter;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Repository
@@ -77,17 +80,21 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
     @Override
     @Transactional
     public UserPortfolio updateUserPortfolioImages(final Long userId, UserUpdateDto userUpdateDto) {
-        Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolioImages();
+        Map<Integer, MultipartFile> changedPortfolioImages = userUpdateDto.getPortfolioImages();
         List<UserPortfolioItem> userPortfolioItems = userPortfolioRepository.findAllByUserId(userId).stream()
                 .map(UserPortfolioImg::toModel).toList();
         UserPortfolio userPortfolio =
                 userPortfolioItems.isEmpty() ? UserPortfolio.withUserId(userId) : UserPortfolio.of(userPortfolioItems);
-        List<UserPortfolioItem> updatePortfolioItems = imageService.saveImagesS3WithSequence(changedPortfolioImages,
+        List<UserPortfolioItem> updatedPortfolioItems = new ArrayList<>(userPortfolioItems);
+        List<UserPortfolioItem> newPortfolioItems = imageService.saveImagesS3WithSequence(changedPortfolioImages,
                 userPortfolio, userUpdateDto.getUsername());
+
+        updatedPortfolioItems.addAll(newPortfolioItems);
+
         userPortfolioRepository.deleteAllByUserId(userId);
         userPortfolio.addOrUpdatePortfolioItems(
                 userPortfolioRepository.saveAll(
-                                updatePortfolioItems.stream().map(UserPortfolioImg::toEntity).toList())
+                        updatedPortfolioItems.stream().map(UserPortfolioImg::toEntity).toList())
                         .stream().map(UserPortfolioImg::toModel).toList());
         return userPortfolio;
     }
