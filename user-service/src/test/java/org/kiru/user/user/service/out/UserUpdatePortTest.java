@@ -66,23 +66,23 @@ class UserUpdatePortTest {
 
     @BeforeEach
     void setUp() {
-        Map<Integer, Object> items = new HashMap<>();
+        Map<Integer, MultipartFile> items = new HashMap<>();
         MultipartFile mockFile = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         MultipartFile mockFile2 = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         MultipartFile mockFile3 = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         String mockString = "string";
         String mockString2 = "string2";
         items.put(1, mockFile);
-        items.put(2, mockString);
+//        items.put(2, mockString);
         items.put(3, mockFile2);
-        items.put(4, mockString2);
+//        items.put(4, mockString2);
         items.put(5, mockFile3);
         userUpdateDto = UserUpdateDto.builder()
                 .email("test@example.com")
                 .username("user1")
                 .userPurposes(List.of(1, 2, 3))
                 .userTalents(List.of(TalentType.ARCHITECTURE, TalentType.COMPOSE, TalentType.DANCE))
-                .portfolioImages(
+                .portfolioImage(
                         items
                 )
                 .build();

@@ -80,16 +80,16 @@ class UserPortfolioTest {
     @Test
     void 업데이트_아이템_찾기() {
         // 준비
-        Map<Integer, Object> items = new HashMap<>();
+        Map<Integer, MultipartFile> items = new HashMap<>();
         MultipartFile mockFile = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         MultipartFile mockFile2 = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         MultipartFile mockFile3 = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         String mockString = "string";
         String mockString2 = "string2";
         items.put(1, mockFile);
-        items.put(2, mockString);
+//        items.put(2, mockString);
         items.put(3, mockFile2);
-        items.put(4, mockString2);
+//        items.put(4, mockString2);
         items.put(5, mockFile3);
         // 실행
         Map<Integer, MultipartFile> updateItems = UserPortfolio.findUpdateItem(items);

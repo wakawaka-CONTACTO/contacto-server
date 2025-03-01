@@ -1,9 +1,12 @@
 package org.kiru.user.user.dto.request;
 
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.Arrays;
+import java.util.HashMap;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,7 +41,18 @@ public class UserUpdateDto {
     @NotNull
     private final List<TalentType> userTalents;
 
-    @NotNull
     @Size(max = 10, message = "포트폴리오는 최대 10개까지 등록 가능합니다")
-    private final Map<Integer, MultipartFile> portfolioImages;
+    private Map<Integer, MultipartFile> portfolioImage;
+
+    @Transient
+    private final Map<Integer, String> portfolio;
+
+
+    public void portfolio( MultipartFile[]  portfolioImages){
+        portfolioImage = new HashMap<>();
+        for(int i=0 ; i < portfolioImages.length; i++){
+            this.portfolioImage.put(i, portfolioImages[i]);
+        }
+//        this.portfolioImage = portfolioImage;
+    }
 }
