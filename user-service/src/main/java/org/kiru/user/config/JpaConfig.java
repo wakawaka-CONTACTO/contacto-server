@@ -1,7 +1,5 @@
 package org.kiru.user.config;
 
-import java.util.Objects;
-import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -14,13 +12,18 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 @Configuration
 @EnableJpaRepositories(
         basePackages = "org.kiru.user",
         entityManagerFactoryRef = "entityManagerFactory",
         transactionManagerRef = "transactionManager"
 )
-@EntityScan(basePackages = {"org.kiru.core.user","org.kiru.core.user.like"})
+@EntityScan(basePackages = {"org.kiru.core.user", "org.kiru.core.user.like"})
 @EnableJpaAuditing
 @Profile({"docker", "local"})
 public class JpaConfig {
@@ -28,10 +31,14 @@ public class JpaConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("dataSource") DataSource dataSource) {
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("hibernate.hbm2ddl.auto", "update");
         return builder
                 .dataSource(dataSource)
                 .packages("org.kiru.core.user")
                 .persistenceUnit("default")
+                .properties(properties)
                 .build();
     }
 
