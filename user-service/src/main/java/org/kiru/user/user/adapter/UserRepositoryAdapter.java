@@ -91,6 +91,12 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
 
         updatedPortfolioItems.addAll(newPortfolioItems);
 
+        if(updatedPortfolioItems.size() > 10){
+            int removeCount = updatedPortfolioItems.size() - 10;
+//            updatedPortfolioItems.sort(Comparator.comparing(UserPortfolio::getSequence));
+            updatedPortfolioItems.subList(0, removeCount).clear();
+        }
+
         userPortfolioRepository.deleteAllByUserId(userId);
         userPortfolio.addOrUpdatePortfolioItems(
                 userPortfolioRepository.saveAll(
