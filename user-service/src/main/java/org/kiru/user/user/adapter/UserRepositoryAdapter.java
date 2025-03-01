@@ -80,7 +80,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
     @Override
     @Transactional
     public UserPortfolio updateUserPortfolioImages(final Long userId, UserUpdateDto userUpdateDto) {
-        Map<Integer, MultipartFile> changedPortfolioImages = userUpdateDto.getPortfolioImages();
+        List<MultipartFile> changedPortfolioImages = userUpdateDto.getPortfolioImages();
         List<UserPortfolioItem> userPortfolioItems = userPortfolioRepository.findAllByUserId(userId).stream()
                 .map(UserPortfolioImg::toModel).toList();
         UserPortfolio userPortfolio =

@@ -72,7 +72,7 @@ public class UserPortfolio {
                 while (index >= this.portfolioItems.size()) {
                     this.portfolioItems.add(null);
                 }
-                this.portfolioItems.set(index, newItem);
+                this.portfolioItems.add(index, newItem);
             }
         }
     }

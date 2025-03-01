@@ -3,12 +3,14 @@ package org.kiru.user.user.service.out;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -66,17 +68,17 @@ class UserUpdatePortTest {
 
     @BeforeEach
     void setUp() {
-        Map<Integer, MultipartFile> items = new HashMap<>();
+        List<MultipartFile> items = new ArrayList<>();
         MultipartFile mockFile = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         MultipartFile mockFile2 = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         MultipartFile mockFile3 = new MockMultipartFile("file", "filename.jpg", "image/jpeg", new byte[0]);
         String mockString = "string";
         String mockString2 = "string2";
-        items.put(1, mockFile);
+        items.add(mockFile);
 //        items.put(2, mockString);
-        items.put(3, mockFile2);
+        items.add(mockFile2);
 //        items.put(4, mockString2);
-        items.put(5, mockFile3);
+        items.add(mockFile3);
         userUpdateDto = UserUpdateDto.builder()
                 .email("test@example.com")
                 .username("user1")
@@ -160,7 +162,7 @@ class UserUpdatePortTest {
         );
         when( userPortfolioRepository.findAllByUserId(1L))
                 .thenReturn(existImagesEntity);
-        when(imageService.saveImagesS3WithSequence(anyMap(), any(),any()))
+        when(imageService.saveImagesS3WithSequence(anyList(), any(),any()))
                 .thenReturn(savedImages);
         when(userPortfolioRepository.saveAll(any()))
                 .thenReturn(savedImagesEntity);
@@ -173,7 +175,7 @@ class UserUpdatePortTest {
         assertThat(result.getPortfolioItems()).isSortedAccordingTo(
                 java.util.Comparator.comparing(UserPortfolioItem::getSequence));
         assertThat(result.getPortfolioItems().getFirst().getItemUrl()).isEqualTo("new-image.jpg");
-        verify(imageService).saveImagesS3WithSequence(anyMap(), any(UserPortfolio.class), anyString());
+        verify(imageService).saveImagesS3WithSequence(anyList(), any(UserPortfolio.class), anyString());
     }
 
     @Test

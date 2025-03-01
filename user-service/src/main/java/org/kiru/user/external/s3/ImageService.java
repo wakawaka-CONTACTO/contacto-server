@@ -76,27 +76,33 @@ public class ImageService {
     }
 
     @Transactional
-    public List<UserPortfolioItem> saveImagesS3WithSequence(final Map<Integer, MultipartFile> changedPortfolioImages , UserPortfolio userPortfolio, String username) {
+    public List<UserPortfolioItem> saveImagesS3WithSequence(final List<MultipartFile> changedPortfolioImages , UserPortfolio userPortfolio, String username) {
         if (changedPortfolioImages == null || changedPortfolioImages.isEmpty())
             return Collections.emptyList();
 
         List<UserPortfolioItem> savedImages = Collections.synchronizedList(new ArrayList<>());
         Long portfolioId = userPortfolio.getPortfolioId() == null ? portfolioIdGenerator.generatePortfolioId() : userPortfolio.getPortfolioId();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            List<CompletableFuture<Void>> futures = changedPortfolioImages.entrySet().stream()
-                    .map(entry -> CompletableFuture.runAsync(() -> {
-                        try {
-                            String imagePath = s3Service.uploadImage(path, entry.getValue());
-                            UserPortfolioItem newImage = UserPortfolioImg.of(userPortfolio.getUserId(),
-                                    portfolioId, cachePath + imagePath,
-                                    entry.getKey(), username);
-                            savedImages.add(newImage);
-                        } catch (IOException e) {
-                            throw new CompletionException(new BadRequestException(FailureCode.BAD_REQUEST));
-                        }
-                    }, executor))
-                    .toList();
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+            for (int i = 0; i < changedPortfolioImages.size(); i++) {
+                final int index = i;
+                MultipartFile file = changedPortfolioImages.get(i);
+
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    try {
+                        String imagePath = s3Service.uploadImage(path, file);
+                        UserPortfolioItem newImage = UserPortfolioImg.of(userPortfolio.getUserId(),
+                            portfolioId, cachePath + imagePath,
+                            index, username);
+                        savedImages.add(newImage);
+                    } catch (IOException e) {
+                        throw new CompletionException(new BadRequestException(FailureCode.BAD_REQUEST));
+                    }
+                }, executor);
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            }
             return savedImages;
         }
     }

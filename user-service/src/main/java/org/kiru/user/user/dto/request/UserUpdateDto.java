@@ -40,5 +40,5 @@ public class UserUpdateDto {
 
     @NotNull
     @Size(max = 10, message = "포트폴리오는 최대 10개까지 등록 가능합니다")
-    private final Map<Integer, MultipartFile> portfolioImages;
+    private final List<MultipartFile> portfolioImages;
 }
