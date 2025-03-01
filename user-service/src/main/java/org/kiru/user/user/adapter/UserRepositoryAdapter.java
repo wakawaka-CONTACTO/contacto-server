@@ -93,7 +93,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
 
         if(updatedPortfolioItems.size() > 10){
             int removeCount = updatedPortfolioItems.size() - 10;
-//            updatedPortfolioItems.sort(Comparator.comparing(UserPortfolio::getSequence));
+            updatedPortfolioItems.sort(Comparator.comparing(UserPortfolioItem::getSequence));
             updatedPortfolioItems.subList(0, removeCount).clear();
         }
 
