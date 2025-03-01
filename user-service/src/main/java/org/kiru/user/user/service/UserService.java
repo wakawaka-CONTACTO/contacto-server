@@ -77,7 +77,7 @@ public class UserService implements GetUserMainPageUseCase {
                 () -> chatApiClient.getRoom(roomId, userId), executor
             );
 
-            CompletableFuture<List<UserPortfolioItem>> userPortfolioImgMapFutre= chatRoomFuture.thenApplyAsync(
+            CompletableFuture<List<UserPortfolioItem>> userPortfolioImgMapFuture= chatRoomFuture.thenApplyAsync(
                 ChatRoom::getParticipantsIds, executor).thenApplyAsync(
                     getUserPortfoliosQuery::getUserPortfoliosWithMinSequence, executor
             );
@@ -90,7 +90,7 @@ public class UserService implements GetUserMainPageUseCase {
                     .toList();
             }, executor);
 
-            return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFutre, (chatRoom, userPortfolioImgMap) -> {
+            return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFuture, (chatRoom, userPortfolioImgMap) -> {
                 chatRoom.setThumbnailAndRoomTitle(userPortfolioImgMap.getFirst());
                 return chatRoom;
             }, executor).thenCombineAsync(messageFuture, ChatRoomResponse::of, executor).join();
