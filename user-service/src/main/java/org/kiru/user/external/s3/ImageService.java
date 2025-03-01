@@ -2,6 +2,7 @@ package org.kiru.user.external.s3;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -75,12 +76,14 @@ public class ImageService {
     }
 
     @Transactional
-    public List<UserPortfolioItem> saveImagesS3WithSequence(final Map<Integer, Object> changedPortfolioImages , UserPortfolio userPortfolio, String username) {
-        Map<Integer,MultipartFile> images = UserPortfolio.findUpdateItem(changedPortfolioImages);
+    public List<UserPortfolioItem> saveImagesS3WithSequence(final Map<Integer, MultipartFile> changedPortfolioImages , UserPortfolio userPortfolio, String username) {
+        if (changedPortfolioImages == null || changedPortfolioImages.isEmpty())
+            return Collections.emptyList();
+
         List<UserPortfolioItem> savedImages = Collections.synchronizedList(new ArrayList<>());
         Long portfolioId = userPortfolio.getPortfolioId() == null ? portfolioIdGenerator.generatePortfolioId() : userPortfolio.getPortfolioId();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            List<CompletableFuture<Void>> futures = images.entrySet().stream()
+            List<CompletableFuture<Void>> futures = changedPortfolioImages.entrySet().stream()
                     .map(entry -> CompletableFuture.runAsync(() -> {
                         try {
                             String imagePath = s3Service.uploadImage(path, entry.getValue());
