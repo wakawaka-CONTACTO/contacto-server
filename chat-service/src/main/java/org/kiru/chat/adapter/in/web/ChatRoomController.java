@@ -12,7 +12,6 @@ import org.kiru.chat.config.argumentresolve.UserId;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,7 +57,7 @@ public class ChatRoomController {
     }
 
     @GetMapping("/rooms/{roomId}/messages")
-    public Slice<Message> getMessageByRoomId(@PathVariable Long roomId, @UserId Long userId,
+    public List<Message> getMessageByRoomId(@PathVariable Long roomId, @UserId Long userId,
                                              @RequestParam Boolean admin, Pageable pageable) {
         return getMessageUseCase.getMessages(roomId, userId, admin, pageable);
     }

@@ -21,7 +21,6 @@ import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.ForbiddenException;
 import org.kiru.core.exception.code.FailureCode;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -83,7 +82,7 @@ public class ChatService implements CreateRoomUseCase, GetChatRoomUseCase , AddP
     }
 
     @Override
-    public Slice<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin,Pageable pageable) {
+    public List<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin,Pageable pageable) {
         return getMessageByRoomQuery.getMessages(roomId, userId,isUserAdmin, pageable);
     }
 }

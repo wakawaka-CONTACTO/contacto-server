@@ -1,5 +1,5 @@
 # Stage 1: custom JRE 생성 (jlink 활용)
-FROM amd64/amazoncorretto:21-alpine-jdk AS builder-jre
+FROM amazoncorretto:21-alpine-jdk AS builder-jre
 RUN apk add --no-cache binutils
 RUN $JAVA_HOME/bin/jlink \
     --module-path "$JAVA_HOME/jmods" \
@@ -10,9 +10,10 @@ RUN $JAVA_HOME/bin/jlink \
     --output /custom-jre
 
 # Stage 2: 애플리케이션 jar 파일 준비
-FROM amd64/amazoncorretto:21-alpine-jdk AS builder
+FROM amazoncorretto:21-alpine-jdk AS builder
 ARG SERVICE_NAME
 WORKDIR /app
+RUN echo ${SERVICE_NAME}
 COPY ${SERVICE_NAME}/build/libs/*.jar app.jar
 ENV SPRING_PROFILES_ACTIVE=dev
 # Stage 3: 최종 이미지 (최소화된 JRE와 애플리케이션 포함)

@@ -4,7 +4,6 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,5 +39,15 @@ public class ChatRoomResponse {
                 .participants(chatRoom.getParticipants())
                 .chatRoomThumbnail(chatRoom.getChatRoomThumbnail())
                 .build();
+    }
+
+    public static ChatRoomResponse of(ChatRoom chatRoom, List<MessageResponse> messages){
+        return ChatRoomResponse.builder()
+            .id(chatRoom.getId())
+            .title(chatRoom.getTitle())
+            .messages(messages)
+            .participants(chatRoom.getParticipants())
+            .chatRoomThumbnail(chatRoom.getChatRoomThumbnail())
+            .build();
     }
 }
