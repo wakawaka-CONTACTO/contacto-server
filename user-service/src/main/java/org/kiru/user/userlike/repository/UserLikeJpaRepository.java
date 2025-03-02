@@ -35,6 +35,14 @@ public interface UserLikeJpaRepository extends JpaRepository<UserLikeJpaEntity, 
     })
     List<Long> findAllMatchedUserIdByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT ul.likedUserId FROM UserLikeJpaEntity ul WHERE ul.userId = :userId")
+    @QueryHints(value = {
+            @QueryHint(name = "org.hibernate.readOnly", value = "true"),
+            @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
+            @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
+    })
+    List<Long> findAllLikedUserIdByUserId(@Param("userId") Long userId);
+
     @Query("SELECT ul FROM UserLikeJpaEntity ul WHERE ul.userId = :likedUserId AND ul.likedUserId = :userId AND ul.likeStatus = :status")
     UserLikeJpaEntity findOppositeLike(@Param("likedUserId") Long likedUserId, @Param("userId") Long userId, @Param("status") LikeStatus status);
 
