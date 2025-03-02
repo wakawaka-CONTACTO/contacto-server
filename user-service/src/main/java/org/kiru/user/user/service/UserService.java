@@ -16,6 +16,8 @@ import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userPortfolioItem.domain.UserPortfolio;
 import org.kiru.core.user.userPortfolioItem.domain.UserPortfolioItem;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
+import org.kiru.user.portfolio.dto.req.AddMultipartFileDto;
+import org.kiru.user.portfolio.dto.req.UpdateResourceDto;
 import org.kiru.user.portfolio.service.out.GetUserPortfoliosQuery;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.dto.request.UserUpdateDto;
@@ -133,7 +135,8 @@ public class UserService implements GetUserMainPageUseCase {
 
     @Transactional
     @CachePut(value = "userDetail", key = "#userId", unless = "#result == null")
-    public User updateUser(final Long userId, final UserUpdateDto userUpdateDto) {
+    public User updateUser(final Long userId, final UserUpdateDto userUpdateDto, List<AddMultipartFileDto> portfolioDtos, UpdateResourceDto updateResourceDto) {
+        userUpdateDto.portfolio(portfolioDtos);
         User user = updateUserDetails(UserJpaEntity.toModel(userRepository.findById(userId)
                         .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND))), userUpdateDto);
         CompletableFuture<List<PurposeType>> purposesFuture = CompletableFuture.supplyAsync(

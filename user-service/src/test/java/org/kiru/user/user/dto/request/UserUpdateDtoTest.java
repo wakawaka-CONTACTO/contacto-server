@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kiru.user.portfolio.dto.req.UpdatePortfolioDto;
+import org.kiru.user.portfolio.dto.req.AddMultipartFileDto;
 import org.springframework.web.multipart.MultipartFile;
 
 class UserUpdateDtoTest {
@@ -37,8 +37,8 @@ class UserUpdateDtoTest {
   @Test
   void testPortfolio_UpdateWithNewAndExistingItems() {
     // Mocking UpdatePortfolioDto 객체 생성
-    UpdatePortfolioDto newItem = mock(UpdatePortfolioDto.class);
-    UpdatePortfolioDto existingItem = mock(UpdatePortfolioDto.class);
+    AddMultipartFileDto newItem = mock(AddMultipartFileDto.class);
+    AddMultipartFileDto existingItem = mock(AddMultipartFileDto.class);
 
     // 새 아이템인 경우
     when(newItem.isNew()).thenReturn(true);
@@ -52,7 +52,7 @@ class UserUpdateDtoTest {
     when(existingItem.getPortfolio()).thenReturn(mockFile);
 
     // 포트폴리오 업데이트 실행
-    List<UpdatePortfolioDto> portfolioList = Arrays.asList(newItem, existingItem);
+    List<AddMultipartFileDto> portfolioList = Arrays.asList(newItem, existingItem);
     userUpdateDto.portfolio(portfolioList);
 
     // 결과 검증

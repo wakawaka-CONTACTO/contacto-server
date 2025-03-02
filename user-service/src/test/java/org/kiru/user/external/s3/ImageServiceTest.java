@@ -92,10 +92,10 @@ class ImageServiceTest {
     @DisplayName("Index를 가진 이미지+텍스트 객체가 들어올때 새롭게 업데이트된 이미지 파일만 저장한다")
     void saveImagesS3WithSequence() throws IOException {
         // given
-        Map<Integer, MultipartFile> changedPortfolioImages =  new HashMap<>();
-//        changedPortfolioImages.put(1, "1.png");
+        Map<Integer, Object> changedPortfolioImages =  new HashMap<>();
+        changedPortfolioImages.put(1, "1.png");
         changedPortfolioImages.put(2, images.get(0));
-//        changedPortfolioImages.put(3, "2.png");
+        changedPortfolioImages.put(3, "2.png");
         changedPortfolioImages.put(4, images.get(1));
         changedPortfolioImages.put(7, images.get(2));
         List<Integer> changeIndex = List.of(2, 4, 7);

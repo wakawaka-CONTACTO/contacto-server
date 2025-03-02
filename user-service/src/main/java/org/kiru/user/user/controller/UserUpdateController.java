@@ -1,11 +1,14 @@
 package org.kiru.user.user.controller;
 
 import jakarta.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
-import org.kiru.user.portfolio.dto.req.UpdatePortfolioDto;
+import org.kiru.user.portfolio.dto.req.AddMultipartFileDto;
+import org.kiru.user.portfolio.dto.req.UpdateResourceDto;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
 import org.kiru.user.user.dto.response.UpdatePwdResponse;
@@ -17,9 +20,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,16 +33,21 @@ public class UserUpdateController {
   @PutMapping(value = "/me", consumes = {"multipart/form-data"})
   public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(@UserId Long userId,
       @Valid @ModelAttribute UserUpdateDto updatedUser,
-      @ModelAttribute List<UpdatePortfolioDto> portfolioImages) {
-//    updatedUser.portfolio(portfolioImages);
-
+      @ModelAttribute ImageList list,
+      @ModelAttribute UpdateResourceDto updatedStored) {
     User user = userService.updateUser(
         userId,
-        updatedUser
+        updatedUser,
+        list.getPortfolioImages()
+        updatedStored
     );
     return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
   }
 
+  @Getter
+  private static class ImageList {
+    private List<AddMultipartFileDto> portfolioImages=new ArrayList<>();
+  }
 
   @PatchMapping(value = "/me/pwd")
   public ResponseEntity<UpdatePwdResponse> updateUserPwd(
