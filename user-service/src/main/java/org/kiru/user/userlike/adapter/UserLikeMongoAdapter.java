@@ -93,6 +93,11 @@ public class UserLikeMongoAdapter implements SendLikeOrDislikeUseCase, GetUserLi
     }
 
     @Override
+    public List<Long> findAllLikedUserIdByUserId(Long userId) {
+        return userLikeRepository.findAllLikedUserIdByUserId(userId).stream().map(UserIdProjection::getUserId).toList();
+    }
+
+    @Override
     public List<Long> findAllLikeMeUserIdAndNotMatchedByLikedUserId(Long likedUserId, Pageable pageable) {
         return userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(likedUserId, pageable)
                 .stream().map(UserIdProjection::getUserId).toList();

@@ -67,6 +67,12 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
     }
 
     @Override
+    public List<Long> findAllLikedUserIdByUserId(Long userId) {
+        List<Long> likedUserIds = userLikeRepository.findAllLikedUserIdByUserId(userId);
+        return likedUserIds;
+    }
+
+    @Override
     @Cacheable(value = "like", key = "#userId+'-'+#pageable.pageNumber", unless = "#result == null")
     public List<Long> findAllLikeMeUserIdAndNotMatchedByLikedUserId(Long userId, Pageable pageable) {
         return userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(userId, pageable);

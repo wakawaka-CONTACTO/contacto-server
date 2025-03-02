@@ -56,6 +56,10 @@ public class PortfolioService {
         return CompletableFuture.supplyAsync(() -> getUserLikeQuery.findAllMatchedUserIdByUserId(userId), executor);
     }
 
+    private CompletableFuture<List<Long>> getAlreadyLikedUserFuture(Long userId, Executor executor) {
+        return CompletableFuture.supplyAsync(() -> getUserLikeQuery.findAllLikedUserIdByUserId(userId), executor);
+    }
+
     private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyMatchedUserFuture,
                                                               List<Long> recommendUserIds) {
         return alreadyMatchedUserFuture.thenApplyAsync(matchedUserIds -> {

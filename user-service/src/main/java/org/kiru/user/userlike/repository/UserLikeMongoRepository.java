@@ -19,5 +19,8 @@ public interface UserLikeMongoRepository extends MongoRepository<UserLikeMongoEn
            fields="{'liked_user_id': 1}")
     List<UserIdProjection> findAllMatchedUserIdByUserId(Long userId);
 
+    @Query(value = "{ 'userId': ?0 }", fields = "{ 'likedUserId': 1, '_id': 0 }")
+    List<UserIdProjection> findAllLikedUserIdByUserId(Long userId);
+
     UserLikeMongoEntity save(UserLike userLike);
 }
