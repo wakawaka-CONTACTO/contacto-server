@@ -24,24 +24,27 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
 public class UserUpdateController {
-    private final UserService userService;
 
-    // 유저 정보 수정
-    @PutMapping(value = "/me", consumes = {"multipart/form-data"})
-    public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(@UserId Long userId, @Valid @ModelAttribute UserUpdateDto updatedUser, @ModelAttribute
-    MultipartFile[] portfolioImages) {
-        updatedUser.portfolio(portfolioImages);
-        User user = userService.updateUser(
-            userId,
-            updatedUser
-        );
-        return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
-    }
+  private final UserService userService;
+
+  // 유저 정보 수정
+  @PutMapping(value = "/me", consumes = {"multipart/form-data"})
+  public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(@UserId Long userId,
+      @Valid @ModelAttribute UserUpdateDto updatedUser, @ModelAttribute
+      MultipartFile[] portfolioImages) {
+    updatedUser.portfolio(portfolioImages);
+    User user = userService.updateUser(
+        userId,
+        updatedUser
+    );
+    return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
+  }
 
 
-    @PatchMapping(value = "/me/pwd")
-    public ResponseEntity<UpdatePwdResponse> updateUserPwd(@RequestBody UserUpdatePwdDto userUpdatePwdDto) {
-        Boolean isSuccess = userService.updateUserPwd(userUpdatePwdDto);
-        return ResponseEntity.ok(new UpdatePwdResponse(isSuccess));
-    }
+  @PatchMapping(value = "/me/pwd")
+  public ResponseEntity<UpdatePwdResponse> updateUserPwd(
+      @RequestBody UserUpdatePwdDto userUpdatePwdDto) {
+    Boolean isSuccess = userService.updateUserPwd(userUpdatePwdDto);
+    return ResponseEntity.ok(new UpdatePwdResponse(isSuccess));
+  }
 }
