@@ -33,7 +33,7 @@ public class RedisStreamSubscriber {
     private final EurekaInstanceConfig eurekaInstanceConfig;
     private final MessageEventListener messageEventListener;
     private final RedisTemplate<String, String> redisTemplateForOne;
-    private final RedisConnectionFactory redisConnectionFactory;
+    private final RedisConnectionFactory redisConnectionFactoryForOne;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private StreamMessageListenerContainer<String, MapRecord<String, String, String>> messageListenerContainer;
@@ -90,7 +90,7 @@ public class RedisStreamSubscriber {
                 }).build();
 
         StreamMessageListenerContainer<String, MapRecord<String, String, String>> container =
-                StreamMessageListenerContainer.create(redisConnectionFactory, containerOptions);
+                StreamMessageListenerContainer.create(redisConnectionFactoryForOne, containerOptions);
 
         container.register(
                 StreamMessageListenerContainer.StreamReadRequest.builder(
