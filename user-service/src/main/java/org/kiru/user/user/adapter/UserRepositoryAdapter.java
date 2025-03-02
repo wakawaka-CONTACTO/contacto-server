@@ -84,11 +84,14 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
                 userPortfolioItems.isEmpty() ? UserPortfolio.withUserId(userId) : UserPortfolio.of(userPortfolioItems);
         List<UserPortfolioItem> updatePortfolioItems = imageService.saveImagesS3WithSequence(changedPortfolioImages,
                 userPortfolio, userUpdateDto.getUsername());
+
         userPortfolioRepository.deleteAllByUserId(userId);
+        userPortfolioRepository.saveAll(userPortfolioItems.stream().map(UserPortfolioImg::toEntity).toList());
         userPortfolio.addOrUpdatePortfolioItems(
                 userPortfolioRepository.saveAll(
                                 updatePortfolioItems.stream().map(UserPortfolioImg::toEntity).toList())
                         .stream().map(UserPortfolioImg::toModel).toList());
+
         return userPortfolio;
     }
 

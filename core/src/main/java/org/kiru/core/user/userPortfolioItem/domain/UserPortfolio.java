@@ -76,9 +76,6 @@ public class UserPortfolio {
     } else {
       for (UserPortfolioItem newItem : updateItems) {
         int index = newItem.getSequence() - 1;
-        if (index < 0) {
-          index = 0;
-        }
         while (index >= this.portfolioItems.size()) {
           this.portfolioItems.add(new UserPortfolioImg());  // 빈 객체 추가
         }
