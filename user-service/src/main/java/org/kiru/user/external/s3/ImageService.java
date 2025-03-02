@@ -75,7 +75,7 @@ public class ImageService {
     }
 
     @Transactional
-    public List<UserPortfolioItem> saveImagesS3WithSequence(final Map<Integer, MultipartFile> changedPortfolioImages , UserPortfolio userPortfolio, String username) {
+    public List<UserPortfolioItem> saveImagesS3WithSequence(final Map<Integer, Object> changedPortfolioImages , UserPortfolio userPortfolio, String username) {
         Map<Integer,MultipartFile> images = UserPortfolio.findUpdateItem(changedPortfolioImages);
         List<UserPortfolioItem> savedImages = Collections.synchronizedList(new ArrayList<>());
         Long portfolioId = userPortfolio.getPortfolioId() == null ? portfolioIdGenerator.generatePortfolioId() : userPortfolio.getPortfolioId();

@@ -43,10 +43,10 @@ public class UserPortfolio {
         this.portfolioItems.sort(Comparator.comparing(UserPortfolioItem::getSequence));
     }
 
-    public static Map<Integer, MultipartFile> findUpdateItem(Map<Integer, MultipartFile> items) {
+    public static Map<Integer, MultipartFile> findUpdateItem(Map<Integer, Object> items) {
         Map<Integer, MultipartFile> updateItem = new HashMap<>();
         if (items != null) {
-            for (Entry<Integer, MultipartFile> entry : items.entrySet()) {
+            for (Entry<Integer, Object> entry : items.entrySet()) {
                 Integer sequence = entry.getKey();
                 Object updatedImg = entry.getValue();
                 if (updatedImg instanceof MultipartFile file) {

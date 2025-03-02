@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +15,7 @@ import org.kiru.core.user.talent.domain.Talent.TalentType;
 
 import java.util.List;
 import java.util.Map;
+import org.kiru.user.portfolio.dto.req.AddMultipartFileDto;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
@@ -42,17 +43,19 @@ public class UserUpdateDto {
     private final List<TalentType> userTalents;
 
     @Size(max = 10, message = "포트폴리오는 최대 10개까지 등록 가능합니다")
-    private Map<Integer, MultipartFile> portfolioImage;
+    private Map<Integer, Object> portfolioImage ;
 
     @Transient
     private final Map<Integer, String> portfolio;
 
 
-    public void portfolio( MultipartFile[]  portfolioImages){
-        portfolioImage = new HashMap<>();
-        for(int i=0 ; i < portfolioImages.length; i++){
-            this.portfolioImage.put(i, portfolioImages[i]);
+    // ✅ setter 메서드 수정
+    public void setPortfolioImages(List<AddMultipartFileDto> portfolioImages) {
+        this.portfolioImage = new HashMap<>();
+        if(portfolioImages == null) return;
+        for (int i = 0; i < portfolioImages.size(); i++) {
+            this.portfolioImage.put(i, portfolioImages.get(i));
         }
-//        this.portfolioImage = portfolioImage;
     }
+
 }
