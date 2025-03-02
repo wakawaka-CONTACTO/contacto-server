@@ -29,7 +29,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Repository
@@ -78,7 +77,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
     @Override
     @Transactional
     public UserPortfolio updateUserPortfolioImages(final Long userId, UserUpdateDto userUpdateDto) {
-        Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolioImage();
+        Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolio();
         List<UserPortfolioItem> userPortfolioItems = userPortfolioRepository.findAllByUserId(userId).stream()
                 .map(UserPortfolioImg::toModel).toList();
         UserPortfolio userPortfolio =

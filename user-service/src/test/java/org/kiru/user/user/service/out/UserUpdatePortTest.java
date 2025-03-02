@@ -82,7 +82,7 @@ class UserUpdatePortTest {
                 .username("user1")
                 .userPurposes(List.of(1, 2, 3))
                 .userTalents(List.of(TalentType.ARCHITECTURE, TalentType.COMPOSE, TalentType.DANCE))
-                .portfolioImage(
+                .portfolio(
                         items
                 )
                 .build();
