@@ -15,6 +15,7 @@ import org.kiru.core.user.talent.domain.Talent.TalentType;
 
 import java.util.List;
 import java.util.Map;
+import org.kiru.user.portfolio.dto.req.UpdatePortfolioDto;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
@@ -45,14 +46,17 @@ public class UserUpdateDto {
     private Map<Integer, MultipartFile> portfolioImage;
 
     @Transient
-    private final Map<Integer, String> portfolio;
+    private Map<Integer, Object> portfolio;
 
 
-    public void portfolio( MultipartFile[]  portfolioImages){
-        portfolioImage = new HashMap<>();
-        for(int i=0 ; i < portfolioImages.length; i++){
-            this.portfolioImage.put(i, portfolioImages[i]);
+    public void portfolio(List<UpdatePortfolioDto> portfolioImages){
+        portfolio = new HashMap<>();
+        for(UpdatePortfolioDto updated: portfolioImages){
+            if(updated.isNew()) {
+                portfolio.put(updated.getKey(), updated.getResource());
+                continue;
+            }
+            portfolio.put(updated.getKey(), updated.getPortfolio());
         }
-//        this.portfolioImage = portfolioImage;
     }
 }

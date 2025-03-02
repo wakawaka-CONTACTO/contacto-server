@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
+import org.kiru.user.portfolio.dto.req.UpdatePortfolioDto;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
 import org.kiru.user.user.dto.response.UpdatePwdResponse;
@@ -30,9 +31,10 @@ public class UserUpdateController {
   // 유저 정보 수정
   @PutMapping(value = "/me", consumes = {"multipart/form-data"})
   public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(@UserId Long userId,
-      @Valid @ModelAttribute UserUpdateDto updatedUser, @ModelAttribute
-      MultipartFile[] portfolioImages) {
-    updatedUser.portfolio(portfolioImages);
+      @Valid @ModelAttribute UserUpdateDto updatedUser,
+      @ModelAttribute List<UpdatePortfolioDto> portfolioImages) {
+//    updatedUser.portfolio(portfolioImages);
+
     User user = userService.updateUser(
         userId,
         updatedUser
