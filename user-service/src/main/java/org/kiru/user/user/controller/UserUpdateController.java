@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.portfolio.dto.req.AddMultipartFileDto;
-import org.kiru.user.portfolio.dto.req.PortfolioImagesRequest;
+//import org.kiru.user.portfolio.dto.req.PortfolioImagesRequest;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
 import org.kiru.user.user.dto.response.UpdatePwdResponse;
@@ -21,7 +21,10 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Int;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,19 +37,14 @@ public class UserUpdateController {
   public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(
       @UserId Long userId,
       @Valid @ModelAttribute UserUpdateDto updatedUser,
-      @ModelAttribute PortfolioImagesRequest portfolioImagesRequest // DTO 사용
+      @RequestParam(required = false) MultipartFile[] portfolioImages,
+      @RequestParam(required = false) int[] keys
   ) {
-    List<AddMultipartFileDto> portfolioImages = (portfolioImagesRequest != null)
-        ? portfolioImagesRequest.getPortfolioImages()
-        : Collections.emptyList(); // null 방지
-
-    updatedUser.setPortfolioImages(portfolioImages);
+    updatedUser.setPortfolioImages(portfolioImages, keys);
     User user = userService.updateUser(userId, updatedUser);
 
     return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
   }
-
-
 
 
   @PatchMapping(value = "/me/pwd")

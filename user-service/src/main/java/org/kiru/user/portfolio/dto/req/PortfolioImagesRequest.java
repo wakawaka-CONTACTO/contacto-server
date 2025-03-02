@@ -8,5 +8,5 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @NoArgsConstructor
 public class PortfolioImagesRequest {
-  private List<AddMultipartFileDto> portfolioImages; // 리스트를 감싸는 DTO
+  private AddMultipartFileDto[] portfolioImages; // 리스트를 감싸는 DTO
 }

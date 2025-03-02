@@ -23,13 +23,23 @@ public class UserPortfolio {
     @Builder.Default
     private final List<UserPortfolioItem> portfolioItems = new ArrayList<>();
 
-    public static UserPortfolio of(List<UserPortfolioItem> items) {
-        return UserPortfolio.builder()
-                .portfolioId(items.isEmpty() ? null : items.getFirst().getPortfolioId())
-                .userId(items.isEmpty() ? null : items.getFirst().getUserId())
-                .portfolioItems(new ArrayList<>(items)) // 수정 가능한 리스트로 설정
-                .build();
+//        return new UserPortfolio(portfolioItems == null ? new ArrayList<>() : portfolioItems);
+public static UserPortfolio of(List<UserPortfolioItem> items) {
+    Long portfolioId = null;
+    Long userId = null;
+
+    // items가 비어 있지 않으면 portfolioId와 userId 설정
+    if (!items.isEmpty()) {
+        portfolioId = items.get(0).getPortfolioId(); // getFirst() 대신 첫 번째 아이템 사용
+        userId = items.get(0).getUserId();
     }
+
+    return UserPortfolio.builder()
+        .portfolioId(portfolioId)
+        .userId(userId)
+        .portfolioItems(new ArrayList<>(items)) // 수정 가능한 리스트로 설정
+        .build();
+}
 
     public static UserPortfolio withUserId(Long userId) {
         return UserPortfolio.builder()
@@ -40,6 +50,7 @@ public class UserPortfolio {
     }
 
     public void sort() {
+        if(this.portfolioItems.isEmpty()) return;
         this.portfolioItems.sort(Comparator.comparing(UserPortfolioItem::getSequence));
     }
 
