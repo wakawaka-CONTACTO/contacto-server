@@ -3,6 +3,7 @@ package org.kiru.user.portfolio.controller;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users/portfolios")
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class PortfolioController {
     @GetMapping
     public ResponseEntity<List<UserPortfolioResDto>> getPortfolios(@UserId Long userId, Pageable pageable) {
         List<UserPortfolioResDto> portfolios = portfolioService.getUserPortfolios(userId,pageable);
+        log.info("추천한 유저들의 포토폴리오: {}", portfolios);
         return ResponseEntity.ok(portfolios);
     }
 

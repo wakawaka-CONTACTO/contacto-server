@@ -34,20 +34,21 @@ public class PortfolioService {
 
     public List<UserPortfolioResDto> getUserPortfolios(Long userId, Pageable pageable) {
         List<Long> distinctUserIds = getDistinctUserIds(userId, pageable);
+        log.info("추천한 유저Id: {}", distinctUserIds);
         return getUserPortfoliosQuery.findAllPortfoliosByUserIds(distinctUserIds);
     }
 
     private List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
 //         이미 매칭된 유저
-        CompletableFuture<List<Long>> alreadyMatchedUserFuture = getAlreadyMatchedUserFuture(userId,
-                virtualThreadExecutor).thenApply(matchedUserIds ->
+        CompletableFuture<List<Long>> alreadyLikedUserFuture = getAlreadyLikedUserFuture(userId,
+                virtualThreadExecutor).thenApply(likedUserIds ->
         {
-            matchedUserIds.add(userId);
-            return matchedUserIds;
+            likedUserIds.add(userId);
+            return likedUserIds;
         });
 //          추천 로직에 의한 유저
         List<Long> recommendUserIds = getRecommendUserIdsQuery.getRecommendUserIds(userId, pageable);
-        CompletableFuture<List<Long>> userPortfolioIds = getUserPortfolioIds(alreadyMatchedUserFuture,
+        CompletableFuture<List<Long>> userPortfolioIds = getUserPortfolioIds(alreadyLikedUserFuture,
                 recommendUserIds);
         return userPortfolioIds.join();
     }
@@ -60,11 +61,13 @@ public class PortfolioService {
         return CompletableFuture.supplyAsync(() -> getUserLikeQuery.findAllLikedUserIdByUserId(userId), executor);
     }
 
-    private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyMatchedUserFuture,
+    private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyLikedUserFuture,
                                                               List<Long> recommendUserIds) {
-        return alreadyMatchedUserFuture.thenApplyAsync(matchedUserIds -> {
+        log.info("필터 안된 추천한 유저Id: {}", recommendUserIds);
+        log.info("좋아요 눌렀던 유저Id: {}", alreadyLikedUserFuture.join());
+        return alreadyLikedUserFuture.thenApplyAsync(likedUserIds -> {
                     List<Long> recommendUserIdList = new ArrayList<>(recommendUserIds);
-                    recommendUserIdList.removeAll(matchedUserIds);
+                    recommendUserIdList.removeAll(likedUserIds);
                     return recommendUserIdList;
                 }, virtualThreadExecutor)
                 .exceptionally(throwable -> {
