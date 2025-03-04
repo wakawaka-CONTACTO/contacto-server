@@ -190,4 +190,8 @@ public class UserService implements GetUserMainPageUseCase {
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
 }
