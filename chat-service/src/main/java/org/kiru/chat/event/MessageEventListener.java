@@ -1,6 +1,5 @@
 package org.kiru.chat.event;
 
-import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +16,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
-public class MessageEventListener implements StreamListener<String, MapRecord<String,String,String>> {
+public class MessageEventListener implements StreamListener<String, MapRecord<String, String, String>> {
     private final SimpMessagingTemplate messagingTemplate;
     private final SaveMessagePort saveMessagePort;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -32,14 +33,15 @@ public class MessageEventListener implements StreamListener<String, MapRecord<St
         try {
             String recordId = message.getId().getValue();
             Map<String, String> map = message.getValue();
-            Message saveMessage = saveMessagePort.save(Message.of(map));
+            Message saveMessage = Message.of(map);
+
             messagingTemplate.convertAndSend(
                     "/topic/" + saveMessage.getChatRoomId(),
                     saveMessage
             );
             String receiverId = map.get("receiverId");
             sendMessagePort.sendMessageAck(recordId);
-            applicationEventPublisher.publishEvent(MessageCreateEvent.of(receiverId,saveMessage));
+            applicationEventPublisher.publishEvent(MessageCreateEvent.of(receiverId, saveMessage));
         } catch (RedisSystemException e) {
             log.error("Redis Listener Error: ERROR: {}", e.getMessage());
             throw new ContactoException(FailureCode.CHAT_MESSAGE_SEND_FAILED);
