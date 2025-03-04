@@ -57,6 +57,4 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             "INNER JOIN UserPortfolioImg p ON u.id = p.userId " +
             "WHERE p.sequence = 1 AND u.username LIKE %:name% ")
     Slice<UserDto> findSimpleUserByName(String name, Pageable pageable);
-
-    boolean existsByEmail(String email);
 }
