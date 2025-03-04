@@ -2,13 +2,10 @@ package org.kiru.user.auth.mail.controller;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.kiru.core.exception.ConflictException;
-import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.auth.mail.dto.MailCheckDto;
 import org.kiru.user.auth.mail.dto.MailCheckResponse;
 import org.kiru.user.auth.mail.dto.MailSendDto;
 import org.kiru.user.auth.mail.service.MailService;
-import org.kiru.user.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
