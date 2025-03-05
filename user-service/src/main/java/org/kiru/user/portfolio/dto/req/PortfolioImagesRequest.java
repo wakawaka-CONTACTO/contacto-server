@@ -8,5 +8,15 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @NoArgsConstructor
 public class PortfolioImagesRequest {
-  private AddMultipartFileDto[] portfolioImages; // 리스트를 감싸는 DTO
+
+  private List<MultipartFile> portfolio;
+  private List<Integer> keys;
+
+  public boolean isValid(){
+    return portfolio.size() == keys.size() ? true : false;
+  }
+
+  public int size(){
+    return portfolio.size();
+  }
 }
