@@ -77,18 +77,21 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
     @Override
     @Transactional
     public UserPortfolio updateUserPortfolioImages(final Long userId, UserUpdateDto userUpdateDto) {
-        Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolioImages();
+        Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolio();
         List<UserPortfolioItem> userPortfolioItems = userPortfolioRepository.findAllByUserId(userId).stream()
                 .map(UserPortfolioImg::toModel).toList();
         UserPortfolio userPortfolio =
                 userPortfolioItems.isEmpty() ? UserPortfolio.withUserId(userId) : UserPortfolio.of(userPortfolioItems);
         List<UserPortfolioItem> updatePortfolioItems = imageService.saveImagesS3WithSequence(changedPortfolioImages,
                 userPortfolio, userUpdateDto.getUsername());
+
         userPortfolioRepository.deleteAllByUserId(userId);
+        userPortfolioRepository.saveAll(userPortfolioItems.stream().map(UserPortfolioImg::toEntity).toList());
         userPortfolio.addOrUpdatePortfolioItems(
                 userPortfolioRepository.saveAll(
                                 updatePortfolioItems.stream().map(UserPortfolioImg::toEntity).toList())
                         .stream().map(UserPortfolioImg::toModel).toList());
+
         return userPortfolio;
     }
 
