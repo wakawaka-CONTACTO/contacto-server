@@ -1,7 +1,8 @@
 package org.kiru.user.user.adapter;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kiru.core.exception.EntityNotFoundException;
@@ -23,11 +25,9 @@ import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.external.s3.ImageService;
 import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.dto.request.UserUpdateDto;
-
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.repository.UserTalentRepository;
-import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,18 +50,16 @@ public class UserRepositoryAdapterUniutTest {
   @Mock
   private ImageService imageService;
 
-  // UserQueryWithCache는 캐시관련 인터페이스로, 여기서는 saveExistUser 호출 시 스텁 처리에 활용합니다.
-  @Mock
-  private UserQueryWithCache userQueryWithCache;
-
   @InjectMocks
   private UserRepositoryAdapter adapter;
 
-  // --- getUser 테스트 ---
-  @Test
-  public void testGetUser_Success() {
-    Long userId = 1L;
-    UserJpaEntity entity = UserJpaEntity.builder()
+  private Long userId;
+  private UserJpaEntity defaultEntity;
+
+  @BeforeEach
+  public void setUp() {
+    userId = 1L;
+    defaultEntity = UserJpaEntity.builder()
         .id(userId)
         .username("testUser")
         .email("test@example.com")
@@ -70,7 +68,11 @@ public class UserRepositoryAdapterUniutTest {
         .webUrl("http://example.com")
         .password("secret")
         .build();
-    when(userRepository.findById(userId)).thenReturn(Optional.of(entity));
+  }
+
+  @Test
+  public void testGetUser_Success() {
+    when(userRepository.findById(userId)).thenReturn(Optional.of(defaultEntity));
 
     User user = adapter.getUser(userId);
 
@@ -81,16 +83,13 @@ public class UserRepositoryAdapterUniutTest {
 
   @Test
   public void testGetUser_NotFound() {
-    Long userId = 1L;
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
     assertThrows(EntityNotFoundException.class, () -> adapter.getUser(userId));
   }
 
-  // --- saveExistUser 테스트 ---
   @Test
   public void testSaveExistUser_PasswordNotCleared() {
-    Long userId = 1L;
     String originalPassword = "originalPassword";
     User user = User.builder()
         .id(userId)
@@ -103,7 +102,6 @@ public class UserRepositoryAdapterUniutTest {
         .build();
     when(userRepository.existsById(userId)).thenReturn(true);
 
-    // 저장시 변환된 엔티티를 그대로 반환하도록 스텁 처리
     UserJpaEntity savedEntity = UserJpaEntity.of(user);
     when(userRepository.save(any(UserJpaEntity.class))).thenReturn(savedEntity);
 
@@ -116,22 +114,18 @@ public class UserRepositoryAdapterUniutTest {
 
   @Test
   public void testSaveExistUser_UserNotFound() {
-    Long userId = 2L;
-    User user = User.builder().id(userId).build();
-    when(userRepository.existsById(userId)).thenReturn(false);
+    Long nonExistingId = 2L;
+    User user = User.builder().id(nonExistingId).build();
+    when(userRepository.existsById(nonExistingId)).thenReturn(false);
 
     assertThrows(EntityNotFoundException.class, () -> adapter.saveExistUser(user));
   }
 
-  // --- updateUserPurposes 테스트 ---
   @Test
   public void testUpdateUserPurposes() {
-    Long userId = 1L;
-    // UserUpdateDto에 userPurposes로 [1, 2, 3] 전달
     UserUpdateDto dto = UserUpdateDto.builder()
         .userPurposes(List.of(1, 2, 3))
         .build();
-    // dummy UserPurpose 엔티티 생성
     UserPurpose up1 = UserPurpose.builder().userId(userId).purposeType(PurposeType.fromIndex(1))
         .build();
     UserPurpose up2 = UserPurpose.builder().userId(userId).purposeType(PurposeType.fromIndex(2))
@@ -150,17 +144,12 @@ public class UserRepositoryAdapterUniutTest {
     assertTrue(result.contains(PurposeType.fromIndex(3)));
   }
 
-  // --- updateUserTalents 테스트 ---
   @Test
   public void testUpdateUserTalents() {
-    Long userId = 1L;
-    List<TalentType> talents = List.of(TalentType.ARCHITECTURE, TalentType.COMPOSE,
-        TalentType.DANCE);
+    List<TalentType> talents = List.of(TalentType.ARCHITECTURE, TalentType.COMPOSE, TalentType.DANCE);
     UserUpdateDto dto = UserUpdateDto.builder()
         .userTalents(talents)
         .build();
-    // dummy UserTalent 엔티티 생성
-    // (UserTalent.builder()를 통해 생성된 객체의 getTalentType()이 해당 TalentType을 반환한다고 가정)
     var ut1 = org.kiru.core.user.talent.entity.UserTalent.builder().userId(userId)
         .talentType(TalentType.ARCHITECTURE).build();
     var ut2 = org.kiru.core.user.talent.entity.UserTalent.builder().userId(userId)
@@ -179,41 +168,30 @@ public class UserRepositoryAdapterUniutTest {
     assertTrue(result.contains(TalentType.DANCE));
   }
 
-  // --- updateUserPortfolioImages 테스트 ---
   @Test
   public void testUpdateUserPortfolioImages() {
-    Long userId = 1L;
-    // 간단한 portfolio Map (실제는 MultipartFile 또는 String 등 다양한 Object가 올 수 있음)
     Map<Integer, Object> portfolioMap = Map.of(1, "dummyString");
     UserUpdateDto dto = UserUpdateDto.builder()
         .portfolio(portfolioMap)
         .username("testUser")
         .build();
 
-    // 기존에 저장된 portfolio가 없는 경우 빈 리스트 반환
     when(userPortfolioRepository.findAllByUserId(userId)).thenReturn(Collections.emptyList());
 
-    // imageService.saveImagesS3WithSequence 호출 시 dummy UserPortfolioItem 리스트 반환
     UserPortfolioItem dummyItem = new UserPortfolioImg();
     List<UserPortfolioItem> dummyItems = List.of(dummyItem);
-    when(imageService.saveImagesS3WithSequence(eq(portfolioMap), any(UserPortfolio.class),
-        eq("testUser")))
+    when(imageService.saveImagesS3WithSequence(eq(portfolioMap), any(UserPortfolio.class), eq("testUser")))
         .thenReturn(dummyItems);
 
-    // deleteAllByUserId와 saveAll은 단순히 호출되고, saveAll은 빈 리스트나 동일한 리스트 반환하도록 스텁 처리
     when(userPortfolioRepository.saveAll(any())).thenReturn(Collections.emptyList());
 
     UserPortfolio portfolio = adapter.updateUserPortfolioImages(userId, dto);
 
     assertNotNull(portfolio);
-    // portfolio 내부에 addOrUpdatePortfolioItems() 호출로 추가되었는지 등은
-    // UserPortfolio의 equals나 getter를 통해 상세하게 확인할 수 있다면 추가 검증 가능
   }
 
-  // --- getUserPurposes 테스트 ---
   @Test
   public void testGetUserPurposes() {
-    Long userId = 1L;
     UserPurpose up1 = UserPurpose.builder().userId(userId).purposeType(PurposeType.fromIndex(1))
         .build();
     UserPurpose up2 = UserPurpose.builder().userId(userId).purposeType(PurposeType.fromIndex(2))
@@ -229,10 +207,8 @@ public class UserRepositoryAdapterUniutTest {
     assertTrue(result.contains(PurposeType.fromIndex(2)));
   }
 
-  // --- getUserTalents 테스트 ---
   @Test
   public void testGetUserTalents() {
-    Long userId = 1L;
     var ut1 = org.kiru.core.user.talent.entity.UserTalent.builder().userId(userId)
         .talentType(TalentType.ARCHITECTURE).build();
     var ut2 = org.kiru.core.user.talent.entity.UserTalent.builder().userId(userId)
@@ -248,10 +224,8 @@ public class UserRepositoryAdapterUniutTest {
     assertTrue(result.contains(TalentType.DANCE));
   }
 
-  // --- getUserPortfolioByUserId 테스트 ---
   @Test
   public void testGetUserPortfolioByUserId() {
-    Long userId = 1L;
     UserPortfolioImg img1 = UserPortfolioImg.builder().build();
     UserPortfolioImg img2 = UserPortfolioImg.builder().build();
     List<UserPortfolioImg> imgs = List.of(img1, img2);
