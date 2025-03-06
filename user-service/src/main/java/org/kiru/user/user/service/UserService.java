@@ -134,27 +134,42 @@ public class UserService implements GetUserMainPageUseCase {
     @Transactional
     @CachePut(value = "userDetail", key = "#userId", unless = "#result == null")
     public User updateUser(final Long userId, final UserUpdateDto userUpdateDto) {
-        User user = updateUserDetails(UserJpaEntity.toModel(userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND))), userUpdateDto);
+        UserJpaEntity existingEntity = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+        User updatedData = User.builder()
+            .id(existingEntity.getId())
+            .username(userUpdateDto.getUsername() != null ? userUpdateDto.getUsername() : null)
+            .email(userUpdateDto.getEmail() != null ? userUpdateDto.getEmail() : null)
+            .description(userUpdateDto.getDescription() != null ? userUpdateDto.getDescription() : null)
+            .instagramId(userUpdateDto.getInstagramId() != null ? userUpdateDto.getInstagramId() : null)
+            .webUrl(userUpdateDto.getWebUrl() != null ? userUpdateDto.getWebUrl() : null)
+            .password(null)
+            .loginType(null)
+            .build();
+        existingEntity.updateDetails(updatedData);
+
+        UserJpaEntity savedEntity = userRepository.save(existingEntity);
+        User savedUser = UserJpaEntity.toModel(savedEntity);
+
         CompletableFuture<List<PurposeType>> purposesFuture = CompletableFuture.supplyAsync(
                 () -> userUpdateport.updateUserPurposes(userId, userUpdateDto)).thenApplyAsync(purposeTypeList -> {
-            user.userPurposes(purposeTypeList);
+            savedUser.userPurposes(purposeTypeList);
             return purposeTypeList;
         });
         CompletableFuture<List<TalentType>> talentsFuture = CompletableFuture.supplyAsync(
                 () -> userUpdateport.updateUserTalents(userId, userUpdateDto)).thenApplyAsync(talentTypeList -> {
-            user.userTalents(talentTypeList);
+            savedUser.userTalents(talentTypeList);
             return talentTypeList;
         });
         CompletableFuture<UserPortfolio> userPortfolioFuture = CompletableFuture.supplyAsync(
                 () -> userUpdateport.updateUserPortfolioImages(userId, userUpdateDto)).thenApplyAsync(userPortfolio -> {
-            user.userPortfolio(userPortfolio);
+            savedUser.userPortfolio(userPortfolio);
             return userPortfolio;
         });
         CompletableFuture.allOf(purposesFuture, talentsFuture, userPortfolioFuture).join();
-        userQueryWithCache.saveExistUser(user);
-        user.getUserPortfolio().sort();
-        return user;
+        userQueryWithCache.saveExistUser(savedUser);
+        savedUser.getUserPortfolio().sort();
+        return savedUser;
     }
 
     private User updateUserDetails(User user, UserUpdateDto userUpdateDto) {
@@ -162,8 +177,8 @@ public class UserService implements GetUserMainPageUseCase {
                 .id(user.getId())
                 .username(userUpdateDto.getUsername())
                 .webUrl(userUpdateDto.getWebUrl())
-                .email(userUpdateDto.getEmail())
-                .username(userUpdateDto.getUsername())
+//                .email(userUpdateDto.getEmail())
+//                .password(userUpdateDto.getPassword())
                 .description(userUpdateDto.getDescription())
                 .instagramId(userUpdateDto.getInstagramId())
                 .build();

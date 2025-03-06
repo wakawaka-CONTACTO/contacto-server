@@ -58,6 +58,7 @@ public class User {
                 .description(user.getDescription())
                 .instagramId(user.getInstagramId())
                 .webUrl(user.getWebUrl())
+                .password(user.getPassword())
                 .build();
     }
 

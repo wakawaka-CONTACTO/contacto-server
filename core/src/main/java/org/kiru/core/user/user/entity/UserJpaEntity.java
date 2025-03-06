@@ -58,7 +58,7 @@ public class UserJpaEntity {
     @Column(name = "web_url")
     private String webUrl;
 
-    @Column(name = "password", nullable = true)
+    @Column(name = "password")
     @Setter
     private String password;
 
@@ -90,6 +90,7 @@ public class UserJpaEntity {
                 .description(entity.getDescription())
                 .instagramId(entity.getInstagramId())
                 .webUrl(entity.getWebUrl())
+                .password(entity.getPassword())
                 .build();
     }
 
@@ -112,5 +113,9 @@ public class UserJpaEntity {
         if (user.getPassword() != null) {
             this.password = user.getPassword();
         }
+        if(user.getLoginType() != null){
+            this.loginType = user.getLoginType();
+        }
     }
+
 }
