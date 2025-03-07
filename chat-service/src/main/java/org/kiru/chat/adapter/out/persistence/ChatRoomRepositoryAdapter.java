@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
+import org.kiru.core.common.PageableResponse;
+import org.kiru.chat.adapter.out.persistence.dto.ChatRoomProjection;
 import org.kiru.chat.adapter.out.persistence.dto.ChatRoomWithDetails;
 import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
@@ -22,6 +24,7 @@ import org.kiru.core.exception.ForbiddenException;
 import org.kiru.core.exception.code.FailureCode;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,9 +72,10 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
                 .map(ChatRoomJpaEntity::toModel);
     }
 
-    public List<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
-        return userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(
-                userId, pageable).getContent().stream().parallel().map(result -> {
+    public PageableResponse<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
+        Slice<ChatRoomProjection> chatRoomSlice =
+                userJoinChatRoomRepository.findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(userId, pageable);
+        List<ChatRoom> chatRooms = chatRoomSlice.getContent().stream().map(result -> {
             ChatRoom chatRoom = ChatRoomJpaEntity.toModel(result.getChatRoom());
             int unreadMessageCount = result.getUnreadMessageCount();
             String latestMessageContent = result.getLatestMessageContent();
@@ -86,6 +90,7 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
             chatRoom.setLatestMessageContent(latestMessageContent);
             return chatRoom;
         }).toList();
+        return PageableResponse.of(chatRoomSlice, chatRooms);
     }
 
     @Transactional

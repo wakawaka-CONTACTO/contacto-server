@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
+import org.kiru.core.common.PageableResponse;
 import org.kiru.chat.adapter.out.persistence.GetOtherParticipantQuery;
 import org.kiru.chat.application.port.in.AddParticipantUseCase;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
@@ -44,7 +45,7 @@ public class ChatService implements CreateRoomUseCase, GetChatRoomUseCase , AddP
     }
 
     @Override
-    public List<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
+    public PageableResponse<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
         return getChatRoomQuery.findRoomsByUserId(userId,pageable);
     }
 

@@ -301,4 +301,5 @@ discovery.sh
 chat.sh
 all.sh
 redis.conf/redis.conf
-
+redis.conf
+pg_hba.conf

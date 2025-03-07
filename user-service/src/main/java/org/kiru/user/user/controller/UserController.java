@@ -1,8 +1,8 @@
 package org.kiru.user.user.controller;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.common.PageableResponse;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.response.ChatRoomListResponse;
@@ -33,9 +33,10 @@ public class UserController {
     }
 
     @GetMapping("/me/chatroom")
-    public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@UserId Long userId, Pageable pageable){
-        List<ChatRoom> chatRooms = userService.getUserChatRooms(userId,pageable);
-        return ResponseEntity.ok(chatRooms.stream().map(ChatRoomListResponse::of).toList());
+    public ResponseEntity<PageableResponse<ChatRoomListResponse>> getUserChatRooms(@UserId Long userId, Pageable pageable) {
+        PageableResponse<ChatRoom> chatRoomPageableResponse = userService.getUserChatRooms(userId, pageable);
+        return ResponseEntity.ok(PageableResponse.of(chatRoomPageableResponse,
+                chatRoomPageableResponse.getContent().stream().map(ChatRoomListResponse::of).toList()));
     }
 
     @GetMapping("/me/chatroom/{roomId}")

@@ -2,6 +2,7 @@ package org.kiru.user.user.api;
 
 import java.util.List;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.common.PageableResponse;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.config.FeignConfig;
@@ -9,7 +10,6 @@ import org.kiru.user.userlike.api.CreateChatRoomRequest;
 import org.kiru.user.userlike.api.CreateChatRoomResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "chat-service",configuration = FeignConfig.class)
 public interface ChatApiClient {
     @GetMapping("/api/v1/chat/rooms")
-    List<ChatRoom> getUserChatRooms(@RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);
+    PageableResponse<ChatRoom> getUserChatRooms(@RequestHeader("X-User-Id") Long userId, @RequestParam Pageable pageable);
 
     @GetMapping("/api/v1/chat/rooms/{roomId}")
     ChatRoom getRoom(@PathVariable("roomId") Long roomId, @RequestHeader("X-User-Id") Long userId);
