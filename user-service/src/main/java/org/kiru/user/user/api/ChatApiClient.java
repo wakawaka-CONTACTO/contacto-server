@@ -45,5 +45,5 @@ public interface ChatApiClient {
     ChatRoom getOrCreateCsChatRoom(@RequestParam Long adminId, @RequestParam Long userId);
 
     @GetMapping("/api/v1/chat/rooms/{roomId}/messages")
-    List<Message> getMessages(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId,@RequestParam Boolean admin, @RequestParam Pageable pageable);
+    PageableResponse<Message> getMessages(@PathVariable Long roomId, @RequestHeader("X-User-Id") Long userId,@RequestParam Boolean admin, @RequestParam Pageable pageable);
 }

@@ -6,7 +6,9 @@ import org.kiru.chat.application.port.out.GetMessageByRoomQuery;
 import org.kiru.chat.application.port.out.SaveMessagePort;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.chat.message.entity.MessageJpaEntity;
+import org.kiru.core.common.PageableResponse;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,17 +39,15 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
     }
 
     @Override
-    public List<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin, Pageable pageable) {
-        return messageRepository.findAllByChatRoomIdOrderByCreatedAtAscIdAsc(roomId, pageable)
-            .getContent()
-            .stream()
-            .parallel()
-            .map(messageJpaEntity -> {
-                if (!messageJpaEntity.getSenderId().equals(userId) && !isUserAdmin) {
-                    messageJpaEntity.setReadStatus(true);
-                }
-                return MessageJpaEntity.toModel(messageJpaEntity);
-            })
-            .toList();
+    public PageableResponse<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin, Pageable pageable) {
+        Slice<MessageJpaEntity> messageSlice = messageRepository.findAllByChatRoomId(roomId, pageable);
+        List<Message> messages = messageSlice.getContent().stream().parallel().map(messageJpaEntity -> {
+                    if (!messageJpaEntity.getSenderId().equals(userId) && !isUserAdmin) {
+                        messageJpaEntity.setReadStatus(true);
+                    }
+                    return MessageJpaEntity.toModel(messageJpaEntity);
+                })
+                .toList();
+        return PageableResponse.of(messageSlice, messages);
     }
 }

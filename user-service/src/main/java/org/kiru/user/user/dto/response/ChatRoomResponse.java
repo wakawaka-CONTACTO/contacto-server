@@ -40,14 +40,4 @@ public class ChatRoomResponse {
                 .chatRoomThumbnail(chatRoom.getChatRoomThumbnail())
                 .build();
     }
-
-    public static ChatRoomResponse of(ChatRoom chatRoom, List<MessageResponse> messages){
-        return ChatRoomResponse.builder()
-            .id(chatRoom.getId())
-            .title(chatRoom.getTitle())
-            .messages(messages)
-            .participants(chatRoom.getParticipants())
-            .chatRoomThumbnail(chatRoom.getChatRoomThumbnail())
-            .build();
-    }
 }
