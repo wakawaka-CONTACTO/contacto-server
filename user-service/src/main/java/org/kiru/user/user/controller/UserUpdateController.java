@@ -35,22 +35,17 @@ public class UserUpdateController {
   public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(
       @UserId Long userId,
       @Valid @ModelAttribute UserUpdateDto updatedUser,
-      // 새로 업로드할 이미지와 각 이미지의 순서를 나타내는 배열
       @RequestParam(required = false) MultipartFile[] portfolioImages,
       @RequestParam(required = false) int[] newImageKeys,
-      // 기존 이미지 URL과 각 이미지의 순서를 나타내는 배열
       @RequestParam(required = false) List<String> existingPortfolioImageUrls,
       @RequestParam(required = false) int[] existingImageKeys
   ) {
-    // portfolio 맵이 없다면 초기화
     if (updatedUser.getPortfolio() == null) {
       updatedUser.setPortfolio(new HashMap<>());
     }
 
-    // 두 그룹의 키가 중복되지 않는지 검증
     validateImageKeys(newImageKeys, existingImageKeys);
 
-    // 새 이미지와 기존 이미지를 각각 portfolio 맵에 추가
     addNewImages(updatedUser, portfolioImages, newImageKeys);
     addExistingImages(updatedUser, existingPortfolioImageUrls, existingImageKeys);
 
@@ -58,7 +53,6 @@ public class UserUpdateController {
     return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
   }
 
-  // 새 이미지와 기존 이미지의 키 중복 여부를 검증하는 메서드
   private void validateImageKeys(int[] newImageKeys, int[] existingImageKeys) {
     Set<Integer> allKeys = new HashSet<>();
     if (newImageKeys != null) {
@@ -77,7 +71,6 @@ public class UserUpdateController {
     }
   }
 
-  // 새 이미지와 해당 키를 portfolio 맵에 추가하는 메서드
   private void addNewImages(UserUpdateDto updatedUser, MultipartFile[] portfolioImages, int[] newImageKeys) {
     if (portfolioImages != null && newImageKeys != null) {
       if (portfolioImages.length != newImageKeys.length) {
@@ -89,7 +82,6 @@ public class UserUpdateController {
     }
   }
 
-  // 기존 이미지 URL과 해당 키를 portfolio 맵에 추가하는 메서드
   private void addExistingImages(UserUpdateDto updatedUser, List<String> existingPortfolioImageUrls, int[] existingImageKeys) {
     if (existingPortfolioImageUrls != null && existingImageKeys != null) {
       if (existingPortfolioImageUrls.size() != existingImageKeys.length) {
