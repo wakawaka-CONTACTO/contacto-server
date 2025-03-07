@@ -64,7 +64,7 @@ public class MailService {
             log.error(e.getMessage());
             throw new IllegalArgumentException("메일 발송 중 오류가 발생했습니다.");
         }
-        return number;
+        return "OK";
     }
 
     public Boolean checkMessage(MailCheckDto mailCheckDto) {
