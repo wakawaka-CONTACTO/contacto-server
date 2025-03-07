@@ -51,4 +51,8 @@ public class UserUpdateDto {
         }
     }
 
+    public void setPortfolio(Map<Integer, Object> inputImages){
+        this.portfolio = inputImages;
+    }
+
 }
