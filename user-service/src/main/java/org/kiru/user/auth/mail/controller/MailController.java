@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.kiru.user.auth.mail.dto.MailCheckDto;
 import org.kiru.user.auth.mail.dto.MailCheckResponse;
 import org.kiru.user.auth.mail.dto.MailSendDto;
+import org.kiru.user.auth.mail.dto.MailSendResponse;
 import org.kiru.user.auth.mail.service.MailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,8 +21,8 @@ public class MailController {
     private final MailService mailService;
 
     @PostMapping("/emailsend")
-    public String emailCheck(@RequestBody MailSendDto mailSendDTO) throws MessagingException {
-        return mailService.sendSimpleMessage(mailSendDTO.getEmail()); // Response body에 값을 반환
+    public ResponseEntity<MailSendResponse> emailCheck(@RequestBody MailSendDto mailSendDTO) throws MessagingException {
+        return ResponseEntity.ok(new MailSendResponse(mailService.sendSimpleMessage(mailSendDTO.getEmail()))); // Response body에 값을 반환
     }
 
     @PostMapping("/emailcheck")
