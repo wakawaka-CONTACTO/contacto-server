@@ -83,7 +83,7 @@ public class ChatService implements CreateRoomUseCase, GetChatRoomUseCase , AddP
     }
 
     @Override
-    public List<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin,Pageable pageable) {
+    public PageableResponse<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin,Pageable pageable) {
         return getMessageByRoomQuery.getMessages(roomId, userId,isUserAdmin, pageable);
     }
 }

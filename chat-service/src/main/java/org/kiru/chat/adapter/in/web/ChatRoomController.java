@@ -58,7 +58,7 @@ public class ChatRoomController {
     }
 
     @GetMapping("/rooms/{roomId}/messages")
-    public List<Message> getMessageByRoomId(@PathVariable Long roomId, @UserId Long userId,
+    public PageableResponse<Message> getMessageByRoomId(@PathVariable Long roomId, @UserId Long userId,
                                              @RequestParam Boolean admin, Pageable pageable) {
         return getMessageUseCase.getMessages(roomId, userId, admin, pageable);
     }

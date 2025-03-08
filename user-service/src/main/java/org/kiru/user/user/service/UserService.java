@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.common.PageableResponse;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.code.FailureCode;
@@ -21,7 +22,6 @@ import org.kiru.user.portfolio.service.out.GetUserPortfoliosQuery;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
-import org.kiru.user.user.dto.response.ChatRoomResponse;
 import org.kiru.user.user.dto.response.MessageResponse;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.service.in.GetUserMainPageUseCase;
@@ -30,9 +30,7 @@ import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.kiru.user.user.service.out.UserUpdatePort;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,35 +71,28 @@ public class UserService implements GetUserMainPageUseCase {
         }
     }
 
-    public ChatRoomResponse getChatMessage(Long roomId, Long userId, int page, int size) {
+    public PageableResponse<MessageResponse> getChatMessage(Long roomId, Long userId, Pageable pageable) {
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-        CompletableFuture<ChatRoom> chatRoomFuture = CompletableFuture.supplyAsync(
-                () -> chatApiClient.getRoom(roomId, userId), executor);
-        CompletableFuture<List<UserPortfolioItem>> userPortfolioImgMapFuture = chatRoomFuture.thenApplyAsync(
-                ChatRoom::getParticipantsIds, executor).thenApplyAsync(
-                getUserPortfoliosQuery::getUserPortfoliosWithMinSequence, executor);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        CompletableFuture<List<MessageResponse>> messageFuture = CompletableFuture.supplyAsync(
-                () -> chatApiClient.getMessages(roomId, userId, false, pageable)
-                .stream().map(MessageResponse::fromMessage).toList(), executor);
-        return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFuture,
-                (chatRoom, userPortfolioImgMap) -> {
-                    chatRoom.setThumbnailAndRoomTitle(userPortfolioImgMap.getFirst());
-                    return chatRoom;
-                }, executor).thenCombineAsync(messageFuture, ChatRoomResponse::of, executor).join();
+            return CompletableFuture.supplyAsync(() -> {
+                PageableResponse<Message> messageResponse = chatApiClient.getMessages(roomId, userId, false, pageable);
+                List<MessageResponse> messageResponseList = messageResponse.getContent()
+                        .stream().map(MessageResponse::fromMessage).toList();
+                return PageableResponse.of(messageResponse, messageResponseList);
+            }, executor).join();
         }
     }
+
     public ChatRoom getUserChatRoom(Long roomId, Long userId) {
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-        CompletableFuture<ChatRoom> chatRoomFuture = CompletableFuture.supplyAsync(
-                () -> chatApiClient.getRoom(roomId, userId), executor);
-        CompletableFuture<List<UserPortfolioItem>> userPortfolioImgMapFuture = chatRoomFuture.thenApplyAsync(
-                ChatRoom::getParticipantsIds, executor).thenApplyAsync(
-                getUserPortfoliosQuery::getUserPortfoliosWithMinSequence, executor);
-        return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFuture,
-                (chatRoom, userPortfolioImgMap) -> {
-                    chatRoom.setThumbnailAndRoomTitle(userPortfolioImgMap.getFirst());
-                    return chatRoom;}, executor).join();
+            CompletableFuture<ChatRoom> chatRoomFuture = CompletableFuture.supplyAsync(
+                    () -> chatApiClient.getRoom(roomId, userId), executor);
+            CompletableFuture<List<UserPortfolioItem>> userPortfolioImgMapFuture = chatRoomFuture.thenApplyAsync(
+                    ChatRoom::getParticipantsIds, executor).thenApplyAsync(
+                    getUserPortfoliosQuery::getUserPortfoliosWithMinSequence, executor);
+            return chatRoomFuture.thenCombineAsync(userPortfolioImgMapFuture,
+                    (chatRoom, userPortfolioImgMap) -> {
+                        chatRoom.setThumbnailAndRoomTitle(userPortfolioImgMap.getFirst());
+                        return chatRoom;}, executor).join();
         }
     }
 

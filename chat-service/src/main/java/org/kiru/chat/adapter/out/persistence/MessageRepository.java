@@ -16,13 +16,14 @@ public interface MessageRepository extends JpaRepository<MessageJpaEntity, Long>
     List<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId);
 
     List<MessageJpaEntity> findAllByChatRoomIdAndReadStatusFalse(Long chatRoomId);
+
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
-    Slice<MessageJpaEntity> findAllByChatRoomIdOrderByCreatedAtAscIdAsc(Long chatRoomId, Pageable pageable);
+    Slice<MessageJpaEntity> findAllByChatRoomId(Long chatRoomId, Pageable pageable);
 
     @Query(value = "SELECT m as message,mt as translateMessage FROM MessageJpaEntity m "
             + "LEFT JOIN TranslateMessageJpaEntity mt "

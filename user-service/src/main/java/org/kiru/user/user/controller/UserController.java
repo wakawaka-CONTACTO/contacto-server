@@ -7,6 +7,7 @@ import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.response.ChatRoomListResponse;
 import org.kiru.user.user.dto.response.ChatRoomResponse;
+import org.kiru.user.user.dto.response.MessageResponse;
 import org.kiru.user.user.dto.response.UserWithAdditionalInfoResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabledTracing;
@@ -46,8 +47,8 @@ public class UserController {
     }
 
     @GetMapping("/me/chatroom/{roomId}/messages")
-    public ResponseEntity<ChatRoomResponse> getChatMessages(@PathVariable("roomId") Long roomId, @UserId Long userId, Pageable pageable){
-        ChatRoomResponse response = userService.getChatMessage(roomId, userId, pageable.getPageNumber(), pageable.getPageSize());
+    public ResponseEntity<PageableResponse<MessageResponse>> getChatMessages(@PathVariable("roomId") Long roomId, @UserId Long userId, Pageable pageable){
+        PageableResponse<MessageResponse> response = userService.getChatMessage(roomId, userId, pageable);
         return ResponseEntity.ok(response);
     }
 
