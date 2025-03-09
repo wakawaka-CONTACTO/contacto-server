@@ -2,6 +2,10 @@ package org.kiru.user.user.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.EntityNotFoundException;
@@ -23,6 +27,8 @@ import org.kiru.user.user.dto.request.UserTalentsReq;
 import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -59,16 +65,25 @@ public class AuthService {
         UserJpaEntity user = userRepository.save(UserJpaEntity.of(newUser));
         Date now = new Date();
         Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(),now);
-        applicationEventPublisher.publishEvent(
-                UserCreateEvent.builder()
-                        .userName(user.getUsername())
-                        .userId(user.getId())
-                        .images(images)
-                        .purposes(purposes)
-                        .talents(talents)
-                        .build()
-        );
+
+        UserCreateEvent userCreateEvent = UserCreateEvent.builder()
+            .userName(user.getUsername())
+            .userId(user.getId())
+            .images(images)
+            .purposes(purposes)
+            .talents(talents)
+            .build();
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            CompletableFuture.runAsync(() -> callCreateUserEvent(userCreateEvent), executor);
+        }
+
         return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
+    }
+
+    private CompletableFuture<Void> callCreateUserEvent(UserCreateEvent userCreateEvent){
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            return CompletableFuture.runAsync(() -> applicationEventPublisher.publishEvent(userCreateEvent), executor);
+        }
     }
 
     // 로그인
