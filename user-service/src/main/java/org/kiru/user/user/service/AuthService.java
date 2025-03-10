@@ -30,8 +30,11 @@ import org.kiru.user.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +48,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final PasswordEncoder passwordEncoder;
+
 
     // 회원가입
     @Transactional
@@ -73,17 +77,8 @@ public class AuthService {
             .purposes(purposes)
             .talents(talents)
             .build();
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            CompletableFuture.runAsync(() -> callCreateUserEvent(userCreateEvent), executor);
-        }
-
+        applicationEventPublisher.publishEvent(userCreateEvent);
         return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
-    }
-
-    private CompletableFuture<Void> callCreateUserEvent(UserCreateEvent userCreateEvent){
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            return CompletableFuture.runAsync(() -> applicationEventPublisher.publishEvent(userCreateEvent), executor);
-        }
     }
 
     // 로그인
