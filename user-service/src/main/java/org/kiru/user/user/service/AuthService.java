@@ -44,8 +44,6 @@ public class AuthService {
   @Transactional
   public UserJwtInfoRes signUp(UserSignUpReq req, List<MultipartFile> images,
       List<UserPurposesReq> purposes, List<UserTalentsReq> talents) {
-    log.info("[START] signup service, AuthService.class ");
-    long startTime = System.currentTimeMillis();
 
     User newUser = userBuilder(req);
     UserJpaEntity userEntity = userRepository.save(UserJpaEntity.of(newUser));
@@ -61,8 +59,6 @@ public class AuthService {
             .talents(talents)
             .build()
     );
-    long endTime = System.currentTimeMillis();
-    log.info("[FINISH] signup service, AuthService.class " + (endTime - startTime));
     return UserJwtInfoRes.of(userEntity.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
   }
 
