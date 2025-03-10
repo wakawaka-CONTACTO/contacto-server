@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserPortfolioEventService {
