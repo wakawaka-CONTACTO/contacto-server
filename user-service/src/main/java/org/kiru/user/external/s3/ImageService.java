@@ -39,6 +39,8 @@ public class ImageService {
 
     @Transactional
     public List<UserPortfolioItem> saveImages(final List<MultipartFile> images, final Long userId, String userName) {
+        log.info("[START] saveImages, ImageService.class ");
+        long startTime = System.currentTimeMillis();
         List<UserPortfolioItem> savedImages = Collections.synchronizedList(new ArrayList<>());
         Long portfolioId = portfolioIdGenerator.generatePortfolioId();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -55,6 +57,8 @@ public class ImageService {
                     .toList();
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
             saveUserPortfolioPort.saveAll(savedImages);
+            long endTime = System.currentTimeMillis();
+            log.info("[FINISH] saveImages, ImageService.class " + (endTime - startTime));
             return savedImages;
         }
     }

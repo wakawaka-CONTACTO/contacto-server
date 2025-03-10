@@ -3,6 +3,7 @@ package org.kiru.user.user.service;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.InvalidValueException;
 import org.kiru.core.exception.UnauthorizedException;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -42,6 +44,9 @@ public class AuthService {
   @Transactional
   public UserJwtInfoRes signUp(UserSignUpReq req, List<MultipartFile> images,
       List<UserPurposesReq> purposes, List<UserTalentsReq> talents) {
+    log.info("[START] signup service, AuthService.class ");
+    long startTime = System.currentTimeMillis();
+
     User newUser = userBuilder(req);
     UserJpaEntity userEntity = userRepository.save(UserJpaEntity.of(newUser));
 
@@ -56,7 +61,8 @@ public class AuthService {
             .talents(talents)
             .build()
     );
-
+    long endTime = System.currentTimeMillis();
+    log.info("[FINISH] signup service, AuthService.class " + (endTime - startTime));
     return UserJwtInfoRes.of(userEntity.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
   }
 
