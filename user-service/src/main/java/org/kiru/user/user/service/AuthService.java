@@ -2,10 +2,6 @@ package org.kiru.user.user.service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.EntityNotFoundException;
@@ -27,14 +23,9 @@ import org.kiru.user.user.dto.request.UserTalentsReq;
 import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,7 +39,6 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final PasswordEncoder passwordEncoder;
-
 
     // 회원가입
     @Transactional
@@ -69,15 +59,15 @@ public class AuthService {
         UserJpaEntity user = userRepository.save(UserJpaEntity.of(newUser));
         Date now = new Date();
         Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(),now);
-
-        UserCreateEvent userCreateEvent = UserCreateEvent.builder()
-            .userName(user.getUsername())
-            .userId(user.getId())
-            .images(images)
-            .purposes(purposes)
-            .talents(talents)
-            .build();
-        applicationEventPublisher.publishEvent(userCreateEvent);
+        applicationEventPublisher.publishEvent(
+            UserCreateEvent.builder()
+                .userName(user.getUsername())
+                .userId(user.getId())
+                .images(images)
+                .purposes(purposes)
+                .talents(talents)
+                .build()
+        );
         return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
     }
 
