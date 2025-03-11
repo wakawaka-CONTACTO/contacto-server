@@ -53,10 +53,15 @@ public class MailService {
     }
 
     // 메일 발송
-    public String sendSimpleMessage(String sendEmail) throws MessagingException {
+    public void sendSimpleMessage(String sendEmail) throws MessagingException {
         validateEmailNotExists(sendEmail);
         String number = createNumber(); // 랜덤 인증번호 생성
+        sendMail(sendEmail, number);
+    }
+
+    private void sendMail(String sendEmail, String number) throws MessagingException{
         MimeMessage message = createMail(sendEmail, number); // 메일 생성
+
         try {
             javaMailSender.send(message); // 메일 발송
             redisTemplateForOne.opsForValue().set(sendEmail, number);
@@ -64,7 +69,6 @@ public class MailService {
             log.error(e.getMessage());
             throw new IllegalArgumentException("메일 발송 중 오류가 발생했습니다.");
         }
-        return number;
     }
 
     public Boolean checkMessage(MailCheckDto mailCheckDto) {
