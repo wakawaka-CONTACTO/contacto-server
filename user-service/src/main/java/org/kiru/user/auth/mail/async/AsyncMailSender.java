@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -21,6 +22,7 @@ public class AsyncMailSender {
   private final JavaMailSender javaMailSender;
   private static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
+  @Async
   public void sendMail(MimeMessage message, String number) throws MessagingException {
     String received = message.getRecipients(MimeMessage.RecipientType.TO)[0].toString();
 
