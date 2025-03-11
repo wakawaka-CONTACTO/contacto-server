@@ -3,16 +3,14 @@ package org.kiru.user.auth.mail.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.ConflictException;
 import org.kiru.core.exception.code.FailureCode;
+import org.kiru.user.auth.mail.async.AsyncMailSender;
 import org.kiru.user.auth.mail.dto.MailCheckDto;
 import org.kiru.user.user.service.UserService;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +23,7 @@ public class MailService {
   private final UserService userService;
   private final RedisTemplate<String, String> redisTemplateForOne;
   private static final String senderEmail = "rlarlgnszx0319@gmail.com";
+  private final AsyncMailSender asyncMailSender;
 
   // 랜덤으로 6자리 숫자 생성
   public String createNumber() {
@@ -59,23 +58,8 @@ public class MailService {
   public void sendSimpleMessage(String sendEmail) throws MessagingException {
     validateEmailNotExists(sendEmail);
     String number = createNumber(); // 랜덤 인증번호 생성
-    sendMail(sendEmail, number);
-  }
-
-  private void sendMail(String sendEmail, String number) throws MessagingException {
-    MimeMessage message = createMail(sendEmail, number); // 메일 생성
-    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-      CompletableFuture.runAsync(() -> {
-        javaMailSender.send(message);
-      }, executor);
-
-      CompletableFuture.runAsync(() -> {
-            redisTemplateForOne.opsForValue().set(sendEmail, number);
-          }, executor);
-    } catch (MailException e) {
-      log.error(e.getMessage());
-      throw new IllegalArgumentException("메일 발송 중 오류가 발생했습니다.");
-    }
+    MimeMessage message = createMail(sendEmail, number);
+    asyncMailSender.sendMail(message, number);
   }
 
   public Boolean checkMessage(MailCheckDto mailCheckDto) {
