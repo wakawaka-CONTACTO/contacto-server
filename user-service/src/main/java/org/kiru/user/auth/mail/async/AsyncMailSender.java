@@ -25,17 +25,22 @@ public class AsyncMailSender {
   @Async
   public void sendMail(MimeMessage message, String number) throws MessagingException {
     String received = message.getRecipients(MimeMessage.RecipientType.TO)[0].toString();
-
-    try {
-      CompletableFuture.runAsync(() -> {
+    CompletableFuture<Void> sendMailFuture = CompletableFuture.runAsync(() -> {
+      try {
         javaMailSender.send(message);
-      }, executor);
-      CompletableFuture.runAsync(() -> {
+      } catch (MailException e) {
+        log.error("Error sending mail: {}", e.getMessage(), e);
+        throw e;
+      }
+    }, executor);
+
+    CompletableFuture<Void> cacheFuture = CompletableFuture.runAsync(() -> {
+      try {
         redisTemplateForOne.opsForValue().set(received, number);
-      }, executor);
-    } catch (MailException e) {
-      log.error(e.getMessage());
-      throw new IllegalArgumentException("메일 발송 중 오류가 발생했습니다.");
-    }
+      } catch (Exception e) {
+        log.error("Error caching mail data: {}", e.getMessage(), e);
+        throw e;
+      }
+    }, executor);
   }
 }
