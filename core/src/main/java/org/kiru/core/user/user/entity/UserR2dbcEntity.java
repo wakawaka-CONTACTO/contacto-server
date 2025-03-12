@@ -1,10 +1,13 @@
 package org.kiru.core.user.user.entity;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.kiru.core.user.user.domain.LoginType;
+import org.kiru.core.user.user.domain.Nationality;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -24,8 +27,9 @@ public class UserR2dbcEntity {
     @Column("description")
     private String description;
 
-    @Column("social_id")
-    private String socialId;
+    @Enumerated(EnumType.STRING)
+    @Column("nationality")
+    private Nationality nationality;
 
     @Column("login_type")
     private LoginType loginType;

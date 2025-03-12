@@ -18,6 +18,7 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.kiru.core.user.user.domain.LoginType;
+import org.kiru.core.user.user.domain.Nationality;
 import org.kiru.core.user.user.domain.User;
 
 @Entity
@@ -38,8 +39,9 @@ public class UserJpaEntity {
     @Column(name = "username")
     private String username;
 
-    @Column(name = "social_id")
-    private String socialId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nationality", nullable = false)
+    private Nationality nationality;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "login_type")
@@ -71,7 +73,7 @@ public class UserJpaEntity {
                 .id(user.getId())
                 .username(user.getUsername())
                 .loginType(user.getLoginType())
-                .socialId(user.getSocialId())
+                .nationality(user.getNationality())
                 .email(user.getEmail())
                 .description(user.getDescription())
                 .instagramId(user.getInstagramId())
@@ -85,7 +87,7 @@ public class UserJpaEntity {
                 .id(entity.getId())
                 .username(entity.getUsername())
                 .loginType(entity.getLoginType())
-                .socialId(entity.getSocialId())
+                .nationality(entity.getNationality())
                 .email(entity.getEmail())
                 .description(entity.getDescription())
                 .instagramId(entity.getInstagramId())
@@ -115,6 +117,9 @@ public class UserJpaEntity {
         }
         if(user.getLoginType() != null){
             this.loginType = user.getLoginType();
+        }
+        if(user.getNationality() != null){
+            this.nationality = user.getNationality();
         }
     }
 
