@@ -20,8 +20,8 @@ public class MailController {
     private final MailService mailService;
 
     @PostMapping("/emailsend")
-    public String emailCheck(@RequestBody MailSendDto mailSendDTO) throws MessagingException {
-        return mailService.sendSimpleMessage(mailSendDTO.getEmail()); // Response body에 값을 반환
+    public void emailCheck(@RequestBody MailSendDto mailSendDTO) throws MessagingException {
+        mailService.sendSimpleMessage(mailSendDTO.getEmail());
     }
 
     @PostMapping("/emailcheck")
