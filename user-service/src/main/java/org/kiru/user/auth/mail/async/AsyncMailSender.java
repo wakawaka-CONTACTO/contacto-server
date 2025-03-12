@@ -18,7 +18,7 @@ public class AsyncMailSender {
   private final RedisTemplate<String, String> redisTemplateForOne;
   private final JavaMailSender javaMailSender;
 
-  @Async
+  @Async("virtualThreadExecutor")
   public void sendMail(MimeMessage message, String number) throws MessagingException {
     String received = message.getRecipients(MimeMessage.RecipientType.TO)[0].toString();
     try {
