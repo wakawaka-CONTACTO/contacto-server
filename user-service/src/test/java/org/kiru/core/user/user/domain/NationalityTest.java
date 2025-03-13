@@ -1,13 +1,8 @@
 package org.kiru.core.user.user.domain;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -62,7 +57,6 @@ class NationalityTest {
   @Test
   void use_Korean_bundle_all() {
     ResourceBundle resourceBundle = ResourceBundle.getBundle("nationalities_ko");
-//    ResourceBundle resourceBundle = ResourceBundle.getBundle("nationalities_ko", new Locale("ko"), new UTF8Control());
     Map<String, String> expectedKorean = Map.of(
         "UK", "영국",
         "CN", "중국",
@@ -84,17 +78,4 @@ class NationalityTest {
           Assertions.assertEquals(expectedValue, actualValue, "For key: " + key);
         });
   }
-
-//  static class UTF8Control extends ResourceBundle.Control {
-//    @Override
-//    public ResourceBundle newBundle(String baseName, Locale locale, String format,
-//        ClassLoader loader, boolean reload)
-//        throws IOException {
-//      String bundleName = toBundleName(baseName, locale);
-//      String resourceName = toResourceName(bundleName, "properties");
-//      try (InputStreamReader reader = new InputStreamReader(loader.getResourceAsStream(resourceName), StandardCharsets.UTF_8)) {
-//        return new PropertyResourceBundle(reader);
-//      }
-//    }
-//  }
 }
