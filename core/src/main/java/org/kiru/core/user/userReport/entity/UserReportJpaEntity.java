@@ -39,4 +39,14 @@ public class UserReportJpaEntity extends BaseTimeEntity implements UserReport {
     @NotNull
     @Column(name = "report_status")
     private ReportStatus reportStatus;
+
+    public static UserReportJpaEntity of(Long userId, Long reportedId,
+                                         ReportReason reportReason, ReportStatus reportStatus) {
+        return UserReportJpaEntity.builder()
+                .userId(userId)
+                .reportedId(reportedId)
+                .reportReason(reportReason)
+                .reportStatus(reportStatus)
+                .build();
+    }
 }

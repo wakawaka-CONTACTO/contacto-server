@@ -22,6 +22,7 @@ public enum FailureCode {
     WRONG_IMAGE_LIST_SIZE(HttpStatus.BAD_REQUEST, "e4009", "데이트 코스 이미지는 최대 10장입니다.."),
     INVALID_USER_LIKE(HttpStatus.BAD_REQUEST,"e40010" ,"좋아요하는 userID가 같습니다." ),
     INVALID_USER_BLOCK(HttpStatus.BAD_REQUEST,"e40011" ,"차단하는 userID가 같습니다." ),
+    INVALID_USER_REPORT(HttpStatus.BAD_REQUEST,"e40012" ,"신고하는 userID가 같습니다." ),
     INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "e4102", "필드가 잘못되었습니다."),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "e4103", "잘못된 필드를 넣었습니다."),
     INVALID_DISCORD_SIGNUP_MESSAGE(HttpStatus.BAD_REQUEST, "e4104", "회원가입 디스코드 알림 전송에 실패하였습니다."),
