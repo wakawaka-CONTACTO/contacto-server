@@ -5,13 +5,13 @@ import java.util.ResourceBundle;
 
 public enum Nationality {
   UK("UK"),
-  CHINA("CN"),
-  JAPAN("JP"),
-  USA("US"),
-  KOREA("KR"),
-  FRANCE("FR"),
-  GERMANY("DE"),
-  NETHERLANDS("NL"),
+  CN("CN"),
+  JP("JP"),
+  US("US"),
+  KR("KR"),
+  FR("FR"),
+  DE("DE"),
+  NL("NL"),
   OTHER("OTHER");
 
   private final String code;
@@ -24,8 +24,13 @@ public enum Nationality {
     return code;
   }
 
-  public String getLocalizedName(Locale locale) {
+  /**
+   * 지정된 Locale에 맞는 ResourceBundle에서 해당 국가의 표기명을 반환합니다.
+   * 예를 들어, Locale.KOREAN을 전달하면 nationalities_ko.properties 파일에서 값을 읽어옵니다.
+   */
+  public String getDisplayName(Locale locale) {
     ResourceBundle bundle = ResourceBundle.getBundle("nationalities", locale);
-    return bundle.getString(code);
+    return bundle.getString(this.code);
   }
 }
+
