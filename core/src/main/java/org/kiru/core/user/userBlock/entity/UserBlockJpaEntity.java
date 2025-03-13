@@ -27,4 +27,11 @@ public class UserBlockJpaEntity extends BaseTimeEntity implements UserBlock {
     @NotNull
     @Column(name = "blocked_id")
     private Long blockedId;
+
+    public static UserBlockJpaEntity of(Long userId, Long blockedId) {
+        return UserBlockJpaEntity.builder()
+                .userId(userId)
+                .blockedId(blockedId)
+                .build();
+    }
 }

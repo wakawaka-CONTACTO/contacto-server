@@ -20,6 +20,8 @@ public enum FailureCode {
     INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "e4007", "닉네임 형식이 올바르지 않습니다."),
     INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "e4008", "이메일 형식이 올바르지 않습니다."),
     WRONG_IMAGE_LIST_SIZE(HttpStatus.BAD_REQUEST, "e4009", "데이트 코스 이미지는 최대 10장입니다.."),
+    INVALID_USER_LIKE(HttpStatus.BAD_REQUEST,"e40010" ,"좋아요하는 userID가 같습니다." ),
+    INVALID_USER_BLOCK(HttpStatus.BAD_REQUEST,"e40011" ,"차단하는 userID가 같습니다." ),
     INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "e4102", "필드가 잘못되었습니다."),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "e4103", "잘못된 필드를 넣었습니다."),
     INVALID_DISCORD_SIGNUP_MESSAGE(HttpStatus.BAD_REQUEST, "e4104", "회원가입 디스코드 알림 전송에 실패하였습니다."),
@@ -51,6 +53,7 @@ public enum FailureCode {
     SOCIAL_LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "e4021", "소셜 로그인이 필요한 계정입니다."),
     EMAIL_LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "e4022", "이메일 로그인이 필요한 계정입니다."),
     INVALID_PASSWORD(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS,"e4023" ,"userPassword 값이 잘못되었습니다." ),
+
     /**
      * 403 Forbidden
      */
@@ -95,9 +98,7 @@ public enum FailureCode {
     COURSE_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"e5001" , "코스 생성에 실패했습니다."),
     POINT_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "e5002", "포인트 생성에 실패했습니다."),
     REDIS_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "e5003", "Redis 연결에 실패했습니다."),
-    DISCORD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "e5004", "디스코드 로그 전송 내용이 존재하지 않습니다."), RESOURCE_NOT_FOUND(
-            HttpStatus.NOT_FOUND,"e4404" , "요청한 리소스를 찾을수 없습니다." ),
-    INVALID_USER_LIKE(HttpStatus.BAD_REQUEST,"e402" ,"좋아요하는 userID가 같습니다." ),
+    DISCORD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "e5004", "디스코드 로그 전송 내용이 존재하지 않습니다."),
     SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "e5005", "서비스가 이용 불가능합니다."),
     INVALID_CONFIGURATION(HttpStatus.INTERNAL_SERVER_ERROR, "e5006", "yaml 설정이 로드되지 않았습니다"),
     PORTFOLIO_ID_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "e5007", "포트폴리오 ID 생성에 실패했습니다.");

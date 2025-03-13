@@ -7,6 +7,4 @@ public interface UserBlock {
     Long getUserId();
     Long getBlockedId();
     LocalDateTime getCreatedAt();
-
-
 }

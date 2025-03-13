@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
 import org.kiru.user.portfolio.service.out.GetRecommendUserIdsQuery;
 import org.kiru.user.portfolio.service.out.GetUserPortfoliosQuery;
+import org.kiru.user.userBlock.service.out.GetUserBlockQuery;
 import org.kiru.user.userlike.service.out.GetUserLikeQuery;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
@@ -20,16 +21,20 @@ public class PortfolioService {
     private final GetUserLikeQuery getUserLikeQuery;
     private final Executor virtualThreadExecutor;
     private final GetRecommendUserIdsQuery getRecommendUserIdsQuery;
+    private final GetUserBlockQuery getUserBlockQuery;
 
 
     public PortfolioService(GetUserPortfoliosQuery getUserPortfoliosQuery,
                             @Qualifier("userLikeJpaAdapter")
                             GetUserLikeQuery getUserLikeQuery,
-                            Executor virtualThreadExecutor, GetRecommendUserIdsQuery getRecommendUserIdsQuery) {
+                            Executor virtualThreadExecutor,
+                            GetRecommendUserIdsQuery getRecommendUserIdsQuery,
+                            GetUserBlockQuery getUserBlockQuery) {
         this.getUserPortfoliosQuery = getUserPortfoliosQuery;
         this.getUserLikeQuery = getUserLikeQuery;
         this.virtualThreadExecutor = virtualThreadExecutor;
         this.getRecommendUserIdsQuery = getRecommendUserIdsQuery;
+        this.getUserBlockQuery = getUserBlockQuery;
     }
 
     public List<UserPortfolioResDto> getUserPortfolios(Long userId, Pageable pageable) {
@@ -39,14 +44,15 @@ public class PortfolioService {
     }
 
     private List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
-//         이미 매칭된 유저
+        // 이미 매칭되었거나 차단된 유저
         CompletableFuture<List<Long>> alreadyLikedUserFuture = getAlreadyLikedUserFuture(userId,
-                virtualThreadExecutor).thenApply(likedUserIds ->
-        {
-            likedUserIds.add(userId);
-            return likedUserIds;
-        });
-//          추천 로직에 의한 유저
+                virtualThreadExecutor).thenApply(likedUserIds -> {
+                    likedUserIds.add(userId);
+                    List<Long> blockedUserIds = getUserBlockQuery.findAllBlockedIdByUserId(userId);
+                    likedUserIds.addAll(blockedUserIds);
+                    return likedUserIds;
+                });
+        // 추천 로직에 의한 유저
         List<Long> recommendUserIds = getRecommendUserIdsQuery.getRecommendUserIds(userId, pageable);
         CompletableFuture<List<Long>> userPortfolioIds = getUserPortfolioIds(alreadyLikedUserFuture,
                 recommendUserIds);
@@ -63,7 +69,7 @@ public class PortfolioService {
 
     private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyLikedUserFuture,
                                                               List<Long> recommendUserIds) {
-        log.info("필터 안된 추천한 유저Id: {}", recommendUserIds);
+        log.info("필터 안 된 추천한 유저Id: {}", recommendUserIds);
         log.info("좋아요 눌렀던 유저Id: {}", alreadyLikedUserFuture.join());
         return alreadyLikedUserFuture.thenApplyAsync(likedUserIds -> {
                     List<Long> recommendUserIdList = new ArrayList<>(recommendUserIds);
