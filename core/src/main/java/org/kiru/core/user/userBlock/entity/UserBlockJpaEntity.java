@@ -21,8 +21,8 @@ public class UserBlockJpaEntity extends BaseTimeEntity implements UserBlock {
     private Long id;
     // 차단을 요청한 유저 ID
     @NotNull
-    @Column(name = "blocker_id")
-    private Long blockerId;
+    @Column(name = "user_id")
+    private Long userId;
     //  차단된 유저 ID
     @NotNull
     @Column(name = "blocked_id")

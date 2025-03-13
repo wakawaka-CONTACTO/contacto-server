@@ -23,8 +23,8 @@ public class UserReportJpaEntity extends BaseTimeEntity implements UserReport {
     private Long id;
     // 신고를 요청한 유저 ID
     @NotNull
-    @Column(name = "reporter_id")
-    private Long reporterId;
+    @Column(name = "user_id")
+    private Long userId;
     //  신고를 당한 유저 ID
     @NotNull
     @Column(name = "reported_id")
