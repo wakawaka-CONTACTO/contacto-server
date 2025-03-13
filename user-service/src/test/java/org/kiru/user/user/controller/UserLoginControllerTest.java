@@ -87,7 +87,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .nationality(Nationality.KOREA)
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
@@ -130,7 +130,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .nationality(Nationality.KOREA)
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
@@ -189,7 +189,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .nationality(Nationality.KOREA)
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
@@ -230,7 +230,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .nationality(Nationality.KOREA)
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         // 요청 생성
@@ -266,7 +266,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .nationality(Nationality.KOREA)
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);

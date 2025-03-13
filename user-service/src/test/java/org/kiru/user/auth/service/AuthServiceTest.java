@@ -81,7 +81,7 @@ class AuthServiceTest {
             "test@example.com",
             "password123",
             "password123",
-            Nationality.KOREA,
+            Nationality.KR,
             "Test Description",
             "testuser",
             "http://example.com",
@@ -93,7 +93,7 @@ class AuthServiceTest {
             .email("test@example.com")
             .password("encodedPassword")
             .username("Test User")
-            .nationality(Nationality.KOREA)
+            .nationality(Nationality.KR)
             .loginType(LoginType.LOCAL)
             .build();
 
