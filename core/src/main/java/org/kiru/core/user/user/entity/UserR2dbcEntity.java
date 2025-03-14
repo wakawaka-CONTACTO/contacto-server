@@ -1,7 +1,5 @@
 package org.kiru.core.user.user.entity;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +25,6 @@ public class UserR2dbcEntity {
     @Column("description")
     private String description;
 
-    @Enumerated(EnumType.STRING)
     @Column("nationality")
     private Nationality nationality;
 
