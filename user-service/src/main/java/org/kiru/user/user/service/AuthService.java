@@ -3,7 +3,6 @@ package org.kiru.user.user.service;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.InvalidValueException;
 import org.kiru.core.exception.UnauthorizedException;
@@ -68,7 +67,7 @@ public class AuthService {
         .instagramId(req.instagramId())
         .loginType(req.loginType())
         .username(req.name())
-        .socialId(req.socialId())
+        .nationality(req.nationality())
         .webUrl(req.webUrl());
 
     if (req.loginType() == LoginType.LOCAL) {

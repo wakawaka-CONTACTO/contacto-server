@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.kiru.core.user.user.domain.LoginType;
+import org.kiru.core.user.user.domain.Nationality;
 
 @Builder
 public record UserSignUpReq(
@@ -21,7 +22,7 @@ public record UserSignUpReq(
         @Pattern(regexp = "^[A-Za-z0-9가-힣]{2,20}$",
                 message = "이름은 2-20자의 영문자, 숫자, 한글만 가능합니다")
         String name,
-        String socialId,
+        Nationality nationality,
         String webUrl,
         String description,
         String instagramId,

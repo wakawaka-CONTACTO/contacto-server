@@ -25,7 +25,7 @@ public enum FailureCode {
     INVALID_DISCORD_SIGNUP_MESSAGE(HttpStatus.BAD_REQUEST, "e4104", "회원가입 디스코드 알림 전송에 실패하였습니다."),
     INVALID_IMAGE_EDIT(HttpStatus.BAD_REQUEST, "e4105", "프로필 이미지 수정에 실패하였습니다."),
     SOCKET_CONNECTED_FAILED(HttpStatus.BAD_REQUEST, "e4106", "소켓 연결에 실패하였습니다."),
-
+    NATIONALITY_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "e4107", "국적 정보가 제공되지 않았습니다. 올바른 국적을 입력해 주세요."),
     /**
      * 401 Unauthorized
      */
@@ -48,7 +48,6 @@ public enum FailureCode {
     INVALID_REGION_TYPE(HttpStatus.UNAUTHORIZED, "e40121", "잘못된 지역 입력입니다."),
     INVALID_TOKEN_USER(HttpStatus.UNAUTHORIZED, "e4019", "토큰의 유저 정보가 올바르지 않습니다."),
     PASSWORD_MISMATCH(HttpStatus.UNAUTHORIZED, "e4020", "비밀번호가 일치하지 않습니다."),
-    SOCIAL_LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "e4021", "소셜 로그인이 필요한 계정입니다."),
     EMAIL_LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "e4022", "이메일 로그인이 필요한 계정입니다."),
     INVALID_PASSWORD(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS,"e4023" ,"userPassword 값이 잘못되었습니다." ),
     /**

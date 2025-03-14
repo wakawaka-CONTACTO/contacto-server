@@ -21,6 +21,7 @@ import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.UnauthorizedException;
 import org.kiru.core.user.talent.domain.Talent.TalentType;
 import org.kiru.core.user.user.domain.LoginType;
+import org.kiru.core.user.user.domain.Nationality;
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.user.auth.jwt.JwtProvider;
@@ -80,7 +81,7 @@ class AuthServiceTest {
             "test@example.com",
             "password123",
             "password123",
-            "Test User",
+            Nationality.KR,
             "Test Description",
             "testuser",
             "http://example.com",
@@ -92,6 +93,7 @@ class AuthServiceTest {
             .email("test@example.com")
             .password("encodedPassword")
             .username("Test User")
+            .nationality(Nationality.KR)
             .loginType(LoginType.LOCAL)
             .build();
 
