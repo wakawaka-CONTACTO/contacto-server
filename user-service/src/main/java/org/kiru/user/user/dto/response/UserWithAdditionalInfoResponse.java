@@ -2,6 +2,7 @@ package org.kiru.user.user.dto.response;
 
 import java.util.List;
 import org.kiru.core.user.talent.entity.UserTalent;
+import org.kiru.core.user.user.domain.Nationality;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.userPortfolioItem.domain.UserPortfolio;
 import org.kiru.core.user.userPortfolioItem.domain.UserPortfolioItem;
@@ -14,6 +15,7 @@ public record UserWithAdditionalInfoResponse(
         String description,
         String instagramId,
         String webUrl,
+        Nationality nationality,
         UserPortfolioResponse userPortfolio,
         List<Integer> userPurposes,
         List<UserTalent> userTalents
@@ -26,6 +28,7 @@ public record UserWithAdditionalInfoResponse(
                 user.getDescription(),
                 user.getInstagramId(),
                 user.getWebUrl(),
+                user.getNationality(),
                 UserPortfolioResponse.of(user.getUserPortfolio()),
                 user.getUserPurposes(),
                 user.getUserTalents().stream().map(
