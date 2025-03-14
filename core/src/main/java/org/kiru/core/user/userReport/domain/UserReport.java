@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public interface UserReport {
     Long getUserId();
-    Long getReportedId();
+    Long getReportedUserId();
     ReportReason getReportReason();
     ReportStatus getReportStatus();
     LocalDateTime getCreatedAt();

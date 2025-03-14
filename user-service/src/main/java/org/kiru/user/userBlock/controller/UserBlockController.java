@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.*;
 public class UserBlockController {
     private final UserBlockService userBlockService;
 
-    @PostMapping("/{blockedId}")
+    @PostMapping("/{blockedUserId}")
     public ResponseEntity<BlockResponse> blockUser(
             @UserId Long userId,
-            @PathVariable Long blockedId) {
-        log.info("Blocking user {} for user {}", blockedId, userId);
-        if(userId.equals(blockedId)) {
+            @PathVariable("blockedUserId") Long blockedUserId) {
+        log.info("Blocking user {} for user {}", blockedUserId, userId);
+        if(userId.equals(blockedUserId)) {
             throw new BadRequestException(FailureCode.INVALID_USER_BLOCK);
         }
-        BlockResponse blockResponse = userBlockService.blockUser(userId, blockedId);
+        BlockResponse blockResponse = userBlockService.blockUser(userId, blockedUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(blockResponse);
     }
 }

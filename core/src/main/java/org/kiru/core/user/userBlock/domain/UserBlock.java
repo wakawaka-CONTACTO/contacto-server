@@ -5,6 +5,6 @@ import java.time.LocalDateTime;
 
 public interface UserBlock {
     Long getUserId();
-    Long getBlockedId();
+    Long getBlockedUserId();
     LocalDateTime getCreatedAt();
 }

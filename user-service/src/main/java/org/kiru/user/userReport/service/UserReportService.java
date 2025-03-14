@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 public class UserReportService {
     private final ReportUserQuery reportUserQuery;
     public UserReportService(ReportUserQuery reportUserQuery) { this.reportUserQuery = reportUserQuery; }
-    public ReportResponse reportUser(Long userId, Long reportedId, int reportReasonIdx) {
-        UserReport userReport = reportUserQuery.reportUser(userId, reportedId, reportReasonIdx);
+    public ReportResponse reportUser(Long userId, Long reportedUserId, int reportReasonIdx) {
+        UserReport userReport = reportUserQuery.reportUser(userId, reportedUserId, reportReasonIdx);
         return ReportResponse.of(userReport);
     }
 }

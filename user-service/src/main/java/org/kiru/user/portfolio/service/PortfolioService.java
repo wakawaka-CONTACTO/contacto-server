@@ -44,17 +44,16 @@ public class PortfolioService {
     }
 
     private List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
-        // 이미 매칭되었거나 차단된 유저
-        CompletableFuture<List<Long>> alreadyLikedUserFuture = getAlreadyLikedUserFuture(userId,
-                virtualThreadExecutor).thenApply(likedUserIds -> {
-                    likedUserIds.add(userId);
-                    List<Long> blockedUserIds = getUserBlockQuery.findAllBlockedIdByUserId(userId);
-                    likedUserIds.addAll(blockedUserIds);
-                    return likedUserIds;
-                });
+        // 이미 좋아요를 눌렀거나 차단한 유저
+        CompletableFuture<List<Long>> alreadyLikedOrBlockedUserFuture = getAlreadyLikedUserFuture(userId, virtualThreadExecutor)
+                .thenCombine(getBlockedUserFuture(userId, virtualThreadExecutor), (likedUserIds, blockedUserIds) -> {
+                    List<Long> combined = new ArrayList<>(likedUserIds);
+                    combined.add(userId);
+                    combined.addAll(blockedUserIds);
+                    return combined; });
         // 추천 로직에 의한 유저
         List<Long> recommendUserIds = getRecommendUserIdsQuery.getRecommendUserIds(userId, pageable);
-        CompletableFuture<List<Long>> userPortfolioIds = getUserPortfolioIds(alreadyLikedUserFuture,
+        CompletableFuture<List<Long>> userPortfolioIds = getUserPortfolioIds(alreadyLikedOrBlockedUserFuture,
                 recommendUserIds);
         return userPortfolioIds.join();
     }
@@ -65,6 +64,10 @@ public class PortfolioService {
 
     private CompletableFuture<List<Long>> getAlreadyLikedUserFuture(Long userId, Executor executor) {
         return CompletableFuture.supplyAsync(() -> getUserLikeQuery.findAllLikedUserIdByUserId(userId), executor);
+    }
+
+    private CompletableFuture<List<Long>> getBlockedUserFuture(Long userId, Executor executor) {
+        return CompletableFuture.supplyAsync(() -> getUserBlockQuery.findAllBlockedUserIdByUserId(userId), executor);
     }
 
     private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyLikedUserFuture,

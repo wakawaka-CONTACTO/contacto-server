@@ -14,7 +14,8 @@ import org.kiru.core.user.userBlock.domain.UserBlock;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "user_block")
+@Table(name = "user_block",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "blocked_user_id"}))
 public class UserBlockJpaEntity extends BaseTimeEntity implements UserBlock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +26,13 @@ public class UserBlockJpaEntity extends BaseTimeEntity implements UserBlock {
     private Long userId;
     //  차단된 유저 ID
     @NotNull
-    @Column(name = "blocked_id")
-    private Long blockedId;
+    @Column(name = "blocked_user_id")
+    private Long blockedUserId;
 
-    public static UserBlockJpaEntity of(Long userId, Long blockedId) {
+    public static UserBlockJpaEntity of(Long userId, Long blockedUserId) {
         return UserBlockJpaEntity.builder()
                 .userId(userId)
-                .blockedId(blockedId)
+                .blockedUserId(blockedUserId)
                 .build();
     }
 }

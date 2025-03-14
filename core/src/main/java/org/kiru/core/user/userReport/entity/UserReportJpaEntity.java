@@ -16,7 +16,8 @@ import org.kiru.core.user.userReport.domain.UserReport;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "user_report")
+@Table(name = "user_report",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "reported_user_id"}))
 public class UserReportJpaEntity extends BaseTimeEntity implements UserReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,8 +28,8 @@ public class UserReportJpaEntity extends BaseTimeEntity implements UserReport {
     private Long userId;
     //  신고를 당한 유저 ID
     @NotNull
-    @Column(name = "reported_id")
-    private Long reportedId;
+    @Column(name = "reported_user_id")
+    private Long reportedUserId;
 
     @Enumerated(EnumType.STRING)
     @NotNull
@@ -40,11 +41,11 @@ public class UserReportJpaEntity extends BaseTimeEntity implements UserReport {
     @Column(name = "report_status")
     private ReportStatus reportStatus;
 
-    public static UserReportJpaEntity of(Long userId, Long reportedId,
+    public static UserReportJpaEntity of(Long userId, Long reportedUserId,
                                          ReportReason reportReason, ReportStatus reportStatus) {
         return UserReportJpaEntity.builder()
                 .userId(userId)
-                .reportedId(reportedId)
+                .reportedUserId(reportedUserId)
                 .reportReason(reportReason)
                 .reportStatus(reportStatus)
                 .build();

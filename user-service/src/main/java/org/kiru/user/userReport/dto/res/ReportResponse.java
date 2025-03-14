@@ -10,14 +10,14 @@ import org.kiru.core.user.userReport.domain.UserReport;
 @Getter
 public class ReportResponse {
     Long userId;
-    Long reportedId;
+    Long reportedUserId;
     ReportReason reportReason;
     ReportStatus reportStatus;
 
     public static ReportResponse of(UserReport userReport) {
         return ReportResponse.builder()
                 .userId(userReport.getUserId())
-                .reportedId(userReport.getReportedId())
+                .reportedUserId(userReport.getReportedUserId())
                 .reportReason(userReport.getReportReason())
                 .reportStatus(userReport.getReportStatus())
                 .build();

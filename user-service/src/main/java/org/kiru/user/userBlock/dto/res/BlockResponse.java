@@ -8,12 +8,12 @@ import org.kiru.core.user.userBlock.domain.UserBlock;
 @Getter
 public class BlockResponse {
     Long userId;
-    Long blockedId;
+    Long blockedUserId;
 
     public static BlockResponse of(UserBlock userBlock) {
         return BlockResponse.builder()
                 .userId(userBlock.getUserId())
-                .blockedId(userBlock.getBlockedId())
+                .blockedUserId(userBlock.getBlockedUserId())
                 .build();
     }
 }

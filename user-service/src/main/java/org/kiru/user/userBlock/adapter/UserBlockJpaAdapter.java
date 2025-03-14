@@ -1,6 +1,5 @@
 package org.kiru.user.userBlock.adapter;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.userBlock.domain.UserBlock;
 import org.kiru.core.user.userBlock.entity.UserBlockJpaEntity;
@@ -20,16 +19,15 @@ public class UserBlockJpaAdapter implements BlockUserQuery, GetUserBlockQuery {
 
     @Transactional
     @Override
-    public UserBlock blockUser(Long userId, Long blockedId) {
-        UserBlock userBlock = userBlockRepository.findByUserIdAndBlockedId(userId, blockedId)
-                .orElseGet(() -> UserBlockJpaEntity.of(userId, blockedId));
+    public UserBlock blockUser(Long userId, Long blockedUserId) {
+        UserBlockJpaEntity userBlock = userBlockRepository.findByUserIdAndBlockedUserId(userId, blockedUserId)
+                .orElseGet(() -> UserBlockJpaEntity.of(userId, blockedUserId));
         userBlockRepository.save(userBlock);
         return userBlock;
     }
 
     @Override
-    public List<Long> findAllBlockedIdByUserId(Long userId) {
-        List<Long> blockedUserIds = userBlockRepository.findAllBlockedIdByUserId(userId);
-        return blockedUserIds;
+    public List<Long> findAllBlockedUserIdByUserId(Long userId) {
+        return userBlockRepository.findAllBlockedUserIdByUserId(userId);
     }
 }

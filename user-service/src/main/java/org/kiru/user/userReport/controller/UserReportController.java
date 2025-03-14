@@ -26,11 +26,11 @@ public class UserReportController {
     public ResponseEntity<ReportResponse> reportUser(
             @UserId Long userId,
             @RequestBody ReportRequest reportRequest) {
-        log.info("Reporting user {} for user {}", reportRequest.reportedId(), userId);
-        if(userId.equals(reportRequest.reportedId())) {
+        log.info("Reporting user {} for user {}", reportRequest.reportedUserId(), userId);
+        if(userId.equals(reportRequest.reportedUserId())) {
             throw new BadRequestException(FailureCode.INVALID_USER_REPORT);
         }
-        ReportResponse reportResponse = userReportService.reportUser(userId, reportRequest.reportedId(), reportRequest.reportReasonIdx());
+        ReportResponse reportResponse = userReportService.reportUser(userId, reportRequest.reportedUserId(), reportRequest.reportReasonIdx());
         return ResponseEntity.status(HttpStatus.CREATED).body(reportResponse);
     }
 }

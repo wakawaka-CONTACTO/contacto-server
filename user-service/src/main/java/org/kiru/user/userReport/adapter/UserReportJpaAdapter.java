@@ -15,16 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Repository
 @Transactional(readOnly = true)
-public class UserReportJpaAdpater implements ReportUserQuery {
+public class UserReportJpaAdapter implements ReportUserQuery {
     private final UserReportJpaRepository userReportRepository;
 
     @Transactional
     @Override
-    public UserReport reportUser(Long userId, Long reportedId, int reportReasonIdx) {
+    public UserReport reportUser(Long userId, Long reportedUserId, int reportReasonIdx) {
         ReportReason reportReason = ReportReason.fromIndex(reportReasonIdx);
-        log.info("Reporting user {} for user {} with report reason {}", reportedId, userId, reportReason);
-        UserReport userReport = userReportRepository.findByUserIdAndReportedId(userId, reportedId)
-                .orElseGet(() -> UserReportJpaEntity.of(userId, reportedId, reportReason, ReportStatus.PENDING));
+        log.info("Reporting user {} for user {} with report reason {}", reportedUserId, userId, reportReason);
+        UserReportJpaEntity userReport = userReportRepository.findByUserIdAndReportedUserId(userId, reportedUserId)
+                .orElseGet(() -> UserReportJpaEntity.of(userId, reportedUserId, reportReason, ReportStatus.PENDING));
         userReportRepository.save(userReport);
         return userReport;
     }
