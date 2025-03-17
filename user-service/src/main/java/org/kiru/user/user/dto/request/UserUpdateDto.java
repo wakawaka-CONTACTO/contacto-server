@@ -55,4 +55,8 @@ public class UserUpdateDto {
         this.portfolio = inputImages;
     }
 
+    public void putPortfolio(int key, Object item){
+        this.portfolio.put(key, item);
+    }
+
 }

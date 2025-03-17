@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.request.UserUpdateDto;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
@@ -35,25 +37,29 @@ public class UserUpdateController {
   public ResponseEntity<UserWithAdditionalInfoResponse> updateUser(
       @UserId Long userId,
       @Valid @ModelAttribute UserUpdateDto updatedUser,
-      @RequestParam(required = false) MultipartFile[] portfolioImages,
-      @RequestParam(required = false) int[] newImageKeys,
+      @RequestParam(required = false) MultipartFile[] newPortfolioImages,
+      @RequestParam(required = false) List<Integer> newImageKeys,
       @RequestParam(required = false) List<String> existingPortfolioImageUrls,
-      @RequestParam(required = false) int[] existingImageKeys
+      @RequestParam(required = false) List<Integer> existingImageKeys
   ) {
     if (updatedUser.getPortfolio() == null) {
       updatedUser.setPortfolio(new HashMap<>());
     }
+    log.info("[DEBUG]  newPortfolioImages[length] >>> "+ newPortfolioImages.length);
+    log.info("[DEBUG]  newImageKeys[size] >>> "+ newImageKeys.size());
+    log.info("[DEBUG]  existingPortfolioImageUrls[size] >>> "+ existingPortfolioImageUrls.size());
+    log.info("[DEBUG]  existingImageKeys[size] >>> "+ existingImageKeys.size());
 
     validateImageKeys(newImageKeys, existingImageKeys);
 
-    addNewImages(updatedUser, portfolioImages, newImageKeys);
+    addNewImages(updatedUser, newPortfolioImages, newImageKeys);
     addExistingImages(updatedUser, existingPortfolioImageUrls, existingImageKeys);
 
     User user = userService.updateUser(userId, updatedUser);
     return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
   }
 
-  private void validateImageKeys(int[] newImageKeys, int[] existingImageKeys) {
+  private void validateImageKeys(List<Integer> newImageKeys, List<Integer> existingImageKeys) {
     Set<Integer> allKeys = new HashSet<>();
     if (newImageKeys != null) {
       for (int key : newImageKeys) {
@@ -71,24 +77,26 @@ public class UserUpdateController {
     }
   }
 
-  private void addNewImages(UserUpdateDto updatedUser, MultipartFile[] portfolioImages, int[] newImageKeys) {
+  private void addNewImages(UserUpdateDto updatedUser, MultipartFile[] portfolioImages, List<Integer> newImageKeys) {
     if (portfolioImages != null && newImageKeys != null) {
-      if (portfolioImages.length != newImageKeys.length) {
+      if (portfolioImages.length != newImageKeys.size()) {
         throw new IllegalArgumentException("새로운 이미지와 키의 개수가 일치하지 않습니다.");
       }
       for (int i = 0; i < portfolioImages.length; i++) {
-        updatedUser.getPortfolio().put(newImageKeys[i], portfolioImages[i]);
+        log.info("[DEBUG] key, portfolioImages[i] >>> "+newImageKeys.get(i) + portfolioImages[i]);
+        updatedUser.putPortfolio(newImageKeys.get(i), portfolioImages[i]);
       }
     }
   }
 
-  private void addExistingImages(UserUpdateDto updatedUser, List<String> existingPortfolioImageUrls, int[] existingImageKeys) {
+  private void addExistingImages(UserUpdateDto updatedUser, List<String> existingPortfolioImageUrls, List<Integer> existingImageKeys) {
     if (existingPortfolioImageUrls != null && existingImageKeys != null) {
-      if (existingPortfolioImageUrls.size() != existingImageKeys.length) {
+      if (existingPortfolioImageUrls.size() != existingImageKeys.size()) {
         throw new IllegalArgumentException("기존 이미지 URL과 키의 개수가 일치하지 않습니다.");
       }
       for (int i = 0; i < existingPortfolioImageUrls.size(); i++) {
-        updatedUser.getPortfolio().put(existingImageKeys[i], existingPortfolioImageUrls.get(i));
+        log.info("[DEBUG] key, existingPortfolioImageUrls.get(i) >>> "+existingImageKeys.get(i) + existingPortfolioImageUrls.get(i));
+        updatedUser.putPortfolio(existingImageKeys.get(i), existingPortfolioImageUrls.get(i));
       }
     }
   }
