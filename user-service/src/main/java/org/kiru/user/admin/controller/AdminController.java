@@ -3,6 +3,7 @@ package org.kiru.user.admin.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
+import org.kiru.core.common.PageableResponse;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.admin.dto.AdminLikeUserResponse;
@@ -53,9 +54,10 @@ public class AdminController {
     }
 
     @GetMapping("/chatroom")
-    public ResponseEntity<List<ChatRoomListResponse>> getUserChatRooms(@RequestParam Long userId, Pageable pageable){
-        List<ChatRoom> chatRooms = userService.getUserChatRooms(userId,pageable);
-        return ResponseEntity.ok(chatRooms.stream().map(ChatRoomListResponse::of).toList());
+    public ResponseEntity<PageableResponse<ChatRoomListResponse>> getUserChatRooms(@RequestParam Long userId, Pageable pageable){
+        PageableResponse<ChatRoom> chatRoomPageableResponse = userService.getUserChatRooms(userId, pageable);
+        return ResponseEntity.ok(PageableResponse.of(chatRoomPageableResponse,
+                chatRoomPageableResponse.getContent().stream().map(ChatRoomListResponse::of).toList()));
     }
 
     @GetMapping("/rooms/{roomId}")
@@ -81,8 +83,8 @@ public class AdminController {
     }
 
     @GetMapping("/rooms/{roomId}/messages")
-    public ResponseEntity<List<Message>> getMessages(@PathVariable Long roomId, @UserId Long userId, Pageable pageable) {
-        List<Message> messages = adminService.getMessages(roomId, userId, true, pageable);
+    public ResponseEntity<PageableResponse<Message>> getMessages(@PathVariable Long roomId, @UserId Long userId, Pageable pageable) {
+        PageableResponse<Message> messages = adminService.getMessages(roomId, userId, true, pageable);
         return ResponseEntity.ok(messages);
     }
 }

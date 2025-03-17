@@ -25,7 +25,7 @@ public class User {
     @NotNull
     private String username;
 
-    private String socialId;
+    private Nationality nationality;
 
     private LoginType loginType;
     @NotNull
@@ -53,7 +53,7 @@ public class User {
                 .id(user.getId())
                 .username(user.getUsername())
                 .loginType(user.getLoginType())
-                .socialId(user.getSocialId())
+                .nationality(user.getNationality())
                 .email(user.getEmail())
                 .description(user.getDescription())
                 .instagramId(user.getInstagramId())

@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
+import org.kiru.core.common.PageableResponse;
 import org.kiru.user.admin.dto.AdminLikeUserResponse;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.dto.AdminMatchedUserResponse;
@@ -96,7 +97,7 @@ public class AdminService {
         }
     }
 
-    public List<Message> getMessages(Long roomId, Long userId, Boolean isAdmin, Pageable pageable) {
+    public PageableResponse<Message> getMessages(Long roomId, Long userId, Boolean isAdmin, Pageable pageable) {
         return chatApiClient.getMessages(roomId, userId, isAdmin, pageable);
     }
 }

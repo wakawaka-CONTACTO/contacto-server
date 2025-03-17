@@ -16,6 +16,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.kiru.core.user.user.domain.Nationality;
 import org.kiru.user.UserServiceApplication;
 import org.kiru.user.user.dto.request.UserPurposesReq;
 import org.kiru.user.user.dto.request.UserSignInReq;
@@ -86,7 +87,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .socialId("socialId")
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
@@ -129,7 +130,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .socialId("socialId")
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
@@ -188,7 +189,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .socialId("socialId")
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
@@ -229,7 +230,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .socialId("socialId")
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         // 요청 생성
@@ -265,7 +266,7 @@ class UserLoginControllerTest {
                 .password("6129nhnh!")
                 .description("description")
                 .instagramId("instagramId")
-                .socialId("socialId")
+                .nationality(Nationality.KR)
                 .webUrl("webUrl")
                 .build();
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);

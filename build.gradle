@@ -53,3 +53,7 @@ project(':user-service') {
 		implementation project(':core')
 	}
 }
+
+processResources{
+	filteringCharset 'UTF-8'
+}

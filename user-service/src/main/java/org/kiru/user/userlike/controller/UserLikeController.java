@@ -29,9 +29,9 @@ public class UserLikeController {
             @RequestBody LikeRequest likeRequest) {
         log.info("User {} sending like or dislike to user {}", userId, likeRequest.likedUserId());
         if(userId.equals(likeRequest.likedUserId())) {
-            throw new BadRequestException(FailureCode.INVALID_USER_LIKE);
+            throw new BadRequestException(FailureCode.INVALID_USER_BLOCK);
         }
         LikeResponse likeResponse = userLikeService.sendLikeOrDislike(userId, likeRequest.likedUserId(), likeRequest.status());
-        return  ResponseEntity.status(HttpStatus.CREATED).body(likeResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(likeResponse);
     }
 }

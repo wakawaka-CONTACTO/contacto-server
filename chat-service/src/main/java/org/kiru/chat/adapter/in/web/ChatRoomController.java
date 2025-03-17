@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.kiru.chat.adapter.in.web.req.CreateChatRoomRequest;
 import org.kiru.chat.adapter.in.web.res.CreateChatRoomResponse;
+import org.kiru.core.common.PageableResponse;
 import org.kiru.chat.application.port.in.CreateRoomUseCase;
 import org.kiru.chat.application.port.in.GetChatRoomUseCase;
 import org.kiru.chat.application.port.in.GetMessageUseCase;
@@ -36,7 +37,7 @@ public class ChatRoomController {
     }
 
     @GetMapping("/rooms")
-    public List<ChatRoom> getChatRoomsByUserId(@UserId Long userId, Pageable pageable) {
+    public PageableResponse<ChatRoom> getChatRoomsByUserId(@UserId Long userId, Pageable pageable) {
         return getChatRoomUseCase.findRoomsByUserId(userId,pageable);
     }
 
@@ -57,7 +58,7 @@ public class ChatRoomController {
     }
 
     @GetMapping("/rooms/{roomId}/messages")
-    public List<Message> getMessageByRoomId(@PathVariable Long roomId, @UserId Long userId,
+    public PageableResponse<Message> getMessageByRoomId(@PathVariable Long roomId, @UserId Long userId,
                                              @RequestParam Boolean admin, Pageable pageable) {
         return getMessageUseCase.getMessages(roomId, userId, admin, pageable);
     }
