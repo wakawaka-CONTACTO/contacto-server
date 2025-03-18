@@ -95,6 +95,7 @@ public class UserUpdateController {
         throw new IllegalArgumentException("기존 이미지 URL과 키의 개수가 일치하지 않습니다.");
       }
       for (int i = 0; i < existingPortfolioImageUrls.size(); i++) {
+        log.debug("existng input form {}", existingPortfolioImageUrls.get(i));
         updatedUser.putPortfolio(existingImageKeys.get(i), existingPortfolioImageUrls.get(i));
       }
     }

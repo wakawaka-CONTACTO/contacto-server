@@ -1,5 +1,6 @@
 package org.kiru.user.user.adapter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -82,14 +83,21 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
                 .map(UserPortfolioImg::toModel).toList();
         UserPortfolio userPortfolio =
                 userPortfolioItems.isEmpty() ? UserPortfolio.withUserId(userId) : UserPortfolio.of(userPortfolioItems);
-        List<UserPortfolioItem> updatePortfolioItems = imageService.saveImagesS3WithSequence(changedPortfolioImages,
+
+        List<UserPortfolioItem> newPortfolioItem = imageService.saveImagesS3WithSequence(changedPortfolioImages,
                 userPortfolio, userUpdateDto.getUsername());
+        List<UserPortfolioItem> existingImages = imageService.verifyExistingImages(changedPortfolioImages, userPortfolio,
+            userUpdateDto.getUsername());
+
+        List<UserPortfolioItem> updatePortfolioItems = new ArrayList<>();
+        updatePortfolioItems.addAll(newPortfolioItem);
+        updatePortfolioItems.addAll(existingImages);
 
         userPortfolioRepository.deleteAllByUserId(userId);
-        userPortfolioRepository.saveAll(userPortfolioItems.stream().map(UserPortfolioImg::toEntity).toList());
+
         userPortfolio.addOrUpdatePortfolioItems(
                 userPortfolioRepository.saveAll(
-                                updatePortfolioItems.stream().map(UserPortfolioImg::toEntity).toList())
+                        updatePortfolioItems.stream().map(UserPortfolioImg::toEntity).toList())
                         .stream().map(UserPortfolioImg::toModel).toList());
 
         return userPortfolio;
