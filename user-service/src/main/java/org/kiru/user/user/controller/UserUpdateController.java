@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.request.UserUpdateDto;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
@@ -45,11 +43,6 @@ public class UserUpdateController {
     if (updatedUser.getPortfolio() == null) {
       updatedUser.setPortfolio(new HashMap<>());
     }
-    log.info("[DEBUG]  newPortfolioImages[length] >>> "+ newPortfolioImages.length);
-    log.info("[DEBUG]  newImageKeys[size] >>> "+ newImageKeys.size());
-    log.info("[DEBUG]  existingPortfolioImageUrls[size] >>> "+ existingPortfolioImageUrls.size());
-    log.info("[DEBUG]  existingImageKeys[size] >>> "+ existingImageKeys.size());
-
     validateImageKeys(newImageKeys, existingImageKeys);
 
     addNewImages(updatedUser, newPortfolioImages, newImageKeys);
@@ -83,7 +76,6 @@ public class UserUpdateController {
         throw new IllegalArgumentException("새로운 이미지와 키의 개수가 일치하지 않습니다.");
       }
       for (int i = 0; i < portfolioImages.length; i++) {
-        log.info("[DEBUG] key, portfolioImages[i] >>> "+newImageKeys.get(i) + portfolioImages[i]);
         updatedUser.putPortfolio(newImageKeys.get(i), portfolioImages[i]);
       }
     }
@@ -95,7 +87,6 @@ public class UserUpdateController {
         throw new IllegalArgumentException("기존 이미지 URL과 키의 개수가 일치하지 않습니다.");
       }
       for (int i = 0; i < existingPortfolioImageUrls.size(); i++) {
-        log.info("[DEBUG] key, existingPortfolioImageUrls.get(i) >>> "+existingImageKeys.get(i) + existingPortfolioImageUrls.get(i));
         updatedUser.putPortfolio(existingImageKeys.get(i), existingPortfolioImageUrls.get(i));
       }
     }
