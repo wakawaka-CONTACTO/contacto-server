@@ -81,26 +81,28 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
         Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolio();
         List<UserPortfolioItem> userPortfolioItems = userPortfolioRepository.findAllByUserId(userId).stream()
                 .map(UserPortfolioImg::toModel).toList();
-        UserPortfolio userPortfolio =
-                userPortfolioItems.isEmpty() ? UserPortfolio.withUserId(userId) : UserPortfolio.of(userPortfolioItems);
+        UserPortfolio userPortfolio = UserPortfolio.withUserId(userId);
 
         List<UserPortfolioItem> newPortfolioItem = imageService.saveImagesS3WithSequence(changedPortfolioImages,
                 userPortfolio, userUpdateDto.getUsername());
         List<UserPortfolioItem> existingImages = imageService.verifyExistingImages(changedPortfolioImages, userPortfolio,
             userUpdateDto.getUsername());
 
-        List<UserPortfolioItem> updatePortfolioItems = new ArrayList<>();
+        List<UserPortfolioItem> updatePortfolioItems = new ArrayList<>(); // TODO: 빈 배열일 경우 예외처리
         updatePortfolioItems.addAll(newPortfolioItem);
         updatePortfolioItems.addAll(existingImages);
 
         userPortfolioRepository.deleteAllByUserId(userId);
 
-        userPortfolio.addOrUpdatePortfolioItems(
-                userPortfolioRepository.saveAll(
-                        updatePortfolioItems.stream().map(UserPortfolioImg::toEntity).toList())
-                        .stream().map(UserPortfolioImg::toModel).toList());
+        List<UserPortfolioItem> savedItems = userPortfolioRepository.saveAll(
+            updatePortfolioItems.stream()
+                .map(UserPortfolioImg::toEntity)
+                .toList()
+        ).stream().map(UserPortfolioImg::toModel).toList();
 
-        return userPortfolio;
+        return UserPortfolio.builder().portfolioId(userPortfolio.getPortfolioId())
+            .userId(userId)
+            .portfolioItems(new ArrayList<>(savedItems)).build();
     }
 
 

@@ -150,15 +150,29 @@ class UserUpdatePortTest {
         );
 
         List<UserPortfolioImg> savedImagesEntity = Arrays.asList(
-                UserPortfolioImg.builder()
-                        .id(1L)
-                        .userId(1L)
-                        .portfolioId(1L)
-                        .portfolioImageUrl("new-image.jpg")
-                        .sequence(1)
-                        .build()
+            UserPortfolioImg.builder()
+                .id(1L)
+                .userId(1L)
+                .portfolioId(1L)
+                .portfolioImageUrl("new-image.jpg")
+                .sequence(1)
+                .build(),
+            UserPortfolioImg.builder()
+                .id(2L)
+                .userId(1L)
+                .portfolioId(1L)
+                .portfolioImageUrl("exist-image2.jpg")
+                .sequence(2)
+                .build(),
+            UserPortfolioImg.builder()
+                .id(3L)
+                .userId(1L)
+                .portfolioId(1L)
+                .portfolioImageUrl("exist-image3.jpg")
+                .sequence(3)
+                .build()
         );
-        when( userPortfolioRepository.findAllByUserId(1L))
+        when(userPortfolioRepository.findAllByUserId(1L))
                 .thenReturn(existImagesEntity);
         when(imageService.saveImagesS3WithSequence(anyMap(), any(),any()))
                 .thenReturn(savedImages);

@@ -46,8 +46,11 @@ public class UserPortfolio {
     if (this.portfolioItems.isEmpty()) {
       return;
     }
-    this.portfolioItems.removeIf(Objects::isNull);
-    this.portfolioItems.sort(Comparator.comparing(UserPortfolioItem::getSequence));
+    List<UserPortfolioItem> mutableItems = new ArrayList<>(this.portfolioItems);
+    mutableItems.removeIf(Objects::isNull);
+    mutableItems.sort(Comparator.comparing(UserPortfolioItem::getSequence));
+    this.portfolioItems.clear();
+    this.portfolioItems.addAll(mutableItems);
   }
 
   public static Map<Integer, MultipartFile> findUpdateItem(Map<Integer, Object> items) {

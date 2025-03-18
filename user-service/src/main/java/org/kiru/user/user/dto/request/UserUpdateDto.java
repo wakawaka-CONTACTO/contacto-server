@@ -56,6 +56,7 @@ public class UserUpdateDto {
     }
 
     public void putPortfolio(int key, Object item){
+        if(this.portfolio == null) this.portfolio = new HashMap<>();
         this.portfolio.put(key, item);
     }
 
