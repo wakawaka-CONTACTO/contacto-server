@@ -29,6 +29,7 @@ public enum FailureCode {
     INVALID_IMAGE_EDIT(HttpStatus.BAD_REQUEST, "e4105", "프로필 이미지 수정에 실패하였습니다."),
     SOCKET_CONNECTED_FAILED(HttpStatus.BAD_REQUEST, "e4106", "소켓 연결에 실패하였습니다."),
     NATIONALITY_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "e4107", "국적 정보가 제공되지 않았습니다. 올바른 국적을 입력해 주세요."),
+    INVALID_PORTFOLIO_EDIT(HttpStatus.BAD_REQUEST, "e4108", "포트폴리오 이미지 수정에 실패하였습니다."),
     /**
      * 401 Unauthorized
      */

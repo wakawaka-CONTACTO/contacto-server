@@ -30,7 +30,7 @@ public class UserPortfolio {
     return UserPortfolio.builder()
         .portfolioId(items.isEmpty() ? null : items.getFirst().getPortfolioId())
         .userId(items.isEmpty() ? null : items.getFirst().getUserId())
-        .portfolioItems(new ArrayList<>(items)) // 수정 가능한 리스트로 설정
+        .portfolioItems(new ArrayList<>(items))
         .build();
   }
 
@@ -46,8 +46,11 @@ public class UserPortfolio {
     if (this.portfolioItems.isEmpty()) {
       return;
     }
-    this.portfolioItems.removeIf(Objects::isNull);
-    this.portfolioItems.sort(Comparator.comparing(UserPortfolioItem::getSequence));
+    List<UserPortfolioItem> mutableItems = new ArrayList<>(this.portfolioItems);
+    mutableItems.removeIf(Objects::isNull);
+    mutableItems.sort(Comparator.comparing(UserPortfolioItem::getSequence));
+    this.portfolioItems.clear();
+    this.portfolioItems.addAll(mutableItems);
   }
 
   public static Map<Integer, MultipartFile> findUpdateItem(Map<Integer, Object> items) {
@@ -64,6 +67,21 @@ public class UserPortfolio {
     return updateItem;
   }
 
+  public static Map<Integer, String> findExistingItem(Map<Integer, Object> items){
+    Map<Integer, String> existingItem = new HashMap<>();
+    if (items!= null) {
+      for (Entry<Integer, Object> entry : items.entrySet()){
+        Integer sequance = entry.getKey();
+        Object existingImg = entry.getValue();
+        if (existingImg instanceof String file){
+          existingItem.put(sequance, file);
+        }
+      }
+    }
+
+    return existingItem;
+  }
+
   public void addOrUpdatePortfolioItems(List<UserPortfolioItem> updateItems) {
     if (updateItems == null) {
       throw new IllegalArgumentException("updateItem이 Null입니다.");
@@ -77,7 +95,7 @@ public class UserPortfolio {
       for (UserPortfolioItem newItem : updateItems) {
         int index = newItem.getSequence() - 1;
         while (index >= this.portfolioItems.size()) {
-          this.portfolioItems.add(new UserPortfolioImg());  // 빈 객체 추가
+          this.portfolioItems.add(new UserPortfolioImg());
         }
 
         this.portfolioItems.set(index, newItem);

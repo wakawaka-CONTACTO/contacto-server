@@ -13,8 +13,6 @@ import org.kiru.core.user.talent.domain.Talent.TalentType;
 
 import java.util.List;
 import java.util.Map;
-//import org.kiru.user.portfolio.dto.req.PortfolioImagesRequest;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @AllArgsConstructor
@@ -43,12 +41,16 @@ public class UserUpdateDto {
     @Size(max = 10, message = "포트폴리오는 최대 10개까지 등록 가능합니다")
     private Map<Integer, Object> portfolio;
 
-    public void setPortfolioImages(MultipartFile[] portfolioImages, int[] keys) {
-        this.portfolio = new HashMap<>();
-        if(portfolioImages == null) return;
-        for (int i = 0; i < portfolioImages.length; i++) {
-            this.portfolio.put(keys[i], portfolioImages[i]);
-        }
+    public void setPortfolio(Map<Integer, Object> inputImages){
+        this.portfolio = inputImages;
     }
 
+    public void putPortfolio(int key, Object item){
+        if(this.portfolio == null) this.portfolio = new HashMap<>();
+        this.portfolio.put(key, item);
+    }
+
+    public boolean isEmptyPortfolio(){
+        return this.portfolio == null ? true: this.portfolio.isEmpty();
+    }
 }

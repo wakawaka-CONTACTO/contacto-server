@@ -1,5 +1,6 @@
 package org.kiru.user.user.adapter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -78,21 +79,31 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
     @Transactional
     public UserPortfolio updateUserPortfolioImages(final Long userId, UserUpdateDto userUpdateDto) {
         Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolio();
-        List<UserPortfolioItem> userPortfolioItems = userPortfolioRepository.findAllByUserId(userId).stream()
-                .map(UserPortfolioImg::toModel).toList();
-        UserPortfolio userPortfolio =
-                userPortfolioItems.isEmpty() ? UserPortfolio.withUserId(userId) : UserPortfolio.of(userPortfolioItems);
-        List<UserPortfolioItem> updatePortfolioItems = imageService.saveImagesS3WithSequence(changedPortfolioImages,
+        UserPortfolio userPortfolio = UserPortfolio.withUserId(userId);
+
+        List<UserPortfolioItem> newPortfolioItem = imageService.saveImagesS3WithSequence(changedPortfolioImages,
                 userPortfolio, userUpdateDto.getUsername());
+        List<UserPortfolioItem> existingImages = imageService.verifyExistingImages(changedPortfolioImages, userPortfolio,
+            userUpdateDto.getUsername());
+
+        List<UserPortfolioItem> updatePortfolioItems = new ArrayList<>();
+        updatePortfolioItems.addAll(newPortfolioItem);
+        updatePortfolioItems.addAll(existingImages);
+        if (updatePortfolioItems.isEmpty()){
+            throw new EntityNotFoundException(FailureCode.INVALID_PORTFOLIO_EDIT);
+        }
 
         userPortfolioRepository.deleteAllByUserId(userId);
-        userPortfolioRepository.saveAll(userPortfolioItems.stream().map(UserPortfolioImg::toEntity).toList());
-        userPortfolio.addOrUpdatePortfolioItems(
-                userPortfolioRepository.saveAll(
-                                updatePortfolioItems.stream().map(UserPortfolioImg::toEntity).toList())
-                        .stream().map(UserPortfolioImg::toModel).toList());
 
-        return userPortfolio;
+        List<UserPortfolioItem> savedItems = userPortfolioRepository.saveAll(
+            updatePortfolioItems.stream()
+                .map(UserPortfolioImg::toEntity)
+                .toList()
+        ).stream().map(UserPortfolioImg::toModel).toList();
+
+        return UserPortfolio.builder().portfolioId(userPortfolio.getPortfolioId())
+            .userId(userId)
+            .portfolioItems(new ArrayList<>(savedItems)).build();
     }
 
 

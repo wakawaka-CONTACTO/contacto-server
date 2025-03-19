@@ -3,6 +3,7 @@ package org.kiru.user.external.s3;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -96,6 +97,19 @@ public class ImageService {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
             return savedImages;
         }
+    }
+
+    @Transactional
+    public List<UserPortfolioItem> verifyExistingImages(final Map<Integer, Object> changedPortfolioImages, UserPortfolio userPortfolio, String username) {
+        Map<Integer, String> existingImages = userPortfolio.findExistingItem(changedPortfolioImages);
+        Long portfolioId = userPortfolio.getPortfolioId() == null ? portfolioIdGenerator.generatePortfolioId() : userPortfolio.getPortfolioId();
+        List<UserPortfolioItem> savedImages = new ArrayList<>();
+        existingImages.forEach((sequence, imageUrl) -> {
+            UserPortfolioItem item = UserPortfolioImg.of(userPortfolio.getUserId(),
+                portfolioId, imageUrl, sequence, username);
+            savedImages.add(item);
+        });
+        return savedImages;
     }
 
     public String getImageUrl(final MultipartFile image) {
