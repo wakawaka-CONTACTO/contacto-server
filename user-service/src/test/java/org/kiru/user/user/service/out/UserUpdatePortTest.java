@@ -172,8 +172,6 @@ class UserUpdatePortTest {
                 .sequence(3)
                 .build()
         );
-        when(userPortfolioRepository.findAllByUserId(1L))
-                .thenReturn(existImagesEntity);
         when(imageService.saveImagesS3WithSequence(anyMap(), any(),any()))
                 .thenReturn(savedImages);
         when(userPortfolioRepository.saveAll(any()))

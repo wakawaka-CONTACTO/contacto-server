@@ -126,6 +126,8 @@ public class UserService implements GetUserMainPageUseCase {
         existingEntity.updateDetails(updatedData);
         User savedUser = UserJpaEntity.toModel(existingEntity);
 
+        if(userUpdateDto.isEmptyPortfolio())
+            throw new EntityNotFoundException(FailureCode.PORTFOLIO_NOT_FOUND);
         updateAssociatedUserDetails(userId, userUpdateDto, savedUser);
 
         userQueryWithCache.saveExistUser(savedUser);

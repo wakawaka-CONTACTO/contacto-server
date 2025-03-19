@@ -79,8 +79,6 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
     @Transactional
     public UserPortfolio updateUserPortfolioImages(final Long userId, UserUpdateDto userUpdateDto) {
         Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolio();
-        List<UserPortfolioItem> userPortfolioItems = userPortfolioRepository.findAllByUserId(userId).stream()
-                .map(UserPortfolioImg::toModel).toList();
         UserPortfolio userPortfolio = UserPortfolio.withUserId(userId);
 
         List<UserPortfolioItem> newPortfolioItem = imageService.saveImagesS3WithSequence(changedPortfolioImages,
@@ -88,9 +86,12 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
         List<UserPortfolioItem> existingImages = imageService.verifyExistingImages(changedPortfolioImages, userPortfolio,
             userUpdateDto.getUsername());
 
-        List<UserPortfolioItem> updatePortfolioItems = new ArrayList<>(); // TODO: 빈 배열일 경우 예외처리
+        List<UserPortfolioItem> updatePortfolioItems = new ArrayList<>();
         updatePortfolioItems.addAll(newPortfolioItem);
         updatePortfolioItems.addAll(existingImages);
+        if (updatePortfolioItems.isEmpty()){
+            throw new EntityNotFoundException(FailureCode.INVALID_PORTFOLIO_EDIT);
+        }
 
         userPortfolioRepository.deleteAllByUserId(userId);
 
