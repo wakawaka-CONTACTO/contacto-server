@@ -1,4 +1,4 @@
-package org.kiru.user.AmazonSqs;
+package org.kiru.user.amazonsqs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.operations.SendResult;

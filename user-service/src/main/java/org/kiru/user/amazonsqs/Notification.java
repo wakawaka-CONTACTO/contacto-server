@@ -1,4 +1,4 @@
-package org.kiru.user.AmazonSqs;
+package org.kiru.user.amazonsqs;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

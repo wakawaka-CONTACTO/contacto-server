@@ -1,4 +1,4 @@
-package org.kiru.user.AmazonSqs;
+package org.kiru.user.amazonsqs;
 
 // 알람전송 결과
 public record NotificationSendResult(
