@@ -35,6 +35,11 @@ subprojects {
 	}
 }
 
+project(':alarm-service') {
+	dependencies {
+		implementation project(':core')
+	}
+}
 
 project(':chat-service') {
 	dependencies {

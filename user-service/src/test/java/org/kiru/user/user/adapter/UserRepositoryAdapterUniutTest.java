@@ -176,8 +176,6 @@ public class UserRepositoryAdapterUniutTest {
         .username("testUser")
         .build();
 
-    when(userPortfolioRepository.findAllByUserId(userId)).thenReturn(Collections.emptyList());
-
     UserPortfolioItem dummyItem = new UserPortfolioImg();
     List<UserPortfolioItem> dummyItems = List.of(dummyItem);
     when(imageService.saveImagesS3WithSequence(eq(portfolioMap), any(UserPortfolio.class), eq("testUser")))
