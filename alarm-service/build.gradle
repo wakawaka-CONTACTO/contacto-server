@@ -38,6 +38,7 @@ dependencies {
 	implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.0.1')
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
 
+	annotationProcessor 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 

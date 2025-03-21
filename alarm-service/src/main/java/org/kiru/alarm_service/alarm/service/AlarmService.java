@@ -24,24 +24,6 @@ public class AlarmService {
         String deviceToken = getDeviceToken(recieverId);
         // deviceToken을 이용하여 알람 전송
         // SQS를 위한 메세지 만들기
-        /*{
-          "Records": [
-            {
-              "messageAttributes": {
-                "title": {
-                  "stringValue": "알림 제목 예시",
-                  "dataType": "String"
-                },
-                "deviceToken": {
-                  "stringValue": "APNs_디바이스_토큰_예시_abc123xyz",
-                  "dataType": "String"
-                }
-              },
-              "body": "푸시 알림 내용 예시입니다."
-            }
-          ]
-        }
-        */
         PushMessage message = PushMessage.builder()
                 .title("알림 제목 예시")
                 .body("푸시 알림 내용 예시입니다.")
