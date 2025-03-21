@@ -13,7 +13,7 @@ public class AlarmController {
 
     private final AlarmService alarmService;
 
-    @PostMapping("/match/${recieverId}")
+    @PostMapping("/match/{recieverId}")
     public void sendAlarm(@PathVariable("recieverId") Long recieverId) {
         // 매칭 알람 전송
         alarmService.sendMatchingAlarm(recieverId);

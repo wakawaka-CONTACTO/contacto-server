@@ -1,4 +1,4 @@
-package org.kiru.alarm_service.amazonsqs.config;
+package org.kiru.alarm_service.amazonsqs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +15,7 @@ public class AwsSqsNotificationSender {
 
     private final SqsAsyncClient sqsAsyncClient;
 
-    @Value("${cloud.aws.sqs.queue.url}")
+    @Value("${cloud.aws.sqs.queue-url}")
     private String queueUrl;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -36,4 +36,5 @@ public class AwsSqsNotificationSender {
             throw new RuntimeException("JSON 직렬화 실패", e);
         }
     }
+
 }

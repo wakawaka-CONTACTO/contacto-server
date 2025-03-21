@@ -3,7 +3,7 @@ package org.kiru.alarm_service.alarm.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.alarm_service.alarm.repository.AlarmRepository;
-import org.kiru.alarm_service.amazonsqs.config.AwsSqsNotificationSender;
+import org.kiru.alarm_service.amazonsqs.AwsSqsNotificationSender;
 import org.kiru.alarm_service.amazonsqs.dto.PushMessage;
 import org.kiru.core.devicetoken.domain.DeviceToken;
 import org.kiru.core.devicetoken.entity.DeviceTokenJpaEntity;
