@@ -48,8 +48,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.github.openfeign:feign-micrometer'
 
-    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.0.1')
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
     // ResilienceJ 의존성 추가
 
     testImplementation 'io.github.autoparams:autoparams-mockito:9.0.0'

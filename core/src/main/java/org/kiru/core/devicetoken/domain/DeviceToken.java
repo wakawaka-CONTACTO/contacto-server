@@ -13,19 +13,15 @@ import org.kiru.core.devicetoken.entity.DeviceTokenJpaEntity;
 @NoArgsConstructor
 public class DeviceToken {
     @NotNull
-    private Long id;
-
-    @NotNull
     private String deviceToken;
 
     @NotNull
     private Long userId;
 
-    public static DeviceToken of(DeviceTokenJpaEntity deviceTokenJpaEntity) {
+    public static DeviceToken of(String deviceToken, Long userId) {
         return DeviceToken.builder()
-                .id(deviceTokenJpaEntity.getId())
-                .deviceToken(deviceTokenJpaEntity.getDeviceToken())
-                .userId(deviceTokenJpaEntity.getUserId())
+                .deviceToken(deviceToken)
+                .userId(userId)
                 .build();
     }
 }

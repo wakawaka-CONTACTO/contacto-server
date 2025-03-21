@@ -26,7 +26,6 @@ public class DeviceTokenJpaEntity {
 
     public static DeviceTokenJpaEntity of(DeviceToken deviceToken) {
         return DeviceTokenJpaEntity.builder()
-                .id(deviceToken.getId())
                 .deviceToken(deviceToken.getDeviceToken())
                 .userId(deviceToken.getUserId())
                 .build();
@@ -34,7 +33,6 @@ public class DeviceTokenJpaEntity {
 
     public static DeviceToken toModel(DeviceTokenJpaEntity deviceTokenJpaEntity) {
         return DeviceToken.builder()
-                .id(deviceTokenJpaEntity.getId())
                 .deviceToken(deviceTokenJpaEntity.getDeviceToken())
                 .userId(deviceTokenJpaEntity.getUserId())
                 .build();
