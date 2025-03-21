@@ -9,9 +9,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableFeignClients
 @EnableConfigurationProperties
-@EntityScan(basePackages = {"org.kiru.core.alarm"})
+@EntityScan(basePackages = {"org.kiru.core.devicetoken"})
 public class AlarmServiceApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(AlarmServiceApplication.class, args);
 	}
