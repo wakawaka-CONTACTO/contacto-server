@@ -2,8 +2,6 @@ package org.kiru.user.auth.mail.async;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,9 +17,8 @@ public class AsyncMailSender {
 
   private final RedisTemplate<String, String> redisTemplateForOne;
   private final JavaMailSender javaMailSender;
-  private final Executor executor;
 
-  @Async
+  @Async("virtualThreadExecutor")
   public void sendMail(MimeMessage message, String number) throws MessagingException {
     String received = message.getRecipients(MimeMessage.RecipientType.TO)[0].toString();
     try {
