@@ -1,8 +1,8 @@
-package org.kiru.alarm_service.alarm.controller;
+package org.kiru.alarm_service.alarm.in.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.kiru.alarm_service.alarm.dto.req.CreatedDeviceTokenReq;
-import org.kiru.alarm_service.alarm.service.AlarmService;
+import org.kiru.alarm_service.alarm.in.dto.req.CreatedDeviceTokenReq;
+import org.kiru.alarm_service.service.AlarmService;
 import org.kiru.core.devicetoken.domain.DeviceToken;
 import org.springframework.web.bind.annotation.*;
 

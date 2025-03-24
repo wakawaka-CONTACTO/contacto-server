@@ -1,4 +1,4 @@
-package org.kiru.alarm_service.alarm.dto.req;
+package org.kiru.alarm_service.alarm.in.dto.req;
 
 import lombok.Builder;
 import lombok.Getter;
