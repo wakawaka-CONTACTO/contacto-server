@@ -27,6 +27,7 @@ import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.user.auth.jwt.JwtProvider;
 import org.kiru.user.auth.jwt.Token;
 import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
+import org.kiru.user.user.api.AlarmApiClient;
 import org.kiru.user.user.dto.event.UserCreateEvent;
 import org.kiru.user.user.dto.request.SignHelpDto;
 import org.kiru.user.user.dto.request.UserPurposesReq;
@@ -67,6 +68,9 @@ class AuthServiceTest {
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Mock
+    private AlarmApiClient alarmApiClient;
 
     private UserSignUpReq testSignUpReq;
     private UserJpaEntity testUser;
@@ -140,7 +144,7 @@ class AuthServiceTest {
     @DisplayName("로그인 - 성공")
     void signIn_Success() {
         // Given
-        UserSignInReq signInReq = new UserSignInReq("test@example.com", "password123");
+        UserSignInReq signInReq = new UserSignInReq("test@example.com", "password123", "deviceToken");
         when(userRepository.findByEmail(signInReq.email())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(any(), any())).thenReturn(true);
         when(jwtProvider.issueToken(anyLong(), anyString(),any())).thenReturn(testToken);
@@ -158,7 +162,7 @@ class AuthServiceTest {
     @DisplayName("로그인 - 잘못된 비밀번호")
     void signIn_InvalidPassword() {
         // Given
-        UserSignInReq signInReq = new UserSignInReq("test@example.com", "wrongPassword");
+        UserSignInReq signInReq = new UserSignInReq("test@example.com", "wrongPassword", "deviceToken");
         when(userRepository.findByEmail(signInReq.email())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(any(), any())).thenReturn(false);
 

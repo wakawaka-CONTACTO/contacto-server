@@ -48,6 +48,7 @@ public class UserLoginController {
             @RequestBody final UserSignInReq userSignInReq
     ) {
         UserJwtInfoRes userSignInRes = authService.signIn(userSignInReq);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(userSignInRes);
     }
 

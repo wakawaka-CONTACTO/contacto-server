@@ -37,6 +37,7 @@ public class AlarmService {
 
     public Long createDeviceToken(DeviceToken deviceToken) {
         // userId와 deviceToken을 저장
+        log.info("deviceToken : {}", deviceToken);
         return alarmRepository.save(DeviceTokenJpaEntity.of(deviceToken)).getId();
     }
 
