@@ -19,7 +19,7 @@ public class AlarmController {
         alarmService.sendMatchingAlarm(recieverId);
     }
 
-    @PostMapping("/device")
+    @PostMapping("/devicetoken")
     public void addDeviceToken(@RequestBody CreatedDeviceTokenReq req) {
         // 디바이스 토큰 추가
         alarmService.createDeviceToken(DeviceToken.of(req.getDeviceToken(), req.getUserId()));

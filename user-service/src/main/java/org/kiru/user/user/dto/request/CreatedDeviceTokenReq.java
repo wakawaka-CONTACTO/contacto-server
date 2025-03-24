@@ -1,4 +1,4 @@
-package org.kiru.alarm_service.alarm.in.dto.req;
+package org.kiru.user.user.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +20,3 @@ public class CreatedDeviceTokenReq {
                 .build();
     }
 }
-
