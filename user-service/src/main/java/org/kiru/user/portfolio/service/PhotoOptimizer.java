@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import net.coobird.thumbnailator.Thumbnails;
 import org.kiru.user.portfolio.constants.PhotoUsage;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+@Component
 public class PhotoOptimizer {
 
   public InputStream optimize(MultipartFile multipartFile, PhotoUsage usage) throws IOException {

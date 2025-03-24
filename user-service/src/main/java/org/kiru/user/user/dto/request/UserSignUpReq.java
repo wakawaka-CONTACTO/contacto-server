@@ -2,6 +2,7 @@ package org.kiru.user.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.kiru.core.user.user.domain.LoginType;
@@ -22,6 +23,7 @@ public record UserSignUpReq(
         @Pattern(regexp = "^[A-Za-z0-9가-힣]{2,20}$",
                 message = "이름은 2-20자의 영문자, 숫자, 한글만 가능합니다")
         String name,
+        @NotNull(message = "국적 선택은 필수입니다")
         Nationality nationality,
         String webUrl,
         String description,

@@ -50,6 +50,7 @@ public class ImageService {
                             UserPortfolioItem newImage = UserPortfolioImg.of(userId, portfolioId,cachePath + imagePath, index + 1,userName);
                             savedImages.add(newImage);
                         } catch (IOException e) {
+                            log.error(e.getMessage());
                             throw new CompletionException(new BadRequestException(FailureCode.BAD_REQUEST));
                         }
                     }, executor))
@@ -90,6 +91,7 @@ public class ImageService {
                                     entry.getKey(), username);
                             savedImages.add(newImage);
                         } catch (IOException e) {
+                            log.error(e.getMessage());
                             throw new CompletionException(new BadRequestException(FailureCode.BAD_REQUEST));
                         }
                     }, executor))

@@ -1,6 +1,7 @@
 package org.kiru.user.external.s3;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -8,6 +9,8 @@ import java.util.UUID;
 import org.kiru.core.exception.BadRequestException;
 import org.kiru.core.exception.InvalidValueException;
 import org.kiru.core.exception.code.FailureCode;
+import org.kiru.user.portfolio.constants.PhotoUsage;
+import org.kiru.user.portfolio.service.PhotoOptimizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,31 +30,41 @@ public class S3Service {
     private final String basePath;
     private static final List<String> IMAGE_EXTENSIONS = Arrays.asList("image/jpeg", "image/png", "image/jpg", "image/webp", "image/heic", "image/heif","image/avif");
     private static final Long MAX_FILE_SIZE = 10 * 1024 * 1024L;
+    private final PhotoOptimizer photoOptimizer;
 
-    public S3Service(@Value("${aws-property.s3-bucket-name}") final String bucketName, AWSConfig awsConfig, @Value("${cloudfront.domain}") String basePath) {
+    public S3Service(@Value("${aws-property.s3-bucket-name}") final String bucketName, AWSConfig awsConfig, @Value("${cloudfront.domain}") String basePath, PhotoOptimizer photoOptimizer) {
         this.bucketName = bucketName;
         this.awsConfig = awsConfig;
         this.basePath = basePath;
+        this.photoOptimizer = photoOptimizer;
     }
 
     public String uploadImage(String directoryPath, MultipartFile image) throws IOException {
-        final String key = directoryPath + generateImageFileName(image);  // 이미지 파일 이름 생성
+        final String key = directoryPath + generateImageFileName(image);
         final S3Client s3Client = awsConfig.getS3Client();
-        validateExtension(image);  // 파일 확장자 유효성 검사
-        validateFileSize(image);   // 파일 크기 유효성 검사
+        validateExtension(image);
+        validateFileSize(image);
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
                 .contentType(image.getContentType())
                 .contentDisposition("inline")
                 .build();
-        RequestBody requestBody = RequestBody.fromBytes(image.getBytes());  // 파일 바이트 배열로 변환
         try {
+            RequestBody requestBody = RequestBody.fromBytes(getOptimizedImageBytes(image));
             s3Client.putObject(request, requestBody);
         } catch (S3Exception e) {
-            throw new IOException("이미지 업로드 중 오류가 발생했습니다.", e);  // 예외 발생 시 IOException 처리
+            throw new IOException("이미지 업로드 중 오류가 발생했습니다.", e);
         }
-        return key;  // S3에 저장된 이미지 경로 반환
+        return key;
+    }
+
+    private byte[] getOptimizedImageBytes(MultipartFile image) throws IOException{
+        try (InputStream optimizedStream = photoOptimizer.optimize(image, PhotoUsage.PORTFOLIO_SCROLL)){
+            return optimizedStream.readAllBytes();
+        }catch (IOException e) {
+            throw new IOException("이미지 최적화 처리 중 오류가 발생했습니다.", e);
+        }
     }
 
 
