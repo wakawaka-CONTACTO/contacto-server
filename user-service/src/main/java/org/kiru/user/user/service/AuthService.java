@@ -17,6 +17,7 @@ import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
 import org.kiru.user.user.api.AlarmApiClient;
 import org.kiru.user.user.dto.event.UserCreateEvent;
 import org.kiru.user.user.dto.request.*;
+import org.kiru.user.user.dto.response.CreatedDeviceTokenRes;
 import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
@@ -177,7 +178,8 @@ public class AuthService {
 
   private void saveDeviceToken(Long userId, String deviceToken) {
     CreatedDeviceTokenReq createdDeviceTokenReq = CreatedDeviceTokenReq.of(userId, deviceToken);
-    alarmApiClient.addDeviceToken(createdDeviceTokenReq);
+    CreatedDeviceTokenRes res = alarmApiClient.addDeviceToken(createdDeviceTokenReq);
+
     log.info("성공적으로 디바이스 토큰을 저장했습니다. ");
   }
 }
