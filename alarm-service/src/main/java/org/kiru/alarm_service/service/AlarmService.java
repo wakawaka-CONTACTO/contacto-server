@@ -4,12 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.alarm_service.alarm.in.repository.AlarmRepository;
 import org.kiru.alarm_service.amazonsqs.AwsSqsNotificationSender;
-import org.kiru.alarm_service.amazonsqs.dto.PushMessage;
-import org.kiru.core.devicetoken.domain.DeviceToken;
-import org.kiru.core.devicetoken.entity.DeviceTokenJpaEntity;
+import org.kiru.core.devicetoken.domain.Device;
+import org.kiru.core.devicetoken.entity.DeviceJpaEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -19,10 +16,10 @@ public class AlarmService {
     private final AlarmRepository alarmRepository;
     private final AwsSqsNotificationSender awsSqsNotificationSender;
 
-    public Long createDeviceToken(DeviceToken deviceToken) {
+    public Long createDeviceToken(Device device) {
         // userId와 deviceToken을 저장
-        log.info("deviceToken : {}", deviceToken);
-        return alarmRepository.save(DeviceTokenJpaEntity.of(deviceToken)).getId();
+        log.info("deviceToken : {}", device);
+        return alarmRepository.save(DeviceJpaEntity.of(device)).getId();
     }
 
     private String getDeviceToken(Long recieverId) {

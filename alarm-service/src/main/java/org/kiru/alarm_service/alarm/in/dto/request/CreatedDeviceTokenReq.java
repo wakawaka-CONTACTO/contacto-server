@@ -12,11 +12,15 @@ import lombok.RequiredArgsConstructor;
 public class CreatedDeviceTokenReq {
     Long userId;
     String deviceToken;
+    String deviceType;
+    String deviceId;
 
-    public static CreatedDeviceTokenReq of(Long userId, String deviceToken) {
+    public static CreatedDeviceTokenReq of(Long userId, String deviceToken, String deviceType, String deviceId) {
         return CreatedDeviceTokenReq.builder()
                 .userId(userId)
                 .deviceToken(deviceToken)
+                .deviceType(deviceType)
+                .deviceId(deviceId)
                 .build();
     }
 }
