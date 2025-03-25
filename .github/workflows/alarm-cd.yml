@@ -1,9 +1,9 @@
-name:  Service CICD
+name: Service CICD
 
 on:
   push:
-    branches: ["dev"]
-    path:
+    branches: [ "dev" ]
+    paths:
       - 'alarm-service/src/main/**'
 
 jobs:
