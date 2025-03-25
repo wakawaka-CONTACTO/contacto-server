@@ -49,10 +49,10 @@ public class PortfolioService {
     private List<Long> getDistinctUserIds(Long userId, Pageable pageable) {
         // 이미 좋아요를 눌렀거나 차단한 유저
         CompletableFuture<List<Long>> alreadyLikedOrBlockedUserFuture = getAlreadyLikedUserFuture(userId, virtualThreadExecutor)
-                .thenCombine(getBlockedUserFuture(userId, virtualThreadExecutor), (likedUserIds, blockedUserIds) -> {
+                .thenCombine(getBlockedOrBlockingUserFuture(userId, virtualThreadExecutor), (likedUserIds, blockedOrBlockingUserIds) -> {
                     List<Long> combined = new ArrayList<>(likedUserIds);
                     combined.add(userId);
-                    combined.addAll(blockedUserIds);
+                    combined.addAll(blockedOrBlockingUserIds);
                     return combined; });
         // 싫어요를 누른 유저 (맨 뒤로 가게 하기 위함)
         List<Long> disLikedUserIds = getUserLikeQuery.findAllLikedUserIdByUserIdAndLikeStatus(userId, LikeStatus.DISLIKE);
@@ -71,8 +71,8 @@ public class PortfolioService {
         return CompletableFuture.supplyAsync(() -> getUserLikeQuery.findAllLikedUserIdByUserIdAndLikeStatus(userId, LikeStatus.LIKE), executor);
     }
 
-    private CompletableFuture<List<Long>> getBlockedUserFuture(Long userId, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> getUserBlockQuery.findAllBlockedUserIdByUserId(userId), executor);
+    private CompletableFuture<List<Long>> getBlockedOrBlockingUserFuture(Long userId, Executor executor) {
+        return CompletableFuture.supplyAsync(() -> getUserBlockQuery.findAllBlockedOrBlockingUserByUserIds(userId), executor);
     }
 
     private CompletableFuture<List<Long>> getUserPortfolioIds(CompletableFuture<List<Long>> alreadyLikedUserFuture,

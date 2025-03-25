@@ -30,4 +30,9 @@ public class UserBlockJpaAdapter implements BlockUserQuery, GetUserBlockQuery {
     public List<Long> findAllBlockedUserIdByUserId(Long userId) {
         return userBlockRepository.findAllBlockedUserIdByUserId(userId);
     }
+
+    @Override
+    public List<Long> findAllBlockedOrBlockingUserByUserIds(Long userId) {
+        return userBlockRepository.findAllBlockedOrBlockingUserByUserIds(userId);
+    }
 }

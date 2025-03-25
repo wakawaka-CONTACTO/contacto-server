@@ -23,4 +23,19 @@ public interface UserBlockJpaRepository extends JpaRepository<UserBlockJpaEntity
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
     })
     List<Long> findAllBlockedUserIdByUserId(@Param("userId") Long userId);
+
+    @Query("""
+    SELECT CASE
+        WHEN ub.userId = :userId THEN ub.blockedUserId
+        ELSE ub.userId
+    END
+    FROM UserBlockJpaEntity ub
+    WHERE ub.userId = :userId OR ub.blockedUserId = :userId
+""")
+    @QueryHints(value = {
+            @QueryHint(name = "org.hibernate.readOnly", value = "true"),
+            @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
+            @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
+    })
+    List<Long> findAllBlockedOrBlockingUserByUserIds(@Param("userId") Long userId);
 }
