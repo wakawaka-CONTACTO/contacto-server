@@ -4,11 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record CreatedDeviceRes(
-        Long deviceTokenId
+        boolean madeDevice
 ){
-    public static CreatedDeviceRes of(final Long deviceTokenId) {
+    public static CreatedDeviceRes of(final boolean madeDevice) {
         return CreatedDeviceRes.builder()
-                .deviceTokenId(deviceTokenId)
+                .madeDevice(madeDevice)
                 .build();
     }
 }

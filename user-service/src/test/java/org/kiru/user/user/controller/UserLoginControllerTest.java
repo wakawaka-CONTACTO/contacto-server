@@ -341,6 +341,7 @@ class UserLoginControllerTest {
     void signInSuccess(String accessToken, String refreshToken) throws Exception {
         UserSignInReq userSignInReq = new UserSignInReq(
                 "rlarlgnszx@naver.com","1234@123n", "deviceToken"
+                , "deviceId", "deviceType"
         );
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
 

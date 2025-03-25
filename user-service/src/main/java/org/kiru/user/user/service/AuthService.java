@@ -186,10 +186,10 @@ public class AuthService {
   private void saveDeviceToken(Long userId, String deviceToken, String deviceType, String deviceId) {
     CreatedDeviceReq createdDeviceReq = CreatedDeviceReq.of(userId, deviceToken, deviceType, deviceId);
     CreatedDeviceRes res = alarmApiClient.createDevice(createdDeviceReq);
-    if (res.deviceTokenId() == -1) {
-      log.info("😭이미 존재하는 디바이스 토큰 입니다 ");
-    }else{
-      log.info("😃성공적으로 디바이스 토큰을 저장했습니다. ");
-    }
+//    if (res.madeDevice()) {
+//      log.info("😃성공적으로 디바이스 토큰을 저장했습니다. ");
+//    }else{
+//      log.info("😭이미 존재하는 디바이스 토큰 입니다 ");
+//    }
   }
 }

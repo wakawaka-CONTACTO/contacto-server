@@ -16,19 +16,17 @@ public class AlarmService {
     private final DeviceRepository deviceRepository;
     private final AwsSqsNotificationSender awsSqsNotificationSender;
 
-    public Long createDevice(Device device) {
+    public DeviceJpaEntity createDevice(Device device) {
         DeviceJpaEntity existingDevice = findDevice(device.getUserId(), device.getDeviceId());
 
         if(existingDevice == null) {
-            return deviceRepository.save(DeviceJpaEntity.of(device)).getId();
+            return deviceRepository.save(DeviceJpaEntity.of(device));
         }else if (validDeviceToken(device, existingDevice)) {
            existingDevice.updateDeviceToken(device.getDeviceToken());
-            return deviceRepository.save(existingDevice).getId();
+            return deviceRepository.save(existingDevice);
         }
 
-        log.info("deviceToken : {}", device);
-
-        return -1L;
+        return null;
     }
 
     private String getDeviceToken(Long recieverId) {
