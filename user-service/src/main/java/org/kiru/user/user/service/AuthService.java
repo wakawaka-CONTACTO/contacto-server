@@ -59,6 +59,10 @@ public class AuthService {
             .build()
     );
 
+    if(req.deviceToken() != null){
+      saveDeviceToken(userEntity.getId(), req.deviceToken(), req.deviceType(), req.deviceId());
+    }
+
     return UserJwtInfoRes.of(userEntity.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
   }
 
