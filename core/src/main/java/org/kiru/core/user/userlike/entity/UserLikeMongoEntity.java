@@ -60,4 +60,6 @@ public class UserLikeMongoEntity implements UserLike {
                 .updatedAt(now)
                 .build();
     }
+
+    public void touch() { this.updatedAt = LocalDateTime.now(); }
 }

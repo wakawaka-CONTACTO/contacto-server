@@ -38,12 +38,16 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
         // 현재 `userId -> likedUserId` 관계 조회 또는 생성
         UserLike userLike = userLikeRepository.findByUserIdAndLikedUserId(userId, likedUserId)
                 .orElseGet(() -> UserLikeJpaEntity.of(userId, likedUserId, status, false));
+        if (userLike.getLikeStatus() == status) {
+            userLike.touch();
+        } else {
+            userLike.likeStatus(status);
+        }
         // 1. 상대방이 나를 좋아요(`LIKE`)한 기록이 있는지 먼저 조회
         if (userLike.isMatched() && status == LikeStatus.LIKE) {
             return userLike;
         }
         UserLike oppositeLike = userLikeRepository.findOppositeLike(likedUserId, userId, LikeStatus.LIKE);
-        userLike.likeStatus(status);
         // 3. 상대방이 나를 이미 `LIKE`했다면 상호 매칭으로 처리
         if (oppositeLike != null && status == LikeStatus.LIKE) {
             userLike.setMatched(true);
@@ -70,6 +74,11 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
     public List<Long> findAllLikedUserIdByUserId(Long userId) {
         List<Long> likedUserIds = userLikeRepository.findAllLikedUserIdByUserId(userId);
         return likedUserIds;
+    }
+
+    @Override
+    public List<Long> findAllLikedUserIdByUserIdAndLikeStatus(Long userId, LikeStatus likeStatus) {
+        return userLikeRepository.findAllLikedUserIdByUserIdAndLikeStatus(userId, likeStatus);
     }
 
     @Override

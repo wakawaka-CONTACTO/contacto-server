@@ -17,6 +17,8 @@ import org.kiru.core.user.common.BaseTimeEntity;
 import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.domain.UserLike;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Entity
 @NoArgsConstructor
