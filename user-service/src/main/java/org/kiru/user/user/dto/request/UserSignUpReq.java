@@ -26,6 +26,9 @@ public record UserSignUpReq(
         String webUrl,
         String description,
         String instagramId,
-        LoginType loginType
+        LoginType loginType,
+        String deviceToken,
+        String deviceId,
+        String deviceType
 ) {
 }

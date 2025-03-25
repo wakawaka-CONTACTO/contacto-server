@@ -47,6 +47,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.github.openfeign:feign-micrometer'
+
     // ResilienceJ 의존성 추가
 
     testImplementation 'io.github.autoparams:autoparams-mockito:9.0.0'
