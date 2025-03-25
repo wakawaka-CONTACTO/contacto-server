@@ -1,0 +1,53 @@
+name:  Service CICD
+
+on:
+  push:
+    branches: ["dev"]
+    path:
+      - 'alarm-service/src/main/**'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Create application.yml
+        run: |
+          mkdir -p alarm-service/src/main/resources
+          touch alarm-service/src/main/resources/application.yml
+          echo "${{ secrets.ALARM_APPLICATION }}" > alarm-service/src/main/resources/application.yml
+          cat alarm-service/src/main/resources/application.yml
+
+      - name: Build Alarm Service
+        run: |
+          ./gradlew :alarm-service:build -x test
+
+      - name: Docker Login
+        uses: docker/login-action@v2.2.0
+        with:
+          username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+          password: ${{ secrets.DOCKER_LOGIN_ACCESSTOKEN }}
+
+      - name: Docker Image Build and Push
+        run: |
+          docker build --build-arg SERVICE_NAME=-service -t ${{ secrets.DOCKER_REPOSITORY }}/-service-image .
+          docker push ${{ secrets.DOCKER_REPOSITORY }}/-service-image
+
+      - name: Deploy  Service via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          script: |
+            cd ~
+            ./deploy__service.sh
+            docker image prune -f
