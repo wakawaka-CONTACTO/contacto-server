@@ -58,6 +58,7 @@ public class AuthService {
             .talents(talents)
             .build()
     );
+
     return UserJwtInfoRes.of(userEntity.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
   }
 
@@ -93,7 +94,9 @@ public class AuthService {
     refreshTokenRepository.deleteByUserId(user.getId());
     Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(), now);
 
-    saveDeviceToken(user.getId(), req.deviceToken(), req.deviceType(), req.deviceId());
+    if(req.deviceToken() != null){
+      saveDeviceToken(user.getId(), req.deviceToken(), req.deviceType(), req.deviceId());
+    }
 
     return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
   }

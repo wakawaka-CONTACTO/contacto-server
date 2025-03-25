@@ -14,10 +14,8 @@ public record UserSignInReq(
                  message = "비밀번호는 8자 이상이며, 영문자, 숫자, 특수문자를 포함해야 합니다")
         String password,
 
-        @NotBlank(message = "디바이스 토큰은 필수입니다")
         String deviceToken,
 
-        @NotBlank(message = "디바이스 아이디는 필수입니다")
         String deviceId,
 
         String deviceType
