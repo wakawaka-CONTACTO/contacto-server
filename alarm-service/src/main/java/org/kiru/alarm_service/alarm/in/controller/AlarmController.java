@@ -19,6 +19,6 @@ public class AlarmController {
     public ResponseEntity<CreatedDeviceRes> createDevice(@RequestBody CreatedDeviceReq req) {
         Long deviceTokenId = alarmService.createDevice(
                 Device.of(req.getDeviceToken(), req.getUserId(), req.getDeviceType(), req.getDeviceId()));
-        return ResponseEntity.ok(CreatedDeviceRes.of(deviceTokenId));
+        return ResponseEntity.ok(new CreatedDeviceRes(deviceTokenId));
     }
 }

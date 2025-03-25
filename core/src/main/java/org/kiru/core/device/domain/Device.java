@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @Builder
-@NoArgsConstructor
 public class Device {
     @NotNull
     private String deviceToken;

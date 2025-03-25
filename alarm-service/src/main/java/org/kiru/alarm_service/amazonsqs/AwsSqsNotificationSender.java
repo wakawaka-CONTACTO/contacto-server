@@ -3,12 +3,14 @@ package org.kiru.alarm_service.amazonsqs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.alarm_service.amazonsqs.dto.PushMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AwsSqsNotificationSender {
@@ -30,7 +32,7 @@ public class AwsSqsNotificationSender {
 
             sqsAsyncClient.sendMessage(request)
                     .thenAccept(response -> {
-                        System.out.println("Message sent! ID: " + response.messageId());
+                        log.info("메시지 전송 완료! ID: {}", response.messageId());
                     });
         } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON 직렬화 실패", e);
