@@ -39,7 +39,7 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
         UserLike userLike = userLikeRepository.findByUserIdAndLikedUserId(userId, likedUserId)
                 .orElseGet(() -> UserLikeJpaEntity.of(userId, likedUserId, status, false));
         if (userLike.getLikeStatus() == status) {
-            userLike.touch();
+            userLike.setUpdateAt();
         } else {
             userLike.likeStatus(status);
         }

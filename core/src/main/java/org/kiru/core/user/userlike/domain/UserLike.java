@@ -10,5 +10,5 @@ public interface UserLike {
     LocalDateTime getCreatedAt();
     void likeStatus(LikeStatus likeStatus);
     void setMatched(boolean b);
-    void touch();
+    void setUpdateAt();
 }
