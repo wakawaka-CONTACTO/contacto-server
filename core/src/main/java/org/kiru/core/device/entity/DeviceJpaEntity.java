@@ -1,11 +1,11 @@
-package org.kiru.core.devicetoken.entity;
+package org.kiru.core.device.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.kiru.core.devicetoken.domain.Device;
+import org.kiru.core.device.domain.Device;
 
 @Entity
 @AllArgsConstructor
@@ -46,5 +46,9 @@ public class DeviceJpaEntity {
                 .deviceType(deviceJpaEntity.getDeviceType())
                 .deviceId(deviceJpaEntity.getDeviceId())
                 .build();
+    }
+
+    public void updateDeviceToken(String newDeviceToken){
+        this.deviceToken = newDeviceToken;
     }
 }

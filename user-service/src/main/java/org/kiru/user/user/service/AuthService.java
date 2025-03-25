@@ -17,7 +17,7 @@ import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
 import org.kiru.user.user.api.AlarmApiClient;
 import org.kiru.user.user.dto.event.UserCreateEvent;
 import org.kiru.user.user.dto.request.*;
-import org.kiru.user.user.dto.response.CreatedDeviceTokenRes;
+import org.kiru.user.user.dto.response.CreatedDeviceRes;
 import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
@@ -93,7 +93,7 @@ public class AuthService {
     refreshTokenRepository.deleteByUserId(user.getId());
     Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(), now);
 
-    saveDeviceToken(user.getId(), req.deviceToken());
+    saveDeviceToken(user.getId(), req.deviceToken(), req.deviceType(), req.deviceId());
 
     return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
   }
@@ -176,10 +176,13 @@ public class AuthService {
     return maskedDomainName + ".***";
   }
 
-  private void saveDeviceToken(Long userId, String deviceToken) {
-    CreatedDeviceTokenReq createdDeviceTokenReq = CreatedDeviceTokenReq.of(userId, deviceToken);
-    CreatedDeviceTokenRes res = alarmApiClient.addDeviceToken(createdDeviceTokenReq);
-
-    log.info("성공적으로 디바이스 토큰을 저장했습니다. ");
+  private void saveDeviceToken(Long userId, String deviceToken, String deviceType, String deviceId) {
+    CreatedDeviceReq createdDeviceReq = CreatedDeviceReq.of(userId, deviceToken, deviceType, deviceId);
+    CreatedDeviceRes res = alarmApiClient.createDevice(createdDeviceReq);
+    if (res.deviceTokenId() == -1) {
+      log.info("😭이미 존재하는 디바이스 토큰 입니다 ");
+    }else{
+      log.info("😃성공적으로 디바이스 토큰을 저장했습니다. ");
+    }
   }
 }

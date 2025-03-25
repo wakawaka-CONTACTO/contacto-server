@@ -1,10 +1,10 @@
 package org.kiru.alarm_service.alarm.in.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.kiru.alarm_service.alarm.in.dto.request.CreatedDeviceTokenReq;
-import org.kiru.alarm_service.alarm.in.dto.response.CreatedDeviceTokenRes;
+import org.kiru.alarm_service.alarm.in.dto.request.CreatedDeviceReq;
+import org.kiru.alarm_service.alarm.in.dto.response.CreatedDeviceRes;
 import org.kiru.alarm_service.service.AlarmService;
-import org.kiru.core.devicetoken.domain.Device;
+import org.kiru.core.device.domain.Device;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +15,10 @@ public class AlarmController {
 
     private final AlarmService alarmService;
 
-    @PostMapping("/devicetoken")
-    public ResponseEntity<CreatedDeviceTokenRes> addDeviceToken(@RequestBody CreatedDeviceTokenReq req) {
-        // 디바이스 토큰 추가
-        Long deviceTokenId = alarmService.createDeviceToken(Device.of(req.getDeviceToken(), req.getUserId(), req.getDeviceType(), req.getDeviceId()));
-        return ResponseEntity.ok(CreatedDeviceTokenRes.of(deviceTokenId));
+    @PostMapping("/device")
+    public ResponseEntity<CreatedDeviceRes> createDevice(@RequestBody CreatedDeviceReq req) {
+        Long deviceTokenId = alarmService.createDevice(
+                Device.of(req.getDeviceToken(), req.getUserId(), req.getDeviceType(), req.getDeviceId()));
+        return ResponseEntity.ok(CreatedDeviceRes.of(deviceTokenId));
     }
 }

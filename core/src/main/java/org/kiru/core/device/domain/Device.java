@@ -1,4 +1,4 @@
-package org.kiru.core.devicetoken.domain;
+package org.kiru.core.device.domain;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

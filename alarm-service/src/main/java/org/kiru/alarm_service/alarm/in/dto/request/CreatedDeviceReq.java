@@ -1,4 +1,4 @@
-package org.kiru.user.user.dto.request;
+package org.kiru.alarm_service.alarm.in.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,14 +9,14 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class CreatedDeviceTokenReq {
+public class CreatedDeviceReq {
     Long userId;
     String deviceToken;
     String deviceType;
     String deviceId;
 
-    public static CreatedDeviceTokenReq of(Long userId, String deviceToken, String deviceType, String deviceId) {
-        return CreatedDeviceTokenReq.builder()
+    public static CreatedDeviceReq of(Long userId, String deviceToken, String deviceType, String deviceId) {
+        return CreatedDeviceReq.builder()
                 .userId(userId)
                 .deviceToken(deviceToken)
                 .deviceType(deviceType)
@@ -24,3 +24,4 @@ public class CreatedDeviceTokenReq {
                 .build();
     }
 }
+
