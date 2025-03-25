@@ -1,4 +1,4 @@
-name: Service CICD
+name: Alarm Service CICD
 
 on:
   push:
