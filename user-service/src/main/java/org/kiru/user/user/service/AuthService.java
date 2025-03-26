@@ -185,11 +185,6 @@ public class AuthService {
 
   private void saveFirebaseToken(Long userId, String firebaseToken, String deviceType, String deviceId) {
     CreatedDeviceReq createdDeviceReq = CreatedDeviceReq.of(userId, firebaseToken, deviceType, deviceId);
-    CreatedDeviceRes res = alarmApiClient.createDevice(createdDeviceReq);
-//    if (res.madeDevice()) {
-//      log.info("😃성공적으로 디바이스 토큰을 저장했습니다. ");
-//    }else{
-//      log.info("😭이미 존재하는 디바이스 토큰 입니다 ");
-//    }
+     alarmApiClient.createDevice(createdDeviceReq);
   }
 }
