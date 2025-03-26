@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Device {
     @NotNull
-    private String deviceToken;
+    private String firebaseToken;
 
     @NotNull
     private Long userId;
@@ -22,9 +22,9 @@ public class Device {
     @NotNull
     private String deviceId;
 
-    public static Device of(String deviceToken, Long userId, String deviceType, String deviceId) {
+    public static Device of(String firebaseToken, Long userId, String deviceType, String deviceId) {
         return Device.builder()
-                .deviceToken(deviceToken)
+                .firebaseToken(firebaseToken)
                 .userId(userId)
                 .deviceType(deviceType)
                 .deviceId(deviceId)

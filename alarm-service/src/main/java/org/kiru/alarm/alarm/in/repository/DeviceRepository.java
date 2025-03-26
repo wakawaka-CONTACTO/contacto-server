@@ -1,4 +1,4 @@
-package org.kiru.alarm_service.alarm.in.repository;
+package org.kiru.alarm.alarm.in.repository;
 
 import org.kiru.core.device.entity.DeviceJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

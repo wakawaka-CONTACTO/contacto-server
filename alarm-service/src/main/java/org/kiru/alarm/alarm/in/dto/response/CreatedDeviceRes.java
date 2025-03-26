@@ -1,4 +1,4 @@
-package org.kiru.alarm_service.alarm.in.dto.response;
+package org.kiru.alarm.alarm.in.dto.response;
 
 
 public record CreatedDeviceRes(

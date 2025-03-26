@@ -18,8 +18,8 @@ public class DeviceJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "device_token")
-    private String deviceToken;
+    @Column(name = "firebase_token")
+    private String firebaseToken;
 
     @Column(name = "user_id")
     private Long userId;
@@ -32,7 +32,7 @@ public class DeviceJpaEntity {
 
     public static DeviceJpaEntity of(Device device) {
         return DeviceJpaEntity.builder()
-                .deviceToken(device.getDeviceToken())
+                .firebaseToken(device.getFirebaseToken())
                 .userId(device.getUserId())
                 .deviceType(device.getDeviceType())
                 .deviceId(device.getDeviceId())
@@ -41,14 +41,14 @@ public class DeviceJpaEntity {
 
     public static Device toModel(DeviceJpaEntity deviceJpaEntity) {
         return Device.builder()
-                .deviceToken(deviceJpaEntity.getDeviceToken())
+                .firebaseToken(deviceJpaEntity.getFirebaseToken())
                 .userId(deviceJpaEntity.getUserId())
                 .deviceType(deviceJpaEntity.getDeviceType())
                 .deviceId(deviceJpaEntity.getDeviceId())
                 .build();
     }
 
-    public void updateDeviceToken(String newDeviceToken){
-        this.deviceToken = newDeviceToken;
+    public void updateFirebaseToken(String newFirebaseToken){
+        this.firebaseToken = newFirebaseToken;
     }
 }
