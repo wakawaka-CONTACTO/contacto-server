@@ -340,7 +340,8 @@ class UserLoginControllerTest {
     @DisplayName("로그인에 적합한 값이 들어올 경우 로그인 성공 및 201 반환")
     void signInSuccess(String accessToken, String refreshToken) throws Exception {
         UserSignInReq userSignInReq = new UserSignInReq(
-                "rlarlgnszx@naver.com","1234@123n"
+                "rlarlgnszx@naver.com","1234@123n", "deviceToken"
+                , "deviceId", "deviceType"
         );
         UserJwtInfoRes userJwtInfoRes = new UserJwtInfoRes(1L, accessToken, refreshToken);
 

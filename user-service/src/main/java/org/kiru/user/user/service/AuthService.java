@@ -3,6 +3,7 @@ package org.kiru.user.user.service;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.InvalidValueException;
 import org.kiru.core.exception.UnauthorizedException;
@@ -13,12 +14,10 @@ import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.user.auth.jwt.JwtProvider;
 import org.kiru.user.auth.jwt.Token;
 import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
+import org.kiru.user.user.api.AlarmApiClient;
 import org.kiru.user.user.dto.event.UserCreateEvent;
-import org.kiru.user.user.dto.request.SignHelpDto;
-import org.kiru.user.user.dto.request.UserPurposesReq;
-import org.kiru.user.user.dto.request.UserSignInReq;
-import org.kiru.user.user.dto.request.UserSignUpReq;
-import org.kiru.user.user.dto.request.UserTalentsReq;
+import org.kiru.user.user.dto.request.*;
+import org.kiru.user.user.dto.response.CreatedDeviceRes;
 import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -35,6 +35,7 @@ public class AuthService {
 
   private final UserRepository userRepository;
   private final JwtProvider jwtProvider;
+  private final AlarmApiClient alarmApiClient;
   private final RefreshTokenRepository refreshTokenRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PasswordEncoder passwordEncoder;
@@ -57,6 +58,11 @@ public class AuthService {
             .talents(talents)
             .build()
     );
+
+    if(req.deviceToken() != null){
+      saveDeviceToken(userEntity.getId(), req.deviceToken(), req.deviceType(), req.deviceId());
+    }
+
     return UserJwtInfoRes.of(userEntity.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
   }
 
@@ -91,6 +97,10 @@ public class AuthService {
 
     refreshTokenRepository.deleteByUserId(user.getId());
     Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(), now);
+
+    if(req.deviceToken() != null){
+      saveDeviceToken(user.getId(), req.deviceToken(), req.deviceType(), req.deviceId());
+    }
 
     return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
   }
@@ -171,5 +181,15 @@ public class AuthService {
         + "*".repeat(Math.max(0, domainName.length() - 2))
         + domainName.charAt(domainName.length() - 1);
     return maskedDomainName + ".***";
+  }
+
+  private void saveDeviceToken(Long userId, String deviceToken, String deviceType, String deviceId) {
+    CreatedDeviceReq createdDeviceReq = CreatedDeviceReq.of(userId, deviceToken, deviceType, deviceId);
+    CreatedDeviceRes res = alarmApiClient.createDevice(createdDeviceReq);
+//    if (res.madeDevice()) {
+//      log.info("😃성공적으로 디바이스 토큰을 저장했습니다. ");
+//    }else{
+//      log.info("😭이미 존재하는 디바이스 토큰 입니다 ");
+//    }
   }
 }
