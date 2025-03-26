@@ -72,8 +72,7 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
 
     @Override
     public List<Long> findAllLikedUserIdByUserId(Long userId) {
-        List<Long> likedUserIds = userLikeRepository.findAllLikedUserIdByUserId(userId);
-        return likedUserIds;
+        return userLikeRepository.findAllLikedUserIdByUserId(userId);
     }
 
     @Override
