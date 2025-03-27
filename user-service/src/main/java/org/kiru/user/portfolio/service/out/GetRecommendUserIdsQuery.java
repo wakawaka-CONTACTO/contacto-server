@@ -4,5 +4,6 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 public interface GetRecommendUserIdsQuery {
-    List<Long> getRecommendUserIds(Long userId, Pageable pageable);
+
+    List<Long> findRecommendedUserIds(Long userId, Pageable pageable);
 }

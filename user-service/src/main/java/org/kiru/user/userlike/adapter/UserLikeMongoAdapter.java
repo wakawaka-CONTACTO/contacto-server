@@ -98,6 +98,12 @@ public class UserLikeMongoAdapter implements SendLikeOrDislikeUseCase, GetUserLi
     }
 
     @Override
+    public List<Long> findAllLikedUserIdByUserIdAndLikeStatus(Long userId, LikeStatus likeStatus) {
+        // 구현 전
+        throw new UnsupportedOperationException("아직 구현되지 않음");
+    }
+
+    @Override
     public List<Long> findAllLikeMeUserIdAndNotMatchedByLikedUserId(Long likedUserId, Pageable pageable) {
         return userLikeRepository.findAllLikeMeUserIdAndNotMatchedByLikedUserId(likedUserId, pageable)
                 .stream().map(UserIdProjection::getUserId).toList();

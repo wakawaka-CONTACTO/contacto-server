@@ -1,6 +1,7 @@
 package org.kiru.user.portfolio.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,8 @@ public class PortfolioController {
 
     @GetMapping
     public ResponseEntity<List<UserPortfolioResDto>> getPortfolios(@UserId Long userId, Pageable pageable) {
-        List<UserPortfolioResDto> portfolios = portfolioService.getUserPortfolios(userId,pageable);
-        log.info("추천한 유저들의 포토폴리오: {}", portfolios);
+        List<UserPortfolioResDto> portfolios = portfolioService.getUserPortfolios(userId, pageable);
+        log.info("추천한 유저들의 포트폴리오 개수: {}", portfolios.size());
         return ResponseEntity.ok(portfolios);
     }
 
