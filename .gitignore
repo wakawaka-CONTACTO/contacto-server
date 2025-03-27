@@ -303,3 +303,5 @@ all.sh
 redis.conf/redis.conf
 redis.conf
 pg_hba.conf
+
+*.json

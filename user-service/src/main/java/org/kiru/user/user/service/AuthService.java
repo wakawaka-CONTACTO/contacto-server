@@ -59,8 +59,8 @@ public class AuthService {
             .build()
     );
 
-    if(req.deviceToken() != null){
-      saveDeviceToken(userEntity.getId(), req.deviceToken(), req.deviceType(), req.deviceId());
+    if(req.firebaseToken() != null){
+      saveFirebaseToken(userEntity.getId(), req.firebaseToken(), req.deviceType(), req.deviceId());
     }
 
     return UserJwtInfoRes.of(userEntity.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
@@ -98,8 +98,8 @@ public class AuthService {
     refreshTokenRepository.deleteByUserId(user.getId());
     Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(), now);
 
-    if(req.deviceToken() != null){
-      saveDeviceToken(user.getId(), req.deviceToken(), req.deviceType(), req.deviceId());
+    if(req.firebaseToken() != null){
+      saveFirebaseToken(user.getId(), req.firebaseToken(), req.deviceType(), req.deviceId());
     }
 
     return UserJwtInfoRes.of(user.getId(), issuedToken.accessToken(), issuedToken.refreshToken());
@@ -183,13 +183,8 @@ public class AuthService {
     return maskedDomainName + ".***";
   }
 
-  private void saveDeviceToken(Long userId, String deviceToken, String deviceType, String deviceId) {
-    CreatedDeviceReq createdDeviceReq = CreatedDeviceReq.of(userId, deviceToken, deviceType, deviceId);
-    CreatedDeviceRes res = alarmApiClient.createDevice(createdDeviceReq);
-//    if (res.madeDevice()) {
-//      log.info("😃성공적으로 디바이스 토큰을 저장했습니다. ");
-//    }else{
-//      log.info("😭이미 존재하는 디바이스 토큰 입니다 ");
-//    }
+  private void saveFirebaseToken(Long userId, String firebaseToken, String deviceType, String deviceId) {
+    CreatedDeviceReq createdDeviceReq = CreatedDeviceReq.of(userId, firebaseToken, deviceType, deviceId);
+     alarmApiClient.createDevice(createdDeviceReq);
   }
 }

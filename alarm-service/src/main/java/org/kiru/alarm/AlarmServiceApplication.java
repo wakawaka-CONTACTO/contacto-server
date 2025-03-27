@@ -1,4 +1,4 @@
-package org.kiru.alarm_service;
+package org.kiru.alarm;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

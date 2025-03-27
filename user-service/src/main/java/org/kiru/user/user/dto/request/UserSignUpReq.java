@@ -27,7 +27,7 @@ public record UserSignUpReq(
         String description,
         String instagramId,
         LoginType loginType,
-        String deviceToken,
+        String firebaseToken,
         String deviceId,
         String deviceType
 ) {

@@ -1,4 +1,4 @@
-package org.kiru.alarm_service.alarm.in.dto.request;
+package org.kiru.alarm.alarm.in.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +15,7 @@ public class CreatedDeviceReq {
     private Long userId;
 
     @NotNull
-    private String deviceToken;
+    private String firebaseToken;
 
     @NotNull
     private String deviceType;
@@ -23,10 +23,10 @@ public class CreatedDeviceReq {
     @NotNull
     private String deviceId;
 
-    public static CreatedDeviceReq of(Long userId, String deviceToken, String deviceType, String deviceId) {
+    public static CreatedDeviceReq of(Long userId, String firebaseToken, String deviceType, String deviceId) {
         return CreatedDeviceReq.builder()
                 .userId(userId)
-                .deviceToken(deviceToken)
+                .firebaseToken(firebaseToken)
                 .deviceType(deviceType)
                 .deviceId(deviceId)
                 .build();

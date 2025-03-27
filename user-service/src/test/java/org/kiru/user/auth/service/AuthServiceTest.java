@@ -90,7 +90,7 @@ class AuthServiceTest {
             "testuser",
             "http://example.com",
             LoginType.LOCAL,
-            "deviceToken",
+            "firebaseToken",
             "deviceId",
             "deviceType"
         );
@@ -147,7 +147,7 @@ class AuthServiceTest {
     @DisplayName("로그인 - 성공")
     void signIn_Success() {
         // Given
-        UserSignInReq signInReq = new UserSignInReq("test@example.com", "password123", "deviceToken", "deviceId", "deviceType");
+        UserSignInReq signInReq = new UserSignInReq("test@example.com", "password123", "firebaseToken", "deviceId", "deviceType");
         when(userRepository.findByEmail(signInReq.email())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(any(), any())).thenReturn(true);
         when(jwtProvider.issueToken(anyLong(), anyString(),any())).thenReturn(testToken);
@@ -165,7 +165,7 @@ class AuthServiceTest {
     @DisplayName("로그인 - 잘못된 비밀번호")
     void signIn_InvalidPassword() {
         // Given
-        UserSignInReq signInReq = new UserSignInReq("test@example.com", "wrongPassword", "deviceToken", "deviceId", "deviceType");
+        UserSignInReq signInReq = new UserSignInReq("test@example.com", "wrongPassword", "firebaseToken", "deviceId", "deviceType");
         when(userRepository.findByEmail(signInReq.email())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(any(), any())).thenReturn(false);
 
