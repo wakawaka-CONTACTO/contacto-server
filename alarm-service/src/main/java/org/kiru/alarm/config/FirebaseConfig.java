@@ -30,11 +30,11 @@ public class FirebaseConfig {
             // 이미 초기화된 앱이 없으면 초기화
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
-                log.info("✅ FirebaseApp 초기화 완료");
+                log.info("FirebaseApp 초기화 완료");
             }
 
         } catch (IOException e) {
-            log.error("❌ FirebaseApp 초기화 실패", e);
+            log.error("FirebaseApp 초기화 실패", e);
         }
     }
 }
