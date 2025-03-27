@@ -43,7 +43,6 @@ public class RedisStreamKeyManager {
             // 키의 TTL 확인
             Long ttl = redisTemplateForOne.getExpire(streamKey);
 
-
             if (ttl == -2) {
                 // 키가 존재하지 않거나 만료된 경우
                 log.warn("Stream key {} not found or expired (TTL: {}), attempting to restore", streamKey, ttl);
@@ -51,11 +50,20 @@ public class RedisStreamKeyManager {
                 // 스트림 키 재생성
                 redisTemplateForOne.execute((RedisCallback<Void>) connection -> {
                     connection.multi();
-                    connection.execute("XGROUP", "CREATE".getBytes(),
-                            streamKey.getBytes(),
-                            "messageConsumerGroup".getBytes(),
-                            "0".getBytes(),
-                            "MKSTREAM".getBytes());
+                    try {
+                        connection.execute("XGROUP", "CREATE".getBytes(),
+                                streamKey.getBytes(),
+                                "messageConsumerGroup".getBytes(),
+                                "0".getBytes(),
+                                "MKSTREAM".getBytes());
+                    } catch (Exception ex) {
+                        if (ex.getMessage() != null && ex.getMessage().contains("BUSYGROUP")) {
+                            log.warn("Stream key {} is busy, attempting to set ID", streamKey);
+                            // 필요하다면 XGROUP SETID 로직 처리
+                        } else {
+                            throw ex;
+                        }
+                    }
                     connection.exec();
                     return null;
                 });
