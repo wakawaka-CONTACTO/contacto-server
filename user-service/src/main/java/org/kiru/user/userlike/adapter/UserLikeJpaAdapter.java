@@ -4,9 +4,11 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.user.user.entity.QUserJpaEntity;
+import org.kiru.core.user.userBlock.entity.UserBlockJpaEntity;
 import org.kiru.core.user.userPortfolioItem.entity.QUserPortfolioImg;
 import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.core.user.userlike.domain.UserLike;
@@ -15,6 +17,7 @@ import org.kiru.core.user.userlike.entity.UserLikeJpaEntity;
 import org.kiru.user.admin.dto.AdminLikeUserResponse.AdminLikeUserDto;
 import org.kiru.user.admin.dto.MatchedUserResponse;
 import org.kiru.user.admin.service.out.UserLikeAdminUseCase;
+import org.kiru.user.userBlock.repository.UserBlockJpaRepository;
 import org.kiru.user.userlike.dto.Longs;
 import org.kiru.user.userlike.repository.UserLikeJpaRepository;
 import org.kiru.user.userlike.service.out.GetUserLikeQuery;
@@ -30,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLikeQuery, UserLikeAdminUseCase {
 
     private final UserLikeJpaRepository userLikeRepository;
+    private final UserBlockJpaRepository userBlockRepository;
     private final JPAQueryFactory queryFactory;
 
     @Transactional
@@ -43,18 +47,22 @@ public class UserLikeJpaAdapter implements SendLikeOrDislikeUseCase, GetUserLike
         } else {
             userLike.likeStatus(status);
         }
-        // 1. 상대방이 나를 좋아요(`LIKE`)한 기록이 있는지 먼저 조회
-        if (userLike.isMatched() && status == LikeStatus.LIKE) {
-            return userLike;
+        // 상대방이 나를 차단했는지 조회
+        Optional<UserBlockJpaEntity> userBlock = userBlockRepository.findByUserIdAndBlockedUserId(likedUserId, userId);
+        if (userBlock.isEmpty()) {
+            // 상대방이 나를 좋아요(`LIKE`)한 기록이 있는지 조회
+            if (userLike.isMatched() && status == LikeStatus.LIKE) {
+                return userLike;
+            }
+            UserLike oppositeLike = userLikeRepository.findOppositeLike(likedUserId, userId, LikeStatus.LIKE);
+            // 상대방이 나를 이미 `LIKE`했다면 상호 매칭으로 처리
+            if (oppositeLike != null && status == LikeStatus.LIKE) {
+                userLike.setMatched(true);
+                oppositeLike.setMatched(true);
+                userLikeRepository.save(oppositeLike); // 상대방 기록도 업데이트
+            }
         }
-        UserLike oppositeLike = userLikeRepository.findOppositeLike(likedUserId, userId, LikeStatus.LIKE);
-        // 3. 상대방이 나를 이미 `LIKE`했다면 상호 매칭으로 처리
-        if (oppositeLike != null && status == LikeStatus.LIKE) {
-            userLike.setMatched(true);
-            oppositeLike.setMatched(true);
-            userLikeRepository.save(oppositeLike); // 상대방 기록도 업데이트
-        }
-        // 4. 최종적으로 현재 관계 저장 후 반환
+        // 최종적으로 현재 관계 저장 후 반환
         userLikeRepository.save(userLike);
         return userLike;
     }
