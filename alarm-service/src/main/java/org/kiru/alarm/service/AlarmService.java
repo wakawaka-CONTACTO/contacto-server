@@ -24,7 +24,7 @@ public class AlarmService {
 
         if(existingDevice == null) {
             return deviceRepository.save(DeviceJpaEntity.of(device));
-        }else if (validFirebaseToken(device, existingDevice)) {
+        }else if (isFirebaseTokenChanged(device, existingDevice)) {
            existingDevice.updateFirebaseToken(device.getFirebaseToken());
             return deviceRepository.save(existingDevice);
         }
@@ -47,7 +47,7 @@ public class AlarmService {
         return deviceRepository.findByUserIdAndDeviceId(userId, deviceId);
     }
 
-    private boolean validFirebaseToken(Device newDevice, DeviceJpaEntity existingDevice){
+    private boolean isFirebaseTokenChanged(Device newDevice, DeviceJpaEntity existingDevice){
         return !newDevice.getFirebaseToken().equals(existingDevice.getFirebaseToken());
     }
     private void sendFcm(String firebaseToken, String message) {
