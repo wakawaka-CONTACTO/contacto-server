@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class AlarmController {
 
     private final AlarmService alarmService;
-
+    
     @PostMapping("/device")
     public ResponseEntity<CreatedDeviceRes> createDevice(@RequestBody CreatedDeviceReq req) {
         DeviceJpaEntity firebaseToken = alarmService.createDevice(
@@ -25,7 +25,7 @@ public class AlarmController {
         }
         return ResponseEntity.ok(new CreatedDeviceRes(true));
     }
-
+    
     @PostMapping("/send/message/all")
     public ResponseEntity<String> sendMessageAll(@RequestBody String message) {
         alarmService.sendMessageAll(message);
