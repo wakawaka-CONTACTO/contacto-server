@@ -38,8 +38,8 @@ jobs:
 
       - name: Docker Image Build and Push
         run: |
-          docker build --build-arg SERVICE_NAME=-service -t ${{ secrets.DOCKER_REPOSITORY }}/-service-image .
-          docker push ${{ secrets.DOCKER_REPOSITORY }}/-service-image
+          docker build --build-arg SERVICE_NAME=alarm-service -t ${{ secrets.DOCKER_REPOSITORY }}/alarm-service-image .
+          docker push ${{ secrets.DOCKER_REPOSITORY }}/alarm-service-image
 
       - name: Deploy  Service via SSH
         uses: appleboy/ssh-action@master
@@ -49,5 +49,5 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           script: |
             cd ~
-            ./deploy__service.sh
+            ./deploy_alarm_service.sh
             docker image prune -f
