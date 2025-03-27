@@ -6,8 +6,9 @@ import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -19,8 +20,8 @@ public class FirebaseConfig {
     public void init() {
         try {
             // 서비스 계정 키 경로
-            String absolutePath = new File("alarm-service/src/main/resources/serviceAccountKey.json").getAbsolutePath();
-            FileInputStream serviceAccount= new FileInputStream(absolutePath);
+            Resource resource = new ClassPathResource("serviceAccountKey.json");
+            FileInputStream serviceAccount = new FileInputStream(resource.getFile());
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
