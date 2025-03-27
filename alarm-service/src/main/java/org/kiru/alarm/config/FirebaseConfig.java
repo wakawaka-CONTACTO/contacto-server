@@ -18,11 +18,9 @@ public class FirebaseConfig {
 
     @PostConstruct
     public void init() {
-        try {
-            // 서비스 계정 키 경로
-            Resource resource = new ClassPathResource("serviceAccountKey.json");
-            InputStream serviceAccount = resource.getInputStream();
-
+        // 서비스 계정 키 경로
+        Resource resource = new ClassPathResource("serviceAccountKey.json");
+        try ( InputStream serviceAccount = resource.getInputStream()){
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
