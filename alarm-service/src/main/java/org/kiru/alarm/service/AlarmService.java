@@ -1,6 +1,5 @@
 package org.kiru.alarm.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
@@ -9,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.kiru.alarm.alarm.in.repository.DeviceRepository;
 import org.kiru.core.device.domain.Device;
 import org.kiru.core.device.entity.DeviceJpaEntity;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,9 +16,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class AlarmService {
-
-    @Value("${fcm.url}")
-    private String fcmApiUrl;
 
     private final DeviceRepository deviceRepository;
 
@@ -38,21 +33,14 @@ public class AlarmService {
     }
 
     public void sendMessageAll(String message) {
-        try {
-            // 단일 디바이스 FCM 토큰
-            List<DeviceJpaEntity> allDeviceList = deviceRepository.findAll();
 
-            for (DeviceJpaEntity device : allDeviceList) {
-                sendFcm(device.getFirebaseToken(), message);
-            }
+        // 단일 디바이스 FCM 토큰
+        List<DeviceJpaEntity> allDeviceList = deviceRepository.findAll();
 
-        } catch (Exception e) {
-            log.error("❌ FCM 전송 실패", e);
+        for (DeviceJpaEntity device : allDeviceList) {
+            sendFcm(device.getFirebaseToken(), message);
         }
-    }
 
-    private String getFirebaseToken(Long deviceId) {
-        return deviceRepository.findByUserId(deviceId).getFirebaseToken();
     }
 
     private DeviceJpaEntity findDevice(Long userId, String deviceId) {
@@ -62,7 +50,7 @@ public class AlarmService {
     private boolean validFirebaseToken(Device newDevice, DeviceJpaEntity existingDevice){
         return !newDevice.getFirebaseToken().equals(existingDevice.getFirebaseToken());
     }
-    private String sendFcm(String firebaseToken, String message) {
+    private void sendFcm(String firebaseToken, String message) {
         try {
             Message fcmMessage = Message.builder()
                     .setNotification(Notification.builder()
@@ -72,11 +60,9 @@ public class AlarmService {
                     .setToken(firebaseToken)
                     .build();
 
-            String response = FirebaseMessaging.getInstance().send(fcmMessage);
-            return response;
+            FirebaseMessaging.getInstance().send(fcmMessage);
         } catch (Exception e) {
             log.error("❌ FCM 전송 실패", e);
         }
-        return null;
     }
 }
