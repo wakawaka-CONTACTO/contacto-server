@@ -4,7 +4,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +23,11 @@ public class FirebaseConfig {
     public void init() {
         // 서비스 계정 키 경로
         Resource resource = new ClassPathResource("serviceAccountKey.json");
-        try ( InputStream serviceAccount = resource.getInputStream()){
+        try (InputStream serviceAccount = resource.getInputStream()) {
+            // GsonBuilder를 사용하여 lenient 모드 설정
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.setLenient();
+
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
@@ -45,15 +48,15 @@ public class FirebaseConfig {
         if (FirebaseApp.getApps().isEmpty()) {
             ClassPathResource resource = new ClassPathResource("serviceAccountKey.json");
             InputStreamReader reader = new InputStreamReader(resource.getInputStream());
-            
-            // JSON 파서의 lenient 모드 활성화
-            JsonParser parser = new JsonParser();
-            parser.setLenient(true);
-            
+
+            // GsonBuilder를 사용하여 lenient 모드 설정
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.setLenient();
+
             var options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
-                .build();
-            
+                    .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
+                    .build();
+
             return FirebaseApp.initializeApp(options);
         }
         return FirebaseApp.getInstance();
