@@ -21,7 +21,7 @@ public class MailController {
 
     @PostMapping("/emailsend")
     public void emailCheck(@RequestBody MailSendDto mailSendDTO) throws MessagingException {
-        mailService.sendSimpleMessage(mailSendDTO.getEmail());
+        mailService.sendSimpleMessage(mailSendDTO);
     }
 
     @PostMapping("/emailcheck")
