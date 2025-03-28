@@ -1,16 +1,18 @@
 package org.kiru.alarm.service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.kiru.alarm.alarm.in.repository.DeviceRepository;
 import org.kiru.core.device.domain.Device;
 import org.kiru.core.device.entity.DeviceJpaEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -35,16 +37,24 @@ public class AlarmService {
     public void sendMessageAll(String message) {
 
         // 단일 디바이스 FCM 토큰
-        List<DeviceJpaEntity> allDeviceList = deviceRepository.findAll();
+        List<String> allFirebaseTokens = deviceRepository.findAllDistinctFirebaseTokens();
 
-        for (DeviceJpaEntity device : allDeviceList) {
-            sendFcm(device.getFirebaseToken(), message);
+        for (String firebaseToken : allFirebaseTokens) {
+            log.info("📲Sending message to device: {}", firebaseToken);
+            sendFcm(firebaseToken, message);
         }
 
     }
 
     private DeviceJpaEntity findDevice(Long userId, String deviceId) {
-        return deviceRepository.findByUserIdAndDeviceId(userId, deviceId);
+        log.info("Finding device with userId: {} and deviceId: {}", userId, deviceId);
+        DeviceJpaEntity device = deviceRepository.findByUserIdAndDeviceId(userId, deviceId);
+        if (device == null) {
+            log.info("No device found with userId: {} and deviceId: {}", userId, deviceId);
+        } else {
+            log.info("Found device: {}", device);
+        }
+        return device;
     }
 
     private boolean isFirebaseTokenChanged(Device newDevice, DeviceJpaEntity existingDevice){
