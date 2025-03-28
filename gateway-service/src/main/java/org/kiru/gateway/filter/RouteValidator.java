@@ -2,6 +2,7 @@ package org.kiru.gateway.filter;
 
 import java.util.List;
 import java.util.function.Predicate;
+
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,8 @@ public class RouteValidator {
             "/api/v1/users/signin/help",
             "/api/v1/users/me/pwd",
             "/api/v1/users/me/email",
-            "/api/v1/alarm/send/message/all"
+            "/api/v1/alarm/send/message/all",
+            "/api/v1/alarm/device"
     );
 
     public Predicate<ServerHttpRequest> isSecured =
