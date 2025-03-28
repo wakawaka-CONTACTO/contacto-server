@@ -12,7 +12,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EntityScan(basePackages = {"org.kiru.core.device"})
 public class AlarmServiceApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(AlarmServiceApplication.class, args);
+		SpringApplication.run(AlarmServiceApplication.class, args); 
 	}
 
 }
