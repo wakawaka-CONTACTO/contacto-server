@@ -9,6 +9,8 @@ import org.kiru.core.exception.ConflictException;
 import org.kiru.core.exception.code.FailureCode;
 import org.kiru.user.auth.mail.async.AsyncMailSender;
 import org.kiru.user.auth.mail.dto.MailCheckDto;
+import org.kiru.user.auth.mail.dto.MailSendDto;
+import org.kiru.user.auth.mail.enums.EmailSendPurpose;
 import org.kiru.user.user.service.UserService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -55,10 +57,13 @@ public class MailService {
   }
 
   // 메일 발송
-  public void sendSimpleMessage(String sendEmail) throws MessagingException {
-    validateEmailNotExists(sendEmail);
+  public void sendSimpleMessage(MailSendDto sendEmail) throws MessagingException {
+    String address = sendEmail.getEmail();
+    if(sendEmail.getPurpose() == EmailSendPurpose.SIGNUP){
+      validateEmailNotExists(address);
+    }
     String number = createNumber(); // 랜덤 인증번호 생성
-    MimeMessage message = createMail(sendEmail, number);
+    MimeMessage message = createMail(address, number);
     asyncMailSender.sendMail(message, number);
   }
 
