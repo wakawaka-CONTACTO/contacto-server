@@ -28,6 +28,9 @@ import org.kiru.user.user.service.in.GetUserMainPageUseCase;
 import org.kiru.user.user.service.out.GetUserAdditionalInfoQuery;
 import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.kiru.user.user.service.out.UserUpdatePort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class UserService implements GetUserMainPageUseCase {
+    private final CacheManager cacheManager;
     private final UserQueryWithCache userQueryWithCache;
     private final UserRepository userRepository;
     private final UserUpdatePort userUpdateport;
@@ -190,7 +194,15 @@ public class UserService implements GetUserMainPageUseCase {
     }
 
     @Transactional
-    public void deleteUser(Long userId) { userRepository.deleteById(userId); }
+    public void deleteUser(Long userId) {
+        UserJpaEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+        userRepository.deleteById(userId);
+        Cache cache = cacheManager.getCache("user");
+        if (cache != null) {
+            cache.evict(user.getEmail());
+        }
+    }
 
     public boolean existsByEmail(String email) { return userRepository.findByEmail(email).isPresent(); }
 }

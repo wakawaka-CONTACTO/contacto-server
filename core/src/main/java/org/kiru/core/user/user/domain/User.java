@@ -28,6 +28,7 @@ public class User {
     private Nationality nationality;
 
     private LoginType loginType;
+
     @NotNull
     @Email
     private String email;
