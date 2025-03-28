@@ -26,9 +26,8 @@ jobs:
           echo "${{ secrets.ALARM_APPLICATION }}" > alarm-service/src/main/resources/application.yml
           cat alarm-service/src/main/resources/application.yml
 
-          touch alarm-service/src/main/resources/application.yml
+          touch alarm-service/src/main/resources/serviceAccountKey.json
           echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" > alarm-service/src/main/resources/serviceAccountKey.json
-          cat alarm-service/src/main/resources/application.yml
 
       - name: Build Alarm Service
         run: |
