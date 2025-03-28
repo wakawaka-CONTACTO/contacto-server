@@ -32,8 +32,7 @@ jobs:
       
       - name: Create serviceAccountKey.json
         run: |
-          touch alarm-service/src/main/resources/serviceAccountKey.json
-          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" > alarm-service/src/main/resources/serviceAccountKey.json
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" | base64 --decode > alarm-service/src/main/resources/serviceAccountKey.json
 
       - name: Build Alarm Service
         run: |
