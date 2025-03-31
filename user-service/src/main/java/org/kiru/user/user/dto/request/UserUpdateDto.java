@@ -13,6 +13,7 @@ import org.kiru.core.user.talent.domain.Talent.TalentType;
 
 import java.util.List;
 import java.util.Map;
+import org.kiru.core.user.user.domain.Nationality;
 
 @Getter
 @AllArgsConstructor
@@ -37,6 +38,9 @@ public class UserUpdateDto {
     private final List<Integer> userPurposes;
     @NotNull
     private final List<TalentType> userTalents;
+
+    @NotNull
+    private final Nationality nationality;
 
     @Size(max = 10, message = "포트폴리오는 최대 10개까지 등록 가능합니다")
     private Map<Integer, Object> portfolio;
