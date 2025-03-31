@@ -122,5 +122,4 @@ public class UserJpaEntity {
             this.nationality = user.getNationality();
         }
     }
-
 }

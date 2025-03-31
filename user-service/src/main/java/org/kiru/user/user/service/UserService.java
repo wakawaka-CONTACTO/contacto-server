@@ -147,6 +147,7 @@ public class UserService implements GetUserMainPageUseCase {
             .description(userUpdateDto.getDescription() != null ? userUpdateDto.getDescription() : null)
             .instagramId(userUpdateDto.getInstagramId() != null ? userUpdateDto.getInstagramId() : null)
             .webUrl(userUpdateDto.getWebUrl() != null ? userUpdateDto.getWebUrl() : null)
+            .nationality(userUpdateDto.getNationality() != null? userUpdateDto.getNationality() : null)
             .password(null)
             .loginType(null)
             .build();
