@@ -27,7 +27,7 @@ public class AlarmService {
         if(existingDevice == null) {
             return deviceRepository.save(DeviceJpaEntity.of(device));
         }else if (isFirebaseTokenChanged(device, existingDevice)) {
-           existingDevice.updateFirebaseToken(device.getFirebaseToken());
+            existingDevice.updateFirebaseToken(device.getFirebaseToken());
             return deviceRepository.save(existingDevice);
         }
 
