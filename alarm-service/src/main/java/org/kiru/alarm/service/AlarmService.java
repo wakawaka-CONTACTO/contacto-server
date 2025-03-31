@@ -34,16 +34,29 @@ public class AlarmService {
         return null;
     }
 
-    public void sendMessageAll(String message) {
-
-        // 단일 디바이스 FCM 토큰
+    public void sendMessageAll(String title, String body) {
         List<String> allFirebaseTokens = deviceRepository.findAllDistinctFirebaseTokens();
+        sendMessagesToTokens(allFirebaseTokens, title, body, "all devices");
+    }
 
-        for (String firebaseToken : allFirebaseTokens) {
-            log.info("📲Sending message to device: {}", firebaseToken);
-            sendFcm(firebaseToken, message);
+    public void sendMessageToUser(Long userId, String title, String body) {
+        List<String> firebaseTokens = deviceRepository.findFirebaseTokensByUserId(userId);
+        if (!firebaseTokens.isEmpty()) {
+            log.info("📲Sending message to user: {} with {} devices", userId, firebaseTokens.size());
+            List<String> validTokens = firebaseTokens.stream()
+                    .filter(token -> token != null)
+                    .toList();
+            sendMessagesToTokens(validTokens, title, body, "user " + userId);
+        } else {
+            log.info("No devices found for user: {}", userId);
         }
+    }
 
+    private void sendMessagesToTokens(List<String> firebaseTokens, String title, String body, String target) {
+        for (String firebaseToken : firebaseTokens) {
+            log.info("📲Sending message to {}: {}", target, firebaseToken);
+            sendFcm(firebaseToken, title, body);
+        }
     }
 
     private DeviceJpaEntity findDevice(Long userId, String deviceId) {
@@ -60,12 +73,13 @@ public class AlarmService {
     private boolean isFirebaseTokenChanged(Device newDevice, DeviceJpaEntity existingDevice){
         return !newDevice.getFirebaseToken().equals(existingDevice.getFirebaseToken());
     }
-    private void sendFcm(String firebaseToken, String message) {
+
+    private void sendFcm(String firebaseToken, String title, String body) {
         try {
             Message fcmMessage = Message.builder()
                     .setNotification(Notification.builder()
-                            .setTitle("알람")
-                            .setBody(message)
+                            .setTitle(title)
+                            .setBody(body)
                             .build())
                     .setToken(firebaseToken)
                     .build();

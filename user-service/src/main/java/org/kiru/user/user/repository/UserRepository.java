@@ -1,8 +1,8 @@
 package org.kiru.user.user.repository;
 
-import jakarta.persistence.QueryHint;
 import java.util.List;
 import java.util.Optional;
+
 import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.user.admin.dto.AdminUserDto.UserDto;
 import org.kiru.user.user.dto.UserIdUsername;
@@ -14,6 +14,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import jakarta.persistence.QueryHint;
 
 
 @Repository

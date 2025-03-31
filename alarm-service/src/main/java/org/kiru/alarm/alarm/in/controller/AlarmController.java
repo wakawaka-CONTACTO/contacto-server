@@ -1,13 +1,19 @@
 package org.kiru.alarm.alarm.in.controller;
 
-import lombok.RequiredArgsConstructor;
+import org.kiru.alarm.alarm.in.dto.request.AlarmMessageRequest;
 import org.kiru.alarm.alarm.in.dto.request.CreatedDeviceReq;
 import org.kiru.alarm.alarm.in.dto.response.CreatedDeviceRes;
 import org.kiru.alarm.service.AlarmService;
 import org.kiru.core.device.domain.Device;
 import org.kiru.core.device.entity.DeviceJpaEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/alarm")
@@ -27,8 +33,16 @@ public class AlarmController {
     }
     
     @PostMapping("/send/message/all")
-    public ResponseEntity<String> sendMessageAll(@RequestBody String message) {
-        alarmService.sendMessageAll(message);
+    public ResponseEntity<String> sendMessageAll(@RequestBody AlarmMessageRequest message) {
+        alarmService.sendMessageAll(message.getTitle(), message.getBody());
+        return ResponseEntity.ok("Success");
+    }
+
+    @PostMapping("/send/message/user")
+    public ResponseEntity<String> sendMessageToUser(
+            @RequestParam("userId") Long userId,
+            @RequestBody AlarmMessageRequest message) {
+        alarmService.sendMessageToUser(userId, message.getTitle(), message.getBody());
         return ResponseEntity.ok("Success");
     }
 }
