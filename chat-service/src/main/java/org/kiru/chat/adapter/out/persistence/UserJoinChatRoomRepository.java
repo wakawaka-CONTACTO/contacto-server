@@ -28,7 +28,8 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
             "LEFT JOIN UserJoinChatRoom uj ON cr.id = uj.chatRoomId " +
             "LEFT JOIN MessageJpaEntity m ON cr.id = m.chatRoomId " +
             "WHERE uj.chatRoomId IN (SELECT uj2.chatRoomId FROM UserJoinChatRoom uj2 WHERE uj2.userId = :userId)" +
-            "GROUP BY cr.id")
+            "GROUP BY cr.id " +
+            "ORDER BY (SELECT MAX(m2.createdAt) FROM MessageJpaEntity m2 WHERE m2.chatRoomId = cr.id) DESC NULLS LAST")
     Slice<ChatRoomProjection> findChatRoomsByUserIdWithUnreadMessageCountAndLatestMessageAndParticipants(Long userId, Pageable pageable);
 
     @Query("SELECT u.userId FROM UserJoinChatRoom u " +
