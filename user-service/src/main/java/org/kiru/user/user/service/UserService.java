@@ -206,4 +206,10 @@ public class UserService implements GetUserMainPageUseCase {
     }
 
     public boolean existsByEmail(String email) { return userRepository.findByEmail(email).isPresent(); }
+
+    public String getUsername(Long userId) {
+        return userRepository.findById(userId)
+            .map(UserJpaEntity::getUsername)
+            .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+    }
 }

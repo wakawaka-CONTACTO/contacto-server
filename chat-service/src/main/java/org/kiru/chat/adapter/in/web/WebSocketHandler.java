@@ -50,7 +50,7 @@ public class WebSocketHandler {
         Message savedMessage = saveMessageUseCase.saveMessage(roomId, message);
         
         // 4. 푸시 알림 전송
-        chatNotificationService.sendNotification(receiverId, message);
+        chatNotificationService.sendNotification(message);
         
         return savedMessage;
     }

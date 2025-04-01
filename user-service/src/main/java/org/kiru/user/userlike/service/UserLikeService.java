@@ -51,20 +51,20 @@ public class UserLikeService {
         boolean isMatched = sendLikeOrDislikeUseCase.sendLikeOrDislike(userId, likedUserId, status).isMatched();
         
         // 좋아요 생성 시 푸시 알림 전송 (좋아요를 받은 사람에게만)
-        if (status == LikeStatus.LIKE) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    UserJpaEntity user = userRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-                    String title = user.getUsername() + "님이 좋아요를 주셨어요🥰";
-                    String body = "새로운 좋아요가 도착했습니다!";
-                    alarmApiClient.sendMessageToUser(likedUserId, 
-                        AlarmMessageRequest.of(title, body));
-                } catch (Exception e) {
-                    log.error("Failed to send like notification to user: {}", likedUserId, e);
-                }
-            }, virtualThreadExecutor);
-        }
+//        if (status == LikeStatus.LIKE) {
+//            CompletableFuture.runAsync(() -> {
+//                try {
+//                    UserJpaEntity user = userRepository.findById(userId)
+//                            .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+//                    String title = user.getUsername() + "님이 좋아요를 주셨어요🥰";
+//                    String body = "새로운 좋아요가 도착했습니다!";
+//                    alarmApiClient.sendMessageToUser(likedUserId,
+//                        AlarmMessageRequest.of(title, body));
+//                } catch (Exception e) {
+//                    log.error("Failed to send like notification to user: {}", likedUserId, e);
+//                }
+//            }, virtualThreadExecutor);
+//        }
 
         if (isMatched) {
             log.info("User matched with userId: {} and likedUserId: {}", userId, likedUserId);

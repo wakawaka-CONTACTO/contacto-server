@@ -67,4 +67,9 @@ public class UserController {
     public ResponseEntity<Void> test(@UserId Long userId){
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/api/v1/users/{userId}/username")
+    public String getUsername(@PathVariable("userId") Long userId){
+        return userService.getUsername(userId);
+    }
 }
