@@ -1,6 +1,5 @@
 package org.kiru.user.user.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.common.PageableResponse;
 import org.kiru.core.user.user.domain.User;
@@ -19,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -68,7 +69,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/api/v1/users/{userId}/username")
+    @GetMapping("/{userId}/username")
     public String getUsername(@PathVariable("userId") Long userId){
         return userService.getUsername(userId);
     }
