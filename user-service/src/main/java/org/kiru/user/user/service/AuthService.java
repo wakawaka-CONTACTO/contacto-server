@@ -122,7 +122,6 @@ public class AuthService {
   /**
    * 토큰 재발급 처리.
    */
-  @Transactional
   public UserJwtInfoRes reissue(final String refreshToken) {
     try {
         // 리프레시 토큰 파싱 및 검증
