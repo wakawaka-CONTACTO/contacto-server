@@ -155,16 +155,10 @@ public class ChatRoomRepositoryAdapter implements GetChatRoomQuery, SaveChatRoom
             List<MessageJpaEntity> resultsMessages = results.stream()
                     .map(ChatRoomWithDetails::message)
                     .filter(Objects::nonNull)
-                    .map(messageJpaEntity -> {
-                                if (!userId.equals(messageJpaEntity.getSenderId())) {
-                                    messageJpaEntity.setReadStatus(true);
-                                }
-                                return messageJpaEntity;
-                            }
-                    )
                     .distinct()
                     .toList();
-            messages = messageRepository.saveAll(resultsMessages).stream().map(MessageJpaEntity::toModel).toList();
+            
+            messages = resultsMessages.stream().map(MessageJpaEntity::toModel).toList();
             chatRoom.removeParticipant(userId);
         }else{
             messages = results.stream()

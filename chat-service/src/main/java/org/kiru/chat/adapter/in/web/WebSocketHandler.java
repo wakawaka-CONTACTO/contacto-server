@@ -41,8 +41,14 @@ public class WebSocketHandler {
         Long senderId = message.getSenderId();
         message.chatRoom(roomId);
         
-        // 본인이 보낸 메시지는 항상 읽음 처리
-        if (senderId != null) {
+        // 기본적으로 메시지는 읽지 않음 상태로 설정
+        message.setReadStatus(false);
+        
+        // 수신자가 같은 채팅방에 접속 중인지 확인
+        boolean isReceiverInRoom = webSocketUserService.isUserInChatRoom(receiverId.toString(), roomId);
+        
+        // 수신자가 같은 채팅방에 있으면 읽음 처리
+        if (isReceiverInRoom) {
             message.toRead();
         }
         

@@ -36,6 +36,10 @@ public class Message {
         this.chatRoomId = chatRoomId;
     }
 
+    public void setReadStatus(Boolean readStatus) {
+        this.readStatus = readStatus;
+    }
+
     public static Message of(Long id, String content, Long senderId, LocalDateTime createdAt, Long chatRoomId,Long sendedId, boolean readStatus) {
         return Message.builder()
                 .id(id)
