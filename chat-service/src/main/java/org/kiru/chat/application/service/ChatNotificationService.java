@@ -27,8 +27,7 @@ public class ChatNotificationService {
     public void sendNotification(Message message) {
         CompletableFuture.runAsync(() -> {
             try {
-                String username = userApiClient.getUsername(message.getSendedId());
-                String title = username + "님이 메시지를 보냈습니다";
+                String title = userApiClient.getUsername(message.getSendedId());
                 String body = message.getContent();
                 alarmApiClient.sendMessageToUser(message.getSendedId(), AlarmMessageRequest.of(title, body));
             } catch (EntityNotFoundException e) {
