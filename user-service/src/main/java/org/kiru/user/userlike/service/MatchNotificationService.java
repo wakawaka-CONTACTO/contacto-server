@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MatchNotificationService {
     private final AlarmApiClient alarmApiClient;
-    private final UserRepository userRepository;
     private final Random random = new Random();
 
     private static final List<MatchNotification> MATCH_NOTIFICATIONS = List.of(
