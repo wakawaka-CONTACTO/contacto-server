@@ -5,13 +5,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
-import org.kiru.core.user.user.entity.UserJpaEntity;
 import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
 import org.kiru.user.user.api.AlarmApiClient;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.user.repository.UserRepository;
-import org.kiru.user.userlike.api.AlarmMessageRequest;
 import org.kiru.user.userlike.api.CreateChatRoomRequest;
 import org.kiru.user.userlike.api.CreateChatRoomResponse;
 import org.kiru.user.userlike.dto.res.LikeResponse;
@@ -28,23 +26,21 @@ public class UserLikeService {
     private final SendLikeOrDislikeUseCase sendLikeOrDislikeUseCase;
     private final GetMatchedUserPortfolioQuery getMatchedUserPortfolioQuery;
     private final ChatApiClient chatRoomCreateApiClient;
-    private final AlarmApiClient alarmApiClient;
-    private final UserRepository userRepository;
+    private final MatchNotificationService matchNotificationService;
     private final Executor virtualThreadExecutor;
 
     public UserLikeService(
             @Qualifier("userLikeJpaAdapter") SendLikeOrDislikeUseCase sendLikeOrDislikeUseCase,
             GetMatchedUserPortfolioQuery getMatchedUserPortfolioQuery,
             ChatApiClient chatRoomCreateApiClient,
-            AlarmApiClient alarmApiClient,
-            UserRepository userRepository,
+            MatchNotificationService matchNotificationService,
             Executor virtualThreadExecutor) {
         this.sendLikeOrDislikeUseCase = sendLikeOrDislikeUseCase;
         this.getMatchedUserPortfolioQuery = getMatchedUserPortfolioQuery;
         this.chatRoomCreateApiClient = chatRoomCreateApiClient;
-        this.alarmApiClient = alarmApiClient;
-        this.userRepository = userRepository;
+        this.matchNotificationService = matchNotificationService;
         this.virtualThreadExecutor = virtualThreadExecutor;
+
     }
 
     public LikeResponse sendLikeOrDislike(Long userId, Long likedUserId, LikeStatus status) {
@@ -70,26 +66,10 @@ public class UserLikeService {
             log.info("User matched with userId: {} and likedUserId: {}", userId, likedUserId);
             
             // 매칭 성공 시 양쪽 모두에게 푸시 알림 전송
-            CompletableFuture.runAsync(() -> {
-                try {
-                    UserJpaEntity user = userRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-                    UserJpaEntity likedUser = userRepository.findById(likedUserId)
-                            .orElseThrow(() -> new RuntimeException("User not found: " + likedUserId));
-                    String likedUserTitle = likedUser.getUsername() + "님과 매칭되었어요!💝";
-                    String userTitle = user.getUsername() + "님과 매칭되었어요!💝";
-                    String body = "매칭이 성공했습니다! 채팅을 시작해보세요.";
-                    
-                    // 좋아요를 보낸 사람에게 알림
-                    alarmApiClient.sendMessageToUser(userId, 
-                        AlarmMessageRequest.of(likedUserTitle, body));
-                    // 좋아요를 받은 사람에게 알림
-                    alarmApiClient.sendMessageToUser(likedUserId, 
-                        AlarmMessageRequest.of(userTitle, body));
-                } catch (Exception e) {
-                    log.error("Failed to send match notification to users: {} and {}", userId, likedUserId, e);
-                }
-            }, virtualThreadExecutor);
+            CompletableFuture.runAsync(() -> 
+                matchNotificationService.sendMatchNotifications(userId, likedUserId),
+                virtualThreadExecutor
+            );
 
             CompletableFuture<List<UserPortfolioResDto>> portfolioFuture = CompletableFuture.supplyAsync(
                     () -> getMatchedUserPortfolioQuery.findByUserIds(List.of(userId, likedUserId)),
