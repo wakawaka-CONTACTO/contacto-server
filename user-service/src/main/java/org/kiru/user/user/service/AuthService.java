@@ -2,12 +2,14 @@ package org.kiru.user.user.service;
 
 import java.util.Date;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.InvalidValueException;
 import org.kiru.core.exception.UnauthorizedException;
 import org.kiru.core.exception.code.FailureCode;
+import org.kiru.core.jwt.AccessTokenGenerator;
+import org.kiru.core.jwt.JwtTokenParser;
+import org.kiru.core.user.refreshtoken.RefreshToken;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.core.user.user.entity.UserJpaEntity;
@@ -16,8 +18,12 @@ import org.kiru.user.auth.jwt.Token;
 import org.kiru.user.auth.jwt.refreshtoken.repository.RefreshTokenRepository;
 import org.kiru.user.user.api.AlarmApiClient;
 import org.kiru.user.user.dto.event.UserCreateEvent;
-import org.kiru.user.user.dto.request.*;
-import org.kiru.user.user.dto.response.CreatedDeviceRes;
+import org.kiru.user.user.dto.request.CreatedDeviceReq;
+import org.kiru.user.user.dto.request.SignHelpDto;
+import org.kiru.user.user.dto.request.UserPurposesReq;
+import org.kiru.user.user.dto.request.UserSignInReq;
+import org.kiru.user.user.dto.request.UserSignUpReq;
+import org.kiru.user.user.dto.request.UserTalentsReq;
 import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
 import org.kiru.user.user.repository.UserRepository;
@@ -26,6 +32,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,6 +51,8 @@ public class AuthService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PasswordEncoder passwordEncoder;
+  private final JwtTokenParser jwtTokenParser;
+  private final AccessTokenGenerator accessTokenGenerator;
 
   @Transactional
   public UserJwtInfoRes signUp(UserSignUpReq req, List<MultipartFile> images,
@@ -109,14 +123,32 @@ public class AuthService {
    * 토큰 재발급 처리.
    */
   @Transactional
-  public UserJwtInfoRes reissue(final Long userId) {
-    Date now = new Date();
-    UserJpaEntity user = userRepository.findById(userId)
-        .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+  public UserJwtInfoRes reissue(final String refreshToken) {
+    try {
+        // 리프레시 토큰 파싱 및 검증
+        Jws<Claims> claims = jwtTokenParser.parseToken(refreshToken);
+        Long userId = jwtTokenParser.getUserIdFromClaims(claims);
+        String email = jwtTokenParser.getEmailFromClaims(claims);
 
-    refreshTokenRepository.deleteRefreshTokenByUserId(userId);
-    Token newToken = jwtProvider.issueToken(userId, user.getEmail(), now);
-    return UserJwtInfoRes.of(userId, newToken.accessToken(), newToken.refreshToken());
+        // 데이터베이스에서 리프레시 토큰 조회 및 검증
+        RefreshToken storedRefreshToken = refreshTokenRepository.findByUserId(userId)
+            .orElseThrow(() -> new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE));
+
+        if (!storedRefreshToken.getToken().equals(refreshToken)) {
+            throw new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE);
+        }
+
+        // 새로운 액세스 토큰 생성
+        Date now = new Date();
+        String newAccessToken = accessTokenGenerator.generateToken(userId, email, now);
+
+        return UserJwtInfoRes.of(userId, newAccessToken, refreshToken);
+    } catch (ExpiredJwtException e) {
+        throw new UnauthorizedException(FailureCode.EXPIRED_REFRESH_TOKEN);
+    } catch (Exception e) {
+        log.error("Token reissue failed", e);
+        throw new UnauthorizedException(FailureCode.INVALID_REFRESH_TOKEN_VALUE);
+    }
   }
 
   private String encodePassword(String rawPassword) {
