@@ -1,7 +1,6 @@
 package org.kiru.chat.adapter.out.persistence;
 
-import java.util.List;
-import java.util.Optional;
+import jakarta.persistence.QueryHint;
 import org.kiru.chat.adapter.in.web.res.AdminUserResponse;
 import org.kiru.chat.adapter.out.persistence.dto.ChatRoomProjection;
 import org.kiru.core.chat.userchatroom.entity.UserJoinChatRoom;
@@ -9,6 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
+
+import java.util.List;
+import java.util.Optional;
 
 
 public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRoom, Long> {
@@ -16,6 +19,10 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
     @Query("SELECT u.userId FROM UserJoinChatRoom u WHERE u.chatRoomId = :chatRoomId AND u.userId <> :senderId")
     List<Long> findOtherParticipantIds(Long chatRoomId, Long senderId);
 
+    @QueryHints(value = {
+            @QueryHint(name = "org.hibernate.cacheable", value = "false"),
+            @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
+    })
     @Query("SELECT cr as chatRoom, " +
             "COUNT(CASE WHEN m.readStatus = false AND m.senderId <> :userId THEN m.id END) AS unreadMessageCount, " +
             "(SELECT m1.content"
