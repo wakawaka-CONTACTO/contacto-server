@@ -17,7 +17,7 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
     List<Long> findOtherParticipantIds(Long chatRoomId, Long senderId);
 
     @Query("SELECT cr as chatRoom, " +
-            "COUNT(CASE WHEN m.readStatus = false AND m.senderId <> :userId THEN m.id END)/2 AS unreadMessageCount, " +
+            "COUNT(CASE WHEN m.readStatus = false AND m.senderId <> :userId THEN m.id END) AS unreadMessageCount, " +
             "(SELECT m1.content"
             + "        FROM MessageJpaEntity m1"
             + "        WHERE m1.chatRoomId = cr.id"

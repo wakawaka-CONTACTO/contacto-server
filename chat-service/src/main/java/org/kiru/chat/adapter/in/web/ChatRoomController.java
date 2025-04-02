@@ -10,6 +10,7 @@ import org.kiru.chat.application.port.in.GetChatRoomUseCase;
 import org.kiru.chat.application.port.in.GetMessageUseCase;
 import org.kiru.chat.application.service.WebSocketUserService;
 import org.kiru.chat.config.argumentresolve.UserId;
+import org.kiru.chat.event.MessageReadStatusService;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ public class ChatRoomController {
     private final GetChatRoomUseCase getChatRoomUseCase;
     private final WebSocketUserService webSocketUserService;
     private final GetMessageUseCase getMessageUseCase;
+    private final MessageReadStatusService messageReadStatusService;
 
     @PostMapping("/rooms")
     public CreateChatRoomResponse createRoom(@UserId Long userId,
@@ -44,7 +46,20 @@ public class ChatRoomController {
     @GetMapping("/rooms/{roomId}")
     public ChatRoom getRoom(@PathVariable("roomId") Long roomId, @UserId Long userId,
                             @RequestParam(required = false, defaultValue = "false") boolean changeStatus) {
-        return getChatRoomUseCase.findRoomById(roomId, userId, changeStatus);
+        if (changeStatus) {
+            messageReadStatusService.markAllMessagesAsRead(roomId, userId);
+        }
+        
+        ChatRoom chatRoom = getChatRoomUseCase.findRoomById(roomId, userId, changeStatus);
+        
+        if (changeStatus) {
+            chatRoom.setUnreadMessageCount(0);
+        } else {
+            int unreadCount = messageReadStatusService.getUnreadMessageCount(roomId, userId);
+            chatRoom.setUnreadMessageCount(unreadCount);
+        }
+        
+        return chatRoom;
     }
 
     @GetMapping("/connect-user")
@@ -60,6 +75,11 @@ public class ChatRoomController {
     @GetMapping("/rooms/{roomId}/messages")
     public PageableResponse<Message> getMessageByRoomId(@PathVariable Long roomId, @UserId Long userId,
                                              @RequestParam Boolean admin, Pageable pageable) {
+        // 관리자가 아니면 메시지 읽음 처리
+        if (!admin) {
+            messageReadStatusService.markAllMessagesAsRead(roomId, userId);
+        }
+        
         return getMessageUseCase.getMessages(roomId, userId, admin, pageable);
     }
 }

@@ -16,6 +16,7 @@ import org.kiru.chat.application.port.out.GetAlreadyLikedUserIdsQuery;
 import org.kiru.chat.application.port.out.GetChatRoomQuery;
 import org.kiru.chat.application.port.out.GetMessageByRoomQuery;
 import org.kiru.chat.application.port.out.SaveChatRoomPort;
+import org.kiru.chat.event.MessageReadStatusService;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.exception.EntityNotFoundException;
@@ -34,6 +35,7 @@ public class ChatService implements CreateRoomUseCase, GetChatRoomUseCase , AddP
     private final GetMessageByRoomQuery getMessageByRoomQuery;
     private final GetOtherParticipantQuery getOtherParticipantQuery;
     private final GetAlreadyLikedUserIdsQuery getAlreadyLikedUserIdsQuery;
+    private final MessageReadStatusService messageReadStatusService;
 
     public ChatRoom createRoom(CreateChatRoomRequest createChatRoomRequest) {
             ChatRoom chatRoom = ChatRoom.of(createChatRoomRequest.getTitle(), createChatRoomRequest.getChatRoomType());
@@ -46,7 +48,15 @@ public class ChatService implements CreateRoomUseCase, GetChatRoomUseCase , AddP
 
     @Override
     public PageableResponse<ChatRoom> findRoomsByUserId(Long userId, Pageable pageable) {
-        return getChatRoomQuery.findRoomsByUserId(userId,pageable);
+        PageableResponse<ChatRoom> chatRooms = getChatRoomQuery.findRoomsByUserId(userId, pageable);
+        
+        // 각 채팅방의 읽지 않은 메시지 수를 정확히 업데이트
+        chatRooms.getContent().forEach(chatRoom -> {
+            int unreadCount = messageReadStatusService.getUnreadMessageCount(chatRoom.getId(), userId);
+            chatRoom.setUnreadMessageCount(unreadCount);
+        });
+        
+        return chatRooms;
     }
 
     @Override

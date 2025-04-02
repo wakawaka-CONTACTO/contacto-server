@@ -32,26 +32,32 @@ public class WebSocketHandler {
 
     @MessageMapping("/chat.send/{roomId}")
     public Message sendMessage(@DestinationVariable @Validated Long roomId, @Validated @Payload Message message) {
+        // 유효성 검사
         ofNullable(message).orElseThrow(() -> new IllegalArgumentException("Message must be provided"));
         ofNullable(message.getSendedId()).orElseThrow(() -> new IllegalArgumentException("Receiver(Sended) ID must be provided"));
+        
+        // 채팅방 설정
         Long receiverId = message.getSendedId();
+        Long senderId = message.getSenderId();
         message.chatRoom(roomId);
         
-        // 1. 상대방이 접속 중인지 확인
-        boolean isUserConnected = webSocketUserService.isUserConnected(receiverId.toString());
-        
-        // 2. 상대방이 접속중이면 읽음 처리 후 메시지 전송
-        if(isUserConnected) {
+        // 본인이 보낸 메시지는 항상 읽음 처리
+        if (senderId != null) {
             message.toRead();
-            return sendMessageUseCase.sendMessage(roomId, message);
         }
         
-        // 3. 메시지 저장
-        Message savedMessage = saveMessageUseCase.saveMessage(roomId, message);
+        // 수신자가 접속 중인지 확인
+        boolean isReceiverConnected = webSocketUserService.isUserConnected(receiverId.toString());
         
-        // 4. 푸시 알림 전송
-        chatNotificationService.sendNotification(message);
-        
-        return savedMessage;
+        // 메시지 처리 및 알림
+        if (isReceiverConnected) {
+            // 수신자가 접속 중이면 메시지 전송
+            return sendMessageUseCase.sendMessage(roomId, message);
+        } else {
+            // 수신자가 접속 중이 아니면 메시지 저장 후 푸시 알림
+            Message savedMessage = saveMessageUseCase.saveMessage(roomId, message);
+            chatNotificationService.sendNotification(message);
+            return savedMessage;
+        }
     }
 }

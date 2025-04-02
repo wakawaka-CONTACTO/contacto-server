@@ -70,4 +70,16 @@ public class WebSocketUserService {
         }
         return null;
     }
+    
+    // 사용자가 특정 채팅방에 접속 중인지 확인하는 메서드
+    // 현재는 단순히 접속 여부만 확인하지만, 추후 특정 채팅방 구독 상태까지 확인하도록 확장 가능
+    public boolean isUserInChatRoom(final String userId, final Long chatRoomId) {
+        // 일단 사용자가 접속 중인지만 확인
+        return isUserConnected(userId);
+        
+        // 추후 개선: Redis에 사용자별 현재 활성화된 채팅방 정보를 저장하여 확인
+        // String activeRoomKey = "user:" + userId + ":active_room";
+        // String activeRoomId = redisTemplateForOne.opsForValue().get(activeRoomKey);
+        // return chatRoomId.toString().equals(activeRoomId);
+    }
 }
