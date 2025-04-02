@@ -31,9 +31,7 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
     public List<Message> findAllByChatRoomIdWithMessageToRead(Long chatRoomId, Long userId, Boolean isUserAdmin) {
         return messageRepository.findAllByChatRoomIdOrderByCreatedAt(chatRoomId).stream()
                 .map(messageJpaEntity -> {
-                    if (!messageJpaEntity.getSenderId().equals(userId) & isUserAdmin.equals(false)) {
-                        messageJpaEntity.setReadStatus(true);
-                    }
+                    // 읽음 처리하지 않고 그대로 반환
                     return MessageJpaEntity.toModel(messageJpaEntity);
                 }).toList();
     }
@@ -42,9 +40,7 @@ public class MessageRepositoryAdapter implements SaveMessagePort , GetMessageByR
     public PageableResponse<Message> getMessages(Long roomId, Long userId, Boolean isUserAdmin, Pageable pageable) {
         Slice<MessageJpaEntity> messageSlice = messageRepository.findAllByChatRoomId(roomId, pageable);
         List<Message> messages = messageSlice.getContent().stream().parallel().map(messageJpaEntity -> {
-                    if (!messageJpaEntity.getSenderId().equals(userId) && !isUserAdmin) {
-                        messageJpaEntity.setReadStatus(true);
-                    }
+                    // 읽음 처리하지 않고 그대로 반환
                     return MessageJpaEntity.toModel(messageJpaEntity);
                 })
                 .toList();
