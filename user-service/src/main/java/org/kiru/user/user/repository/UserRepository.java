@@ -84,7 +84,7 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             GROUP BY up.user_id
         ),
         liked_me AS (
-            SELECT user_id
+            SELECT DISTINCT user_id
             FROM user_like
             WHERE liked_user_id = :userId AND like_status = 'LIKE'
         ),
