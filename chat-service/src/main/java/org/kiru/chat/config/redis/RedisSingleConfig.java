@@ -31,6 +31,9 @@ public class RedisSingleConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
+    @Value("${spring.data.redis.password}")
+    private String password;
+
     @Bean(destroyMethod = "shutdown")
     public ClientResources clientResources() {
         return DefaultClientResources.builder()
@@ -42,6 +45,7 @@ public class RedisSingleConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactoryForOne(ClientResources clientResources) {
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
+        redisConfig.setPassword(password);
 
         SocketOptions socketOptions = SocketOptions.builder()
                 .connectTimeout(Duration.ofSeconds(5))
