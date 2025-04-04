@@ -2,6 +2,7 @@ package org.kiru.alarm.alarm.in.controller;
 
 import org.kiru.alarm.alarm.in.dto.request.AlarmMessageRequest;
 import org.kiru.alarm.alarm.in.dto.request.CreatedDeviceReq;
+import org.kiru.alarm.alarm.in.dto.request.UpdateDeviceReq;
 import org.kiru.alarm.alarm.in.dto.response.CreatedDeviceRes;
 import org.kiru.alarm.service.AlarmService;
 import org.kiru.core.device.domain.Device;
@@ -36,6 +37,12 @@ public class AlarmController {
     public ResponseEntity<String> sendMessageAll(@RequestBody AlarmMessageRequest message) {
         alarmService.sendMessageAll(message.getTitle(), message.getBody());
         return ResponseEntity.ok("Success");
+    }
+
+    @PostMapping("/device/update")
+    public ResponseEntity<CreatedDeviceRes> updateDevice(@RequestBody UpdateDeviceReq req) {
+        alarmService.updateDevice(req);
+        return ResponseEntity.ok(new CreatedDeviceRes(true));
     }
 
     @PostMapping("/send/message/user")

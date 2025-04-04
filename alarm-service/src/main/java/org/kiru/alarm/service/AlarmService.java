@@ -2,6 +2,7 @@ package org.kiru.alarm.service;
 
 import java.util.List;
 
+import org.kiru.alarm.alarm.in.dto.request.UpdateDeviceReq;
 import org.kiru.alarm.alarm.in.repository.DeviceRepository;
 import org.kiru.core.device.domain.Device;
 import org.kiru.core.device.entity.DeviceJpaEntity;
@@ -59,6 +60,17 @@ public class AlarmService {
         }
     }
 
+    private List<DeviceJpaEntity> findByDeviceId(String deviceId) {
+        log.info("Finding device with deviceId: {}", deviceId);
+        List<DeviceJpaEntity> devices = deviceRepository.findByDeviceId(deviceId);
+        if (devices == null || devices.isEmpty()) {
+            log.info("No device found with deviceId: {}", deviceId);
+        } else {
+            log.info("Found devices: {}", devices);
+        }
+        return devices;
+    }
+
     private DeviceJpaEntity findDevice(Long userId, String deviceId) {
         log.info("Finding device with userId: {} and deviceId: {}", userId, deviceId);
         DeviceJpaEntity device = deviceRepository.findByUserIdAndDeviceId(userId, deviceId);
@@ -88,5 +100,14 @@ public class AlarmService {
         } catch (Exception e) {
             log.error("❌ FCM 전송 실패", e);
         }
+    }
+
+    public DeviceJpaEntity updateDevice(UpdateDeviceReq req) {
+        List<DeviceJpaEntity> existingDevices = findByDeviceId(req.getDeviceId());
+        for(DeviceJpaEntity deviceJpaEntity: existingDevices) {
+           deviceJpaEntity.updateFirebaseToken(req.getFirebaseToken());
+        }
+        deviceRepository.saveAll(existingDevices);
+        return null;
     }
 }

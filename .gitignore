@@ -305,3 +305,6 @@ redis.conf
 pg_hba.conf
 
 *.json
+
+newrelic/
+dummy/
