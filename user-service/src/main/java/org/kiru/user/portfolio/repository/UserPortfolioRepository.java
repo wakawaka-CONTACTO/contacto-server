@@ -29,7 +29,7 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
 
     @Query("""
     SELECT 
-        upi.portfolioId as portfolioId,
+        MIN(upi.portfolioId) as portfolioId,
         upi.userId as userId,
         upi.userName as username,
         STRING_AGG(upi.portfolioImageUrl,',') as portfolioImageUrl
@@ -38,7 +38,7 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
     WHERE 
         upi.userId IN :userIds
     GROUP BY 
-         upi.userId, upi.userName, upi.portfolioId
+         upi.userId, upi.userName
     """)
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
