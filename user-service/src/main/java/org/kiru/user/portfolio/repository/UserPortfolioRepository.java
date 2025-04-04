@@ -7,6 +7,7 @@ import org.kiru.user.portfolio.adapter.dto.UserPortfolioProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -27,24 +28,24 @@ public interface UserPortfolioRepository extends JpaRepository<UserPortfolioImg,
     })
     List<UserPortfolioImg> findAllByUserIdInWithItemUrlMinSequence(List<Long> userIds);
 
-    @Query("""
+    @Query(value = """
     SELECT 
-        upi.portfolioId as portfolioId,
-        upi.userId as userId,
-        upi.userName as username,
-        STRING_AGG(upi.portfolioImageUrl,',') as portfolioImageUrl
+        MIN(upi.portfolio_id) AS portfolioId,
+        upi.user_id AS userId,
+        upi.username AS username,
+        STRING_AGG(upi.portfolio_image_url, ',' ORDER BY upi.sequence) AS portfolioImageUrl
     FROM 
-       UserPortfolioImg upi
+        user_portfolio_imgs upi
     WHERE 
-        upi.userId IN :userIds
+        upi.user_id IN (:userIds)
     GROUP BY 
-         upi.userId, upi.userName, upi.portfolioId
-    """)
+        upi.user_id, upi.username
+    """, nativeQuery = true)
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
             @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
 
     })
-    List<UserPortfolioProjection> findAllPortfoliosByUserIds(List<Long> userIds);
+    List<UserPortfolioProjection> findAllPortfoliosByUserIds(@Param("userIds") List<Long> userIds);
 }
