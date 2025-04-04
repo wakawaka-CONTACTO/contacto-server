@@ -14,6 +14,7 @@ import com.google.firebase.messaging.Notification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -101,7 +102,7 @@ public class AlarmService {
             log.error("❌ FCM 전송 실패", e);
         }
     }
-
+    @Transactional
     public DeviceJpaEntity updateDevice(UpdateDeviceReq req) {
         List<DeviceJpaEntity> existingDevices = findByDeviceId(req.getDeviceId());
         for(DeviceJpaEntity deviceJpaEntity: existingDevices) {
