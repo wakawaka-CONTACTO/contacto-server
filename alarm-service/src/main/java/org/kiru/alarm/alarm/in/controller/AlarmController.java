@@ -1,5 +1,6 @@
 package org.kiru.alarm.alarm.in.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.kiru.alarm.alarm.in.dto.request.AlarmMessageRequest;
 import org.kiru.alarm.alarm.in.dto.request.CreatedDeviceReq;
 import org.kiru.alarm.alarm.in.dto.request.UpdateDeviceReq;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/alarm")
 @RequiredArgsConstructor
+@Slf4j
 public class AlarmController {
 
     private final AlarmService alarmService;
@@ -42,6 +44,7 @@ public class AlarmController {
     @PostMapping("/device/update")
     public ResponseEntity<CreatedDeviceRes> updateDevice(@RequestBody UpdateDeviceReq req) {
         alarmService.updateDevice(req);
+        log.info("Device updated: {}", req);
         return ResponseEntity.ok(new CreatedDeviceRes(true));
     }
 
