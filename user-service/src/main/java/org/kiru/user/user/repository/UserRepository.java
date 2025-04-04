@@ -108,6 +108,7 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
         LEFT JOIN disliked_users du ON u.id = du.user_id
         WHERE u.id != :userId
           AND u.id NOT IN (SELECT user_id FROM excluded_users)
+          AND u.deleted = false
         ORDER BY
             CASE WHEN du.user_id IS NULL THEN 0 ELSE 1 END ASC,
             COALESCE(pm.purpose_match_count, 0) DESC,
