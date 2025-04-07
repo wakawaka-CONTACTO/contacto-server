@@ -1,22 +1,11 @@
 package org.kiru.core.user.user.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.kiru.core.user.common.BaseTimeEntity;
 import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.domain.Nationality;
 import org.kiru.core.user.user.domain.User;
@@ -31,7 +20,7 @@ import org.kiru.core.user.user.domain.User;
                 @Index(name = "idx_email", columnList = "email")})
 @SQLDelete(sql = "UPDATE users SET deleted = true WHERE id = ?")
 @SQLRestriction("deleted = false")
-public class UserJpaEntity {
+public class UserJpaEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -115,10 +104,10 @@ public class UserJpaEntity {
         if (user.getPassword() != null) {
             this.password = user.getPassword();
         }
-        if(user.getLoginType() != null){
+        if (user.getLoginType() != null) {
             this.loginType = user.getLoginType();
         }
-        if(user.getNationality() != null){
+        if (user.getNationality() != null) {
             this.nationality = user.getNationality();
         }
     }
