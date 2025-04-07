@@ -7,12 +7,13 @@ import org.kiru.alarm.service.AlarmService;
 import org.kiru.core.device.domain.Device;
 import org.kiru.core.device.entity.DeviceJpaEntity;
 import org.springframework.http.ResponseEntity;
+import org.kiru.alarm.dto.request.UpdateDeviceReq;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 
 @RestController
