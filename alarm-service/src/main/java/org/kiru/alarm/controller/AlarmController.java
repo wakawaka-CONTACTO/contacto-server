@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/alarm")
 @RequiredArgsConstructor
+@Slf4j
 public class AlarmController {
 
     private final AlarmService alarmService;
@@ -36,6 +37,13 @@ public class AlarmController {
     public ResponseEntity<String> sendMessageAll(@RequestBody AlarmMessageRequest message) {
         alarmService.sendMessageAll(message.getTitle(), message.getBody());
         return ResponseEntity.ok("Success");
+    }
+
+    @PostMapping("/device/update")
+    public ResponseEntity<CreatedDeviceRes> updateDevice(@RequestBody UpdateDeviceReq req) {
+        alarmService.updateDevice(req);
+        log.info("Device updated: {}", req);
+        return ResponseEntity.ok(new CreatedDeviceRes(true));
     }
 
     @PostMapping("/send/message/user")
