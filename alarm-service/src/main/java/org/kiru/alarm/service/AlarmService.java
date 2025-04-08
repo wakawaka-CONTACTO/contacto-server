@@ -2,11 +2,12 @@ package org.kiru.alarm.service;
 
 import java.util.List;
 
+import org.kiru.alarm.dto.request.UpdateDeviceReq;
 import org.kiru.alarm.repository.DeviceRepository;
 import org.kiru.core.device.domain.Device;
 import org.kiru.core.device.entity.DeviceJpaEntity;
-import org.kiru.alarm.dto.request.UpdateDeviceReq;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
@@ -14,7 +15,6 @@ import com.google.firebase.messaging.Notification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -110,5 +110,16 @@ public class AlarmService {
         }
         deviceRepository.saveAll(existingDevices);
         return null;
+    }
+
+    @Transactional
+    public void deleteDevice(Long userId, String deviceId) {
+        DeviceJpaEntity device = findDevice(userId, deviceId);
+        if (device != null) {
+            deviceRepository.delete(device);
+            log.info("Device deleted successfully - userId: {}, deviceId: {}", userId, deviceId);
+        } else {
+            log.info("Device not found - userId: {}, deviceId: {}", userId, deviceId);
+        }
     }
 }

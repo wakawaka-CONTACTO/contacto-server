@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.user.dto.request.*;
 import org.kiru.user.user.dto.response.SignHelpDtoRes;
 import org.kiru.user.user.dto.response.UserJwtInfoRes;
@@ -51,6 +52,15 @@ public class UserLoginController {
     @PostMapping("/signin/help") // 이 부분은 각자 바꿔주시면 됩니다.
     public ResponseEntity<SignHelpDtoRes> signHelp(@RequestBody SignHelpDto signHelpDto) {
         return  ResponseEntity.ok(authService.signHelp(signHelpDto));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(
+            @UserId Long userId,
+            @RequestBody final LogoutReq logoutReq
+    ) {
+        authService.logout(userId, logoutReq.deviceId());
+        return ResponseEntity.ok("로그아웃 성공");
     }
 
 }

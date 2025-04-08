@@ -218,4 +218,11 @@ public class AuthService {
     CreatedDeviceReq createdDeviceReq = CreatedDeviceReq.of(userId, firebaseToken, deviceType, deviceId);
      alarmApiClient.createDevice(createdDeviceReq);
   }
+
+    public void logout(Long userId, String deviceId) {
+        // Firebase Token 삭제
+        if (deviceId != null) {
+            alarmApiClient.deleteDevice(userId, deviceId);
+        }
+    }
 }

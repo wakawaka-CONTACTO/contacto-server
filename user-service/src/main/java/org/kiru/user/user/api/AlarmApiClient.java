@@ -5,6 +5,7 @@ import org.kiru.user.user.dto.request.CreatedDeviceReq;
 import org.kiru.user.user.dto.response.CreatedDeviceRes;
 import org.kiru.user.userlike.api.AlarmMessageRequest;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,4 +17,7 @@ public interface AlarmApiClient {
 
     @PostMapping("/api/v1/alarm/send/message/user")
     String sendMessageToUser(@RequestParam("userId") Long userId, @RequestBody AlarmMessageRequest message);
+
+    @DeleteMapping("/api/v1/alarm/device/delete")
+    String deleteDevice(@RequestParam("userId") Long userId,@RequestParam("deviceId") String deviceId);
 }
