@@ -55,12 +55,12 @@ public class UserLoginController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(
+    public ResponseEntity<Void> logout(
             @UserId Long userId,
             @RequestBody final LogoutReq logoutReq
     ) {
         authService.logout(userId, logoutReq.deviceId());
-        return ResponseEntity.ok("로그아웃 성공");
+        return ResponseEntity.ok().build();
     }
 
 }
