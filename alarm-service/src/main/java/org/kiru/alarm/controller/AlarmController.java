@@ -2,19 +2,21 @@ package org.kiru.alarm.controller;
 
 import org.kiru.alarm.dto.request.AlarmMessageRequest;
 import org.kiru.alarm.dto.request.CreatedDeviceReq;
+import org.kiru.alarm.dto.request.UpdateDeviceReq;
 import org.kiru.alarm.dto.response.CreatedDeviceRes;
 import org.kiru.alarm.service.AlarmService;
 import org.kiru.core.device.domain.Device;
 import org.kiru.core.device.entity.DeviceJpaEntity;
 import org.springframework.http.ResponseEntity;
-import org.kiru.alarm.dto.request.UpdateDeviceReq;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/alarm")
@@ -44,6 +46,15 @@ public class AlarmController {
     public ResponseEntity<CreatedDeviceRes> updateDevice(@RequestBody UpdateDeviceReq req) {
         alarmService.updateDevice(req);
         log.info("Device updated: {}", req);
+        return ResponseEntity.ok(new CreatedDeviceRes(true));
+    }
+
+    @DeleteMapping("/device/delete")
+    public ResponseEntity<CreatedDeviceRes> deleteDevice(
+            @RequestParam("userId") Long userId,
+            @RequestParam("deviceId") String deviceId) {
+        alarmService.deleteDevice(userId, deviceId);
+        log.info("Device deleted - userId: {}, deviceId: {}", userId, deviceId);
         return ResponseEntity.ok(new CreatedDeviceRes(true));
     }
 
