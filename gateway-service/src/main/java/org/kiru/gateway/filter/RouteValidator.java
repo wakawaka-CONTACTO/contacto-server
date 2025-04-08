@@ -22,7 +22,6 @@ public class RouteValidator {
             "/api/v1/alarm/send/message/all",
             "/api/v1/alarm/device",
             "api/v1/alarm/device/update",
-
             "/api/v1/auth/reissue"
     );
 

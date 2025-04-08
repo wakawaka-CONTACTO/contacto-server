@@ -1,4 +1,4 @@
-package org.kiru.alarm.alarm.in.dto.request;
+package org.kiru.alarm.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,10 +10,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 @Getter
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class CreatedDeviceReq {
-    @NotNull
-    private Long userId;
-
+public class UpdateDeviceReq {
     @NotNull
     private String firebaseToken;
 
@@ -23,13 +20,11 @@ public class CreatedDeviceReq {
     @NotNull
     private String deviceId;
 
-    public static CreatedDeviceReq of(Long userId, String firebaseToken, String deviceType, String deviceId) {
-        return CreatedDeviceReq.builder()
-                .userId(userId)
+    public static UpdateDeviceReq of(String firebaseToken, String deviceType, String deviceId) {
+        return UpdateDeviceReq.builder()
                 .firebaseToken(firebaseToken)
                 .deviceType(deviceType)
                 .deviceId(deviceId)
                 .build();
     }
 }
-

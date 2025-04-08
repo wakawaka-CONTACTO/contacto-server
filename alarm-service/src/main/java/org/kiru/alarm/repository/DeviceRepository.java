@@ -1,4 +1,4 @@
-package org.kiru.alarm.alarm.in.repository;
+package org.kiru.alarm.repository;
 
 import java.util.List;
 
