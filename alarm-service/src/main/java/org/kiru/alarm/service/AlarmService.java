@@ -2,10 +2,10 @@ package org.kiru.alarm.service;
 
 import java.util.List;
 
-import org.kiru.alarm.alarm.in.dto.request.UpdateDeviceReq;
-import org.kiru.alarm.alarm.in.repository.DeviceRepository;
+import org.kiru.alarm.repository.DeviceRepository;
 import org.kiru.core.device.domain.Device;
 import org.kiru.core.device.entity.DeviceJpaEntity;
+import org.kiru.alarm.dto.request.UpdateDeviceReq;
 import org.springframework.stereotype.Service;
 
 import com.google.firebase.messaging.FirebaseMessaging;
