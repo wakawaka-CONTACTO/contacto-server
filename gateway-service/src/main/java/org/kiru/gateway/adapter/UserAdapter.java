@@ -2,6 +2,7 @@ package org.kiru.gateway.adapter;
 
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.exception.EntityNotFoundException;
+import org.kiru.core.exception.UnauthorizedException;
 import org.kiru.core.exception.code.FailureCode;
 import org.kiru.gateway.common.UserGatewayRepository;
 import org.kiru.gateway.jwt.JwtValidStatusDto;
@@ -21,7 +22,7 @@ public class UserAdapter implements GetUserPort {
         return userGatewayRepository.findByIdAndEmail(userId, email)
                 .map(JwtValidStatusDto::of)
                 .flatMap(dto -> redisTemplate.opsForValue().set(token, dto).thenReturn(dto))
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new EntityNotFoundException(FailureCode.USER_NOT_FOUND))));
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new UnauthorizedException(FailureCode.UNAUTHORIZED))));
     }
 
     @Override
