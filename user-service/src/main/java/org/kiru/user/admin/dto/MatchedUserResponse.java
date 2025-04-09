@@ -10,7 +10,7 @@ public record MatchedUserResponse(
     public static MatchedUserResponse of(UserLikeJpaEntity userLikeJpaEntity) {
         return new MatchedUserResponse(
                 userLikeJpaEntity.getLikedUserId(),
-                userLikeJpaEntity.getUpdateAt()
+                userLikeJpaEntity.getUpdatedAt()
         );
     }
 }

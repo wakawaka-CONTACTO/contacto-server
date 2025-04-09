@@ -23,9 +23,9 @@ public abstract class BaseTimeEntity {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "update_at")
-    private LocalDateTime updateAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    public void setUpdateAt() { this.updateAt = LocalDateTime.now(); }
+    public void setUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
 }
 
