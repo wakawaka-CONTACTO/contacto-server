@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class AlarmMessageRequest {
     private String title;
-    private String body;
+    private String body; 
 } 
