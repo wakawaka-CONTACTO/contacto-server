@@ -2,6 +2,8 @@ package org.kiru.gateway.filter;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.kiru.core.exception.UnauthorizedException;
+import org.kiru.core.exception.code.FailureCode;
 import org.kiru.gateway.filter.AuthenticationFilter.Config;
 import org.kiru.gateway.jwt.JwtUtils;
 import org.kiru.gateway.jwt.JwtValidationType;
@@ -51,8 +53,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Config> {
                                             .request(modifiedRequest)
                                             .build());
                                 }
-                                return Mono.error(new RuntimeException(
-                                        "Invalid JWT token: " + token + " : " + jwtValidResponse.status()));
+                                return Mono.error(UnauthorizedException::new);
                             });
                 }
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
