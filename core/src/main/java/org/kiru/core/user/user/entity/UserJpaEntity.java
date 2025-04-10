@@ -10,6 +10,8 @@ import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.domain.Nationality;
 import org.kiru.core.user.user.domain.User;
 
+import java.time.LocalDateTime;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -56,6 +58,9 @@ public class UserJpaEntity extends BaseTimeEntity {
     @Column(name = "deleted")
     @Builder.Default
     private Boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     public static UserJpaEntity of(User user) {
         return UserJpaEntity.builder()
