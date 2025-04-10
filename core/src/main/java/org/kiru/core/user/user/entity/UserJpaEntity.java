@@ -18,7 +18,7 @@ import org.kiru.core.user.user.domain.User;
 @Table(name = "users",
         indexes = {@Index(name = "idx_username", columnList = "username"),
                 @Index(name = "idx_email", columnList = "email")})
-@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE users SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class UserJpaEntity extends BaseTimeEntity {
     @Id
