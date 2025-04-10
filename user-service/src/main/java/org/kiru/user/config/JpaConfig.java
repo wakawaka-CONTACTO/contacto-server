@@ -24,7 +24,6 @@ import java.util.Objects;
         transactionManagerRef = "transactionManager"
 )
 @EntityScan(basePackages = {"org.kiru.core.user", "org.kiru.core.user.like"})
-@EnableJpaAuditing
 @Profile({"docker", "local"})
 public class JpaConfig {
     @Bean(name = "entityManagerFactory")
