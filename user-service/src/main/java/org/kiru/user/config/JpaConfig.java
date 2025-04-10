@@ -25,6 +25,7 @@ import java.util.Objects;
 )
 @EntityScan(basePackages = {"org.kiru.core.user", "org.kiru.core.user.like"})
 @Profile({"docker", "local"})
+@EnableJpaAuditing
 public class JpaConfig {
     @Bean(name = "entityManagerFactory")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
