@@ -44,7 +44,7 @@ public class MatchNotificationService {
     
             // 알림에 채팅방 ID 포함
             Map<String, String> content = new HashMap<>();
-            content.put("type", "match");
+            content.put("type", "chat");
             content.put("chatRoomId", chatRoomId.toString());
             
             // 양쪽 모두에게 알림 전송
