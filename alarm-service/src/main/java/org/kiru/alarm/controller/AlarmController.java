@@ -45,7 +45,6 @@ public class AlarmController {
     @PostMapping("/device/update")
     public ResponseEntity<CreatedDeviceRes> updateDevice(@RequestBody UpdateDeviceReq req) {
         alarmService.updateDevice(req);
-        log.info("Device updated: {}", req);
         return ResponseEntity.ok(new CreatedDeviceRes(true));
     }
 

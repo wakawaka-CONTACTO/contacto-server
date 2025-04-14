@@ -1,5 +1,7 @@
 package org.kiru.alarm.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.kiru.alarm.dto.request.UpdateDeviceReq;
@@ -103,13 +105,14 @@ public class AlarmService {
         }
     }
     @Transactional
-    public DeviceJpaEntity updateDevice(UpdateDeviceReq req) {
+    public void  updateDevice(UpdateDeviceReq req) {
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         List<DeviceJpaEntity> existingDevices = findByDeviceId(req.getDeviceId());
         for(DeviceJpaEntity deviceJpaEntity: existingDevices) {
+            log.info("{} Updating device with userId: {} and deviceId: {}", now,deviceJpaEntity.getUserId(), req.getDeviceId());
            deviceJpaEntity.updateFirebaseToken(req.getFirebaseToken());
         }
         deviceRepository.saveAll(existingDevices);
-        return null;
     }
 
     @Transactional
