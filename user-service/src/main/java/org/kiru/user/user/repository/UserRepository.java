@@ -95,7 +95,7 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             GROUP BY liked_user_id
         ),
         disliked_users AS (
-            SELECT liked_user_id AS user_id, update_at
+            SELECT liked_user_id AS user_id, updated_at
             FROM user_like
             WHERE user_id = :userId AND like_status = 'DISLIKE'
         )
@@ -114,7 +114,7 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             COALESCE(pm.purpose_match_count, 0) DESC,
             CASE WHEN lm.user_id IS NOT NULL THEN 1 ELSE 0 END DESC,
             COALESCE(lrc.like_received_count, 0) DESC,
-            du.update_at ASC NULLS LAST
+            du.updated_at ASC NULLS LAST
         LIMIT :limit OFFSET :offset
         """,
             nativeQuery = true

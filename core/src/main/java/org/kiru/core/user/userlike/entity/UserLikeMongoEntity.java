@@ -36,7 +36,7 @@ public class UserLikeMongoEntity implements UserLike {
     @Field("created_at")
     private LocalDateTime createdAt;
 
-    @Field("update_at")
+    @Field("updated_at")
     private LocalDateTime updatedAt;
 
     public void likeStatus(LikeStatus likeStatus) {
@@ -61,5 +61,5 @@ public class UserLikeMongoEntity implements UserLike {
                 .build();
     }
 
-    public void setUpdateAt() { this.updatedAt = LocalDateTime.now(); }
+    public void setUpdatedAt() { this.updatedAt = LocalDateTime.now(); }
 }
