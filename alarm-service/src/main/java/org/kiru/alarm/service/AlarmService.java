@@ -90,12 +90,18 @@ public class AlarmService {
 
     private void sendFcm(String firebaseToken, String title, String body, Map<String, String> content) {
         try {
+            Notification notification = Notification.builder()
+                    .setTitle(title)
+                    .setBody(body)
+                    .build();
+
             Message.Builder messageBuilder = Message.builder()
-                    .setNotification(Notification.builder()
-                            .setTitle(title)
-                            .setBody(body)
-                            .build())
+                    .setNotification(notification)
                     .setToken(firebaseToken);
+
+            if (content != null && !content.isEmpty()) {
+                messageBuilder.putAllData(content);
+            }
 
             if (content != null && !content.isEmpty()) {
                 messageBuilder.putAllData(content);
