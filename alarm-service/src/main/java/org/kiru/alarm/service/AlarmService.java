@@ -1,6 +1,7 @@
 package org.kiru.alarm.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.kiru.alarm.dto.request.UpdateDeviceReq;
 import org.kiru.alarm.repository.DeviceRepository;
@@ -36,28 +37,28 @@ public class AlarmService {
         return null;
     }
 
-    public void sendMessageAll(String title, String body) {
+    public void sendMessageAll(String title, String body, Map<String, String> content) {
         List<String> allFirebaseTokens = deviceRepository.findAllDistinctFirebaseTokens();
-        sendMessagesToTokens(allFirebaseTokens, title, body, "all devices");
+        sendMessagesToTokens(allFirebaseTokens, title, body, content, "all devices");
     }
 
-    public void sendMessageToUser(Long userId, String title, String body) {
+    public void sendMessageToUser(Long userId, String title, String body, Map<String, String> content) {
         List<String> firebaseTokens = deviceRepository.findFirebaseTokensByUserId(userId);
         if (!firebaseTokens.isEmpty()) {
             log.info("📲Sending message to user: {} with {} devices", userId, firebaseTokens.size());
             List<String> validTokens = firebaseTokens.stream()
                     .filter(token -> token != null)
                     .toList();
-            sendMessagesToTokens(validTokens, title, body, "user " + userId);
+            sendMessagesToTokens(validTokens, title, body, content, "user " + userId);
         } else {
             log.info("No devices found for user: {}", userId);
         }
     }
 
-    private void sendMessagesToTokens(List<String> firebaseTokens, String title, String body, String target) {
+    private void sendMessagesToTokens(List<String> firebaseTokens, String title, String body, Map<String, String> content, String target) {
         for (String firebaseToken : firebaseTokens) {
             log.info("📲Sending message to {}: {}", target, firebaseToken);
-            sendFcm(firebaseToken, title, body);
+            sendFcm(firebaseToken, title, body, content);
         }
     }
 
@@ -87,17 +88,20 @@ public class AlarmService {
         return !newDevice.getFirebaseToken().equals(existingDevice.getFirebaseToken());
     }
 
-    private void sendFcm(String firebaseToken, String title, String body) {
+    private void sendFcm(String firebaseToken, String title, String body, Map<String, String> content) {
         try {
-            Message fcmMessage = Message.builder()
+            Message.Builder messageBuilder = Message.builder()
                     .setNotification(Notification.builder()
                             .setTitle(title)
                             .setBody(body)
                             .build())
-                    .setToken(firebaseToken)
-                    .build();
+                    .setToken(firebaseToken);
 
-            FirebaseMessaging.getInstance().send(fcmMessage);
+            if (content != null && !content.isEmpty()) {
+                messageBuilder.putAllData(content);
+            }
+
+            FirebaseMessaging.getInstance().send(messageBuilder.build());
         } catch (Exception e) {
             log.error("❌ FCM 전송 실패", e);
         }
@@ -106,7 +110,7 @@ public class AlarmService {
     public DeviceJpaEntity updateDevice(UpdateDeviceReq req) {
         List<DeviceJpaEntity> existingDevices = findByDeviceId(req.getDeviceId());
         for(DeviceJpaEntity deviceJpaEntity: existingDevices) {
-           deviceJpaEntity.updateFirebaseToken(req.getFirebaseToken());
+            deviceJpaEntity.updateFirebaseToken(req.getFirebaseToken());
         }
         deviceRepository.saveAll(existingDevices);
         return null;

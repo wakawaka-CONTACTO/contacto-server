@@ -7,9 +7,7 @@ import java.util.concurrent.Executor;
 import org.kiru.core.chat.chatroom.domain.ChatRoomType;
 import org.kiru.core.user.userlike.domain.LikeStatus;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
-import org.kiru.user.user.api.AlarmApiClient;
 import org.kiru.user.user.api.ChatApiClient;
-import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.userlike.api.CreateChatRoomRequest;
 import org.kiru.user.userlike.api.CreateChatRoomResponse;
 import org.kiru.user.userlike.dto.res.LikeResponse;
@@ -64,12 +62,6 @@ public class UserLikeService {
 
         if (isMatched) {
             log.info("User matched with userId: {} and likedUserId: {}", userId, likedUserId);
-            
-            // 매칭 성공 시 양쪽 모두에게 푸시 알림 전송
-            CompletableFuture.runAsync(() -> 
-                matchNotificationService.sendMatchNotifications(userId, likedUserId),
-                virtualThreadExecutor
-            );
 
             CompletableFuture<List<UserPortfolioResDto>> portfolioFuture = CompletableFuture.supplyAsync(
                     () -> getMatchedUserPortfolioQuery.findByUserIds(List.of(userId, likedUserId)),
@@ -79,6 +71,11 @@ public class UserLikeService {
                                     CreateChatRoomRequest.of("CONTACTO MANAGER", ChatRoomType.PRIVATE, userId,
                                             likedUserId)),
                     virtualThreadExecutor);
+            // 매칭 성공 시 양쪽 모두에게 푸시 알림 전송
+            CompletableFuture.runAsync(() -> 
+                matchNotificationService.sendMatchNotifications(userId, likedUserId, chatRoomIdFuture.join().getChatRoomId()),
+                virtualThreadExecutor
+            );
             return CompletableFuture.allOf(portfolioFuture, chatRoomIdFuture).thenApplyAsync(v -> LikeResponse.of(
                     true, portfolioFuture.join(), chatRoomIdFuture.join().getChatRoomId()
             )).join();

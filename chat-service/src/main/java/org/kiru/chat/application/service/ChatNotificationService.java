@@ -1,5 +1,7 @@
 package org.kiru.chat.application.service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +31,10 @@ public class ChatNotificationService {
             try {
                 String title = userApiClient.getUsername(message.getSendedId());
                 String body = message.getContent();
-                alarmApiClient.sendMessageToUser(message.getSendedId(), AlarmMessageRequest.of(title, body));
+                Map<String, String> content = new HashMap<>();
+                content.put("type", "chat");
+                content.put("chatRoomId", message.getChatRoomId().toString());
+                alarmApiClient.sendMessageToUser(message.getSendedId(), AlarmMessageRequest.of(title, body, content));
             } catch (EntityNotFoundException e) {
                 log.error("User not found for chat notification: {}", message.getSendedId());
             } catch (FeignException e) {
