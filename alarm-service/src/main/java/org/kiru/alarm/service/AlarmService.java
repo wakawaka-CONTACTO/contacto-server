@@ -112,6 +112,7 @@ public class AlarmService {
             log.info("{} Updating device with userId: {} and deviceId: {}", now,deviceJpaEntity.getUserId(), req.getDeviceId());
            deviceJpaEntity.updateFirebaseToken(req.getFirebaseToken());
         }
+        deviceRepository.saveAll(existingDevices);
     }
 
     @Transactional
