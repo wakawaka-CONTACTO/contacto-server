@@ -105,10 +105,6 @@ public class AlarmService {
                 messageBuilder.putAllData(content);
             }
 
-            if (content != null && !content.isEmpty()) {
-                messageBuilder.putAllData(content);
-            }
-
             FirebaseMessaging.getInstance().send(messageBuilder.build());
         } catch (Exception e) {
             log.error("❌ FCM 전송 실패", e);
