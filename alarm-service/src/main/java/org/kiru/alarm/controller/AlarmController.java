@@ -38,7 +38,7 @@ public class AlarmController {
     
     @PostMapping("/send/message/all")
     public ResponseEntity<String> sendMessageAll(@RequestBody AlarmMessageRequest message) {
-        alarmService.sendMessageAll(message.getTitle(), message.getBody());
+        alarmService.sendMessageAll(message.getTitle(), message.getBody(), message.getContent());
         return ResponseEntity.ok("Success");
     }
 
@@ -61,7 +61,7 @@ public class AlarmController {
     public ResponseEntity<String> sendMessageToUser(
             @RequestParam("userId") Long userId,
             @RequestBody AlarmMessageRequest message) {
-        alarmService.sendMessageToUser(userId, message.getTitle(), message.getBody());
+        alarmService.sendMessageToUser(userId, message.getTitle(), message.getBody(), message.getContent());
         return ResponseEntity.ok("Success");
     }
 }
