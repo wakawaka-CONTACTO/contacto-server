@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserLikeJpaRepository extends JpaRepository<UserLikeJpaEntity, Long>,  UserLikeRepository<UserLikeJpaEntity,Long>  {
-    @Query("SELECT ul FROM UserLikeJpaEntity ul WHERE ul.userId = :userId AND ul.likedUserId = :likedUserId ORDER BY ul.updateAt DESC LIMIT 1")
+    @Query("SELECT ul FROM UserLikeJpaEntity ul WHERE ul.userId = :userId AND ul.likedUserId = :likedUserId ORDER BY ul.updatedAt DESC LIMIT 1")
     Optional<UserLikeJpaEntity> findByUserIdAndLikedUserId(@Param("userId") Long userId, @Param("likedUserId") Long likedUserId);
 
     @Query("SELECT ul.userId FROM UserLikeJpaEntity ul WHERE ul.likedUserId = :likedUserId AND ul.isMatched = false GROUP BY ul.userId ORDER BY COUNT(ul.likedUserId) DESC")
@@ -43,7 +43,7 @@ public interface UserLikeJpaRepository extends JpaRepository<UserLikeJpaEntity, 
     })
     List<Long> findAllLikedUserIdByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT ul.likedUserId From UserLikeJpaEntity ul WHERE ul.userId = :userId AND ul.likeStatus = :status ORDER BY ul.updateAt ASC")
+    @Query("SELECT ul.likedUserId From UserLikeJpaEntity ul WHERE ul.userId = :userId AND ul.likeStatus = :status ORDER BY ul.updatedAt ASC")
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
@@ -51,7 +51,7 @@ public interface UserLikeJpaRepository extends JpaRepository<UserLikeJpaEntity, 
     })
     List<Long> findAllLikedUserIdByUserIdAndLikeStatus(@Param("userId") Long userId, @Param("status") LikeStatus likeStatus);
 
-    @Query("SELECT ul FROM UserLikeJpaEntity ul WHERE ul.userId = :likedUserId AND ul.likedUserId = :userId AND ul.likeStatus = :status ORDER BY ul.updateAt DESC LIMIT 1")
+    @Query("SELECT ul FROM UserLikeJpaEntity ul WHERE ul.userId = :likedUserId AND ul.likedUserId = :userId AND ul.likeStatus = :status ORDER BY ul.updatedAt DESC LIMIT 1")
     UserLikeJpaEntity findOppositeLike(@Param("likedUserId") Long likedUserId, @Param("userId") Long userId, @Param("status") LikeStatus status);
 
     @Query("SELECT ul.userId FROM UserLikeJpaEntity ul WHERE ul.likeStatus = 'LIKE' GROUP BY ul.userId ORDER BY COUNT(ul.likedUserId) DESC")

@@ -9,9 +9,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableFeignClients
 @EnableConfigurationProperties
-@EntityScan(basePackages = {"org.kiru.core.user","org.kiru.core.user.like"})
+@EntityScan(basePackages = {"org.kiru.core.user", "org.kiru.core.user.like"})
 public class UserServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(UserServiceApplication.class, args); 
+        SpringApplication.run(UserServiceApplication.class, args);
     }
 }

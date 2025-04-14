@@ -10,6 +10,8 @@ import org.kiru.core.user.user.domain.LoginType;
 import org.kiru.core.user.user.domain.Nationality;
 import org.kiru.core.user.user.domain.User;
 
+import java.time.LocalDateTime;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,7 +20,7 @@ import org.kiru.core.user.user.domain.User;
 @Table(name = "users",
         indexes = {@Index(name = "idx_username", columnList = "username"),
                 @Index(name = "idx_email", columnList = "email")})
-@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE users SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class UserJpaEntity extends BaseTimeEntity {
     @Id
@@ -56,6 +58,9 @@ public class UserJpaEntity extends BaseTimeEntity {
     @Column(name = "deleted")
     @Builder.Default
     private Boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     public static UserJpaEntity of(User user) {
         return UserJpaEntity.builder()
