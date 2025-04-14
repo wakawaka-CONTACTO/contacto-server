@@ -103,13 +103,12 @@ public class AlarmService {
         }
     }
     @Transactional
-    public DeviceJpaEntity updateDevice(UpdateDeviceReq req) {
+    public void  updateDevice(UpdateDeviceReq req) {
         List<DeviceJpaEntity> existingDevices = findByDeviceId(req.getDeviceId());
         for(DeviceJpaEntity deviceJpaEntity: existingDevices) {
+            log.info("Updating device with userId: {} and deviceId: {}", deviceJpaEntity.getUserId(), req.getDeviceId());
            deviceJpaEntity.updateFirebaseToken(req.getFirebaseToken());
         }
-        deviceRepository.saveAll(existingDevices);
-        return null;
     }
 
     @Transactional
