@@ -65,6 +65,7 @@ public class MailService {
     String number = createNumber(); // 랜덤 인증번호 생성
     MimeMessage message = createMail(address, number);
     asyncMailSender.sendMail(message, number);
+    asyncMailSender.addNumberToRedis(address, number);
   }
 
   public Boolean checkMessage(MailCheckDto mailCheckDto) {

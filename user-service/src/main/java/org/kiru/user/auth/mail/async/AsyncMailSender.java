@@ -20,14 +20,16 @@ public class AsyncMailSender {
 
   @Async("virtualThreadExecutor")
   public void sendMail(MimeMessage message, String number) throws MessagingException {
-    String received = message.getRecipients(MimeMessage.RecipientType.TO)[0].toString();
     try {
       javaMailSender.send(message);
     } catch (MailException e) {
       log.error("Error sending mail: {}", e.getMessage(), e);
       throw e;
     }
+  }
 
+  @Async("virtualThreadExecutor")
+  public void addNumberToRedis(String received, String number){
     try {
       redisTemplateForOne.opsForValue().set(received, number);
     } catch (Exception e) {
