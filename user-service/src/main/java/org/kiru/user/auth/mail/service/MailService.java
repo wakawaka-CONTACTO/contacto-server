@@ -24,7 +24,6 @@ public class MailService {
   private final JavaMailSender javaMailSender;
   private final UserService userService;
   private final RedisTemplate<String, String> redisTemplateForOne;
-  private static final String senderEmail = "rlarlgnszx0319@gmail.com";
   private final AsyncMailSender asyncMailSender;
 
   // 랜덤으로 6자리 숫자 생성
@@ -37,19 +36,6 @@ public class MailService {
     return key.toString();
   }
 
-  public MimeMessage createMail(String mail, String number) throws MessagingException {
-    MimeMessage message = javaMailSender.createMimeMessage();
-    message.setFrom(senderEmail);
-    message.setRecipients(MimeMessage.RecipientType.TO, mail);
-    message.setSubject("이메일 인증");
-    String body = "";
-    body += "<h3>요청하신 인증 번호입니다.</h3>";
-    body += "<h1>" + number + "</h1>";
-    body += "<h3>감사합니다.</h3>";
-    message.setText(body, "UTF-8", "html");
-    return message;
-  }
-
   private void validateEmailNotExists(String email) {
     if (userService.existsByEmail(email)) {
       throw new ConflictException(FailureCode.DUPLICATE_EMAIL);
@@ -57,15 +43,14 @@ public class MailService {
   }
 
   // 메일 발송
-  public void sendSimpleMessage(MailSendDto sendEmail) throws MessagingException {
+  public void sendSimpleMessage(MailSendDto sendEmail) {
     String address = sendEmail.getEmail();
     if(sendEmail.getPurpose() == EmailSendPurpose.SIGNUP){
       validateEmailNotExists(address);
     }
     String number = createNumber(); // 랜덤 인증번호 생성
-    MimeMessage message = createMail(address, number);
-    asyncMailSender.sendMail(message, number);
     asyncMailSender.addNumberToRedis(address, number);
+    asyncMailSender.sendMail(address, number);
   }
 
   public Boolean checkMessage(MailCheckDto mailCheckDto) {
