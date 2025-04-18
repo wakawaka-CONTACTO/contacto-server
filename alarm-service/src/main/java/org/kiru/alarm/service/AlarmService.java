@@ -27,15 +27,18 @@ public class AlarmService {
     private final DeviceRepository deviceRepository;
 
     public DeviceJpaEntity createDevice(Device device) {
-        DeviceJpaEntity existingDevice = findDevice(device.getUserId(), device.getDeviceId());
+        log.info("디바이스 생성 요청 시작 - userId: {}, deviceId: {}, firebaseToken: {}",
+            device.getUserId(), device.getDeviceId(), device.getFirebaseToken());
 
+        DeviceJpaEntity existingDevice = findDevicetoToken(device.getFirebaseToken());
         if(existingDevice == null) {
+            log.info("새로운 디바이스 생성 - userId: {}, deviceId: {}", 
+                device.getUserId(), device.getDeviceId());
             return deviceRepository.save(DeviceJpaEntity.of(device));
-        }else if (isFirebaseTokenChanged(device, existingDevice)) {
-            existingDevice.updateFirebaseToken(device.getFirebaseToken());
-            return deviceRepository.save(existingDevice);
         }
 
+        log.info("디바이스 생성 요청 무시 - 이미 존재하는 디바이스이며 Firebase 토큰이 변경되지 않음 - userId: {}, deviceId: {}", 
+            device.getUserId(), device.getDeviceId());
         return null;
     }
 
@@ -86,8 +89,15 @@ public class AlarmService {
         return device;
     }
 
-    private boolean isFirebaseTokenChanged(Device newDevice, DeviceJpaEntity existingDevice){
-        return !newDevice.getFirebaseToken().equals(existingDevice.getFirebaseToken());
+    private DeviceJpaEntity findDevicetoToken(String firebaseToken) {
+        log.info("Finding device with firebaseToken: {}", firebaseToken);
+        DeviceJpaEntity device = deviceRepository.findByFirebaseToken(firebaseToken);
+        if (device == null) {
+            log.info("No device found with firebaseToken: {}", firebaseToken);
+        } else {
+            log.info("Found device: {}", device);
+        }
+        return device;
     }
 
     private void sendFcm(String firebaseToken, String title, String body, Map<String, String> content) {

@@ -113,6 +113,8 @@ public class AuthService {
     Token issuedToken = jwtProvider.issueToken(user.getId(), user.getEmail(), now);
 
     if(req.firebaseToken() != null){
+      log.info("Firebase 토큰 생성 요청 - userId: {}, deviceType: {}, deviceId: {}", 
+          user.getId(), req.deviceType(), req.deviceId());
       saveFirebaseToken(user.getId(), req.firebaseToken(), req.deviceType(), req.deviceId());
     }
 
@@ -215,8 +217,12 @@ public class AuthService {
   }
 
   private void saveFirebaseToken(Long userId, String firebaseToken, String deviceType, String deviceId) {
+    log.info("Firebase 토큰 저장 시작 - userId: {}, deviceType: {}, deviceId: {}", 
+        userId, deviceType, deviceId);
     CreatedDeviceReq createdDeviceReq = CreatedDeviceReq.of(userId, firebaseToken, deviceType, deviceId);
-     alarmApiClient.createDevice(createdDeviceReq);
+    alarmApiClient.createDevice(createdDeviceReq);
+    log.info("Firebase 토큰 저장 완료 - userId: {}, deviceType: {}, deviceId: {}", 
+        userId, deviceType, deviceId);
   }
 
     public void logout(Long userId, String deviceId) {

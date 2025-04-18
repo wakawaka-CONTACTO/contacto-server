@@ -18,4 +18,6 @@ public interface DeviceRepository extends JpaRepository<DeviceJpaEntity,Long> {
     List<DeviceJpaEntity> findByDeviceId(@Param("deviceId") String deviceId);
     @Query("SELECT d.firebaseToken FROM DeviceJpaEntity d WHERE d.userId = :userId")
     List<String> findFirebaseTokensByUserId(@Param("userId") Long userId);
+    @Query("SELECT d FROM DeviceJpaEntity d WHERE d.firebaseToken = :firebaseToken")
+    DeviceJpaEntity findByFirebaseToken(@Param("firebaseToken") String firebaseToken);
 }
