@@ -93,6 +93,11 @@ public enum FailureCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "e4093", "이미 존재하는 이메일입니다."),
 
     /**
+     * 429 Too Many Request
+     */
+    LIKE_TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "e4290", "일일 좋아요 횟수를 초과했습니다."),
+
+    /**
      * 500 Internal Server Error
      */
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "e5000", "서버 내부 오류입니다."),
