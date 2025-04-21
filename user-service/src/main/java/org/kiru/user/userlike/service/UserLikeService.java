@@ -17,6 +17,7 @@ import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
 import org.kiru.user.user.api.ChatApiClient;
 import org.kiru.user.userlike.api.CreateChatRoomRequest;
 import org.kiru.user.userlike.api.CreateChatRoomResponse;
+import org.kiru.user.userlike.dto.res.LikeLimitResponse;
 import org.kiru.user.userlike.dto.res.LikeResponse;
 import org.kiru.user.userlike.service.out.GetMatchedUserPortfolioQuery;
 import org.kiru.user.userlike.service.out.SendLikeOrDislikeUseCase;
@@ -49,7 +50,12 @@ public class UserLikeService {
         this.matchNotificationService = matchNotificationService;
         this.virtualThreadExecutor = virtualThreadExecutor;
         this.redisTemplateForOne = redisTemplateForOne;
+    }
 
+    public LikeLimitResponse getLikeLimit(Long userId) {
+        int likeLimit = 3;
+        int likeCount = getLikeCount(userId);
+        return LikeLimitResponse.of(likeLimit, likeCount);
     }
 
     public LikeResponse sendLikeOrDislike(Long userId, Long likedUserId, LikeStatus status) {
@@ -96,12 +102,15 @@ public class UserLikeService {
         return LikeResponse.of(false, null, null, likeCount);
     }
 
-    private int increaseLikeCount(Long userId, LikeStatus status) {
-        ZoneId zoneKST = ZoneId.of("Asia/Seoul");
-        LocalDateTime now = LocalDateTime.now(zoneKST);
-        String today = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String key = "likeCount:" + userId + ":" + today;
+    private int getLikeCount(Long userId) {
+        String key = getRedisKey(userId);
+        String likeCountStr = redisTemplateForOne.opsForValue().get(key);
+        log.debug("{} = {}", key, likeCountStr);
+        return (likeCountStr != null) ? Integer.parseInt(likeCountStr) : 0;
+    }
 
+    private int increaseLikeCount(Long userId, LikeStatus status) {
+        String key = getRedisKey(userId);
         String likeCountStr = redisTemplateForOne.opsForValue().get(key);
         log.debug("{} = {}", key, likeCountStr);
 
@@ -114,17 +123,30 @@ public class UserLikeService {
             }
             
             if (likeCountStr == null) {
-                log.debug("레디스 데이터 생성");
-                long secondsUntilEndOfDay = Duration.between(
-                        now,
-                        now.toLocalDate().plusDays(1).atStartOfDay(zoneKST)
-                ).getSeconds();
-                redisTemplateForOne.expire(key, secondsUntilEndOfDay, TimeUnit.SECONDS);
+                log.debug("저장된 데이터가 없으므로 새 데이터 생성");
+                setRedisExpiration(key);
             }
             
             likeCount += 1;
             redisTemplateForOne.opsForValue().set(key, String.valueOf(likeCount));
         }
         return likeCount;
+    }
+
+    private String getRedisKey(Long userId) {
+        ZoneId zoneKST = ZoneId.of("Asia/Seoul");
+        LocalDateTime now = LocalDateTime.now(zoneKST);
+        String today = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return "likeCount:" + userId + ":" + today;
+    }
+
+    private void setRedisExpiration(String key) {
+        ZoneId zoneKST = ZoneId.of("Asia/Seoul");
+        LocalDateTime now = LocalDateTime.now(zoneKST);
+        long secondsUntilEndOfDay = Duration.between(
+                now,
+                now.toLocalDate().plusDays(1).atStartOfDay(zoneKST)
+        ).getSeconds();
+        redisTemplateForOne.expire(key, secondsUntilEndOfDay, TimeUnit.SECONDS);
     }
 }
