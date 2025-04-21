@@ -39,21 +39,30 @@ public class MatchNotificationService {
     );
 
     public void sendMatchNotifications(Long userId, Long matchedUserId, Long chatRoomId) {
+        log.info("💘 매치 알림 전송 시작 - userId: {}, matchedUserId: {}, chatRoomId: {}", 
+            userId, matchedUserId, chatRoomId);
         try {
             MatchNotification notification = getRandomNotification();
+            log.info("🎲 선택된 알림 메시지 - title: {}, body: {}", notification.title(), notification.body());
     
-            // 알림에 채팅방 ID 포함
             Map<String, String> content = new HashMap<>();
             content.put("type", "chat");
             content.put("chatRoomId", chatRoomId.toString());
             
-            // 양쪽 모두에게 알림 전송
+            log.info("📢 첫 번째 사용자에게 알림 전송 - userId: {}", userId);
             alarmApiClient.sendMessageToUser(userId, 
                 AlarmMessageRequest.of(notification.title(), notification.body(), content));
+            log.info("✅ 첫 번째 사용자 알림 전송 완료 - userId: {}", userId);
+            
+            log.info("📢 두 번째 사용자에게 알림 전송 - userId: {}", matchedUserId);
             alarmApiClient.sendMessageToUser(matchedUserId, 
                 AlarmMessageRequest.of(notification.title(), notification.body(), content));
+            log.info("✅ 두 번째 사용자 알림 전송 완료 - userId: {}", matchedUserId);
+            
+            log.info("✨ 매치 알림 전송 완료 - userId: {}, matchedUserId: {}", userId, matchedUserId);
         } catch (Exception e) {
-            log.error("Failed to send match notification to users: {} and {}", userId, matchedUserId, e);
+            log.error("❌ 매치 알림 전송 실패 - userId: {}, matchedUserId: {}, error: {}", 
+                userId, matchedUserId, e.getMessage(), e);
         }
     }
 

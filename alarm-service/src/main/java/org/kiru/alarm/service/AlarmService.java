@@ -27,39 +27,49 @@ public class AlarmService {
     private final DeviceRepository deviceRepository;
 
     public DeviceJpaEntity createDevice(Device device) {
+        log.info("📱 새로운 디바이스 등록 시도 - userId: {}, deviceId: {}, deviceType: {}, firebaseToken: {}", 
+            device.getUserId(), device.getDeviceId(), device.getDeviceType(), device.getFirebaseToken());
         DeviceJpaEntity existingDevice = findDevice(device.getUserId(), device.getDeviceId());
 
         if(existingDevice == null) {
+            log.info("✅ 새로운 디바이스 등록 완료 - userId: {}, deviceId: {}", device.getUserId(), device.getDeviceId());
             return deviceRepository.save(DeviceJpaEntity.of(device));
         }else if (isFirebaseTokenChanged(device, existingDevice)) {
+            log.info("🔄 Firebase 토큰 업데이트 - userId: {}, deviceId: {}, oldToken: {}, newToken: {}", 
+                device.getUserId(), device.getDeviceId(), existingDevice.getFirebaseToken(), device.getFirebaseToken());
             existingDevice.updateFirebaseToken(device.getFirebaseToken());
             return deviceRepository.save(existingDevice);
         }
 
+        log.info("ℹ️ 디바이스 변경 없음 - userId: {}, deviceId: {}", device.getUserId(), device.getDeviceId());
         return null;
     }
 
     public void sendMessageAll(String title, String body, Map<String, String> content) {
+        log.info("📢 전체 메시지 전송 시작 - title: {}, body: {}, content: {}", title, body, content);
         List<String> allFirebaseTokens = deviceRepository.findAllDistinctFirebaseTokens();
+        log.info("📱 전체 메시지 전송 대상 디바이스 수: {}", allFirebaseTokens.size());
         sendMessagesToTokens(allFirebaseTokens, title, body, content, "all devices");
     }
 
     public void sendMessageToUser(Long userId, String title, String body, Map<String, String> content) {
+        log.info("📢 사용자 메시지 전송 시작 - userId: {}, title: {}, body: {}, content: {}", userId, title, body, content);
         List<String> firebaseTokens = deviceRepository.findFirebaseTokensByUserId(userId);
         if (!firebaseTokens.isEmpty()) {
-            log.info("📲Sending message to user: {} with {} devices", userId, firebaseTokens.size());
+            log.info("📱 사용자 디바이스 수: {} - userId: {}", firebaseTokens.size(), userId);
             List<String> validTokens = firebaseTokens.stream()
                     .filter(token -> token != null)
                     .toList();
+            log.info("✅ 유효한 토큰 수: {} - userId: {}", validTokens.size(), userId);
             sendMessagesToTokens(validTokens, title, body, content, "user " + userId);
         } else {
-            log.info("No devices found for user: {}", userId);
+            log.warn("⚠️ 사용자 디바이스 없음 - userId: {}", userId);
         }
     }
 
     private void sendMessagesToTokens(List<String> firebaseTokens, String title, String body, Map<String, String> content, String target) {
         for (String firebaseToken : firebaseTokens) {
-            log.info("📲Sending message to {}: {}", target, firebaseToken);
+            log.info("📲 메시지 전송 중 - target: {}, token: {}, title: {}, body: {}", target, firebaseToken, title, body);
             sendFcm(firebaseToken, title, body, content);
         }
     }
@@ -92,6 +102,7 @@ public class AlarmService {
 
     private void sendFcm(String firebaseToken, String title, String body, Map<String, String> content) {
         try {
+            log.info("🔥 FCM 전송 시도 - token: {}, title: {}, body: {}, content: {}", firebaseToken, title, body, content);
             Notification notification = Notification.builder()
                     .setTitle(title)
                     .setBody(body)
@@ -106,8 +117,9 @@ public class AlarmService {
             }
 
             FirebaseMessaging.getInstance().send(messageBuilder.build());
+            log.info("✅ FCM 전송 성공 - token: {}", firebaseToken);
         } catch (Exception e) {
-            log.error("❌ FCM 전송 실패", e);
+            log.error("❌ FCM 전송 실패 - token: {}, error: {}", firebaseToken, e.getMessage(), e);
         }
     }
     @Transactional
