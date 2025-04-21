@@ -53,7 +53,7 @@ public class UserLikeService {
     }
 
     public LikeLimitResponse getLikeLimit(Long userId) {
-        int likeLimit = 3;
+        int likeLimit = 50;
         int likeCount = getLikeCount(userId);
         return LikeLimitResponse.of(likeLimit, likeCount);
     }
