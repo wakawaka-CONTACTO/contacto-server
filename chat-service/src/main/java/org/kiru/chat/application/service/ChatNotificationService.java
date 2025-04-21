@@ -27,21 +27,27 @@ public class ChatNotificationService {
     private final ExecutorService virtualThreadExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     public void sendNotification(Message message) {
+        log.info("💬 채팅 알림 전송 시작 - messageId: {}, senderId: {}, chatRoomId: {}", 
+            message.getId(), message.getSendedId(), message.getChatRoomId());
         CompletableFuture.runAsync(() -> {
             try {
+                log.info("👤 사용자 이름 조회 중 - userId: {}", message.getSendedId());
                 String title = userApiClient.getUsername(message.getSendedId());
                 String body = message.getContent();
                 Map<String, String> content = new HashMap<>();
                 content.put("type", "chat");
                 content.put("chatRoomId", message.getChatRoomId().toString());
+                
+                log.info("📢 알림 메시지 구성 - title: {}, body: {}, content: {}", title, body, content);
                 alarmApiClient.sendMessageToUser(message.getSendedId(), AlarmMessageRequest.of(title, body, content));
+                log.info("✅ 채팅 알림 전송 완료 - messageId: {}", message.getId());
             } catch (EntityNotFoundException e) {
-                log.error("User not found for chat notification: {}", message.getSendedId());
+                log.error("❌ 사용자를 찾을 수 없음 - userId: {}, error: {}", message.getSendedId(), e.getMessage());
             } catch (FeignException e) {
-                log.error("Failed to communicate with user-service for chat notification: {} - Status: {}, Message: {}", 
+                log.error("❌ 사용자 서비스 통신 실패 - userId: {}, status: {}, message: {}", 
                     message.getSendedId(), e.status(), e.contentUTF8());
             } catch (Exception e) {
-                log.error("Failed to send chat notification to user: {}", message.getSendedId(), e);
+                log.error("❌ 채팅 알림 전송 실패 - messageId: {}, error: {}", message.getId(), e.getMessage(), e);
             }
         }, virtualThreadExecutor);
     }
