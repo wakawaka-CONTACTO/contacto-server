@@ -31,8 +31,8 @@ public class ChatNotificationService {
             message.getId(), message.getSendedId(), message.getChatRoomId());
         CompletableFuture.runAsync(() -> {
             try {
-                log.info("👤 사용자 이름 조회 중 - userId: {}", message.getSendedId());
-                String title = userApiClient.getUsername(message.getSendedId());
+                log.info("👤 사용자 이름 조회 중 - userId: {}", message.getSenderId());
+                String title = userApiClient.getUsername(message.getSenderId());
                 String body = message.getContent();
                 Map<String, String> content = new HashMap<>();
                 content.put("type", "chat");
