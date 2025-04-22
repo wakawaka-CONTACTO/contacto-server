@@ -31,7 +31,7 @@ public class UserLoginController {
             MediaType.APPLICATION_JSON_VALUE}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserJwtInfoRes> signUp(
             @RequestPart("userSignUpReq") @Valid final UserSignUpReq userSignUpReq,
-            @RequestPart("portfolioImgs") @Valid @Size(max = 9) final List<MultipartFile> images,
+            @RequestPart("portfolioImgs") @Valid @Size(max = 10) final List<MultipartFile> images,
             @RequestPart("purpose")  @Valid @NotEmpty final List<UserPurposesReq> purposes,
             @RequestPart("talent") @Valid @NotEmpty  final List<UserTalentsReq> talents
     ) {
