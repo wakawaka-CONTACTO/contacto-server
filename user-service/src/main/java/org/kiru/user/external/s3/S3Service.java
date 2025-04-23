@@ -45,8 +45,8 @@ public class S3Service {
                 .contentType(image.getContentType())
                 .contentDisposition("inline")
                 .build();
-        RequestBody requestBody = RequestBody.fromBytes(image.getBytes());  // 파일 바이트 배열로 변환
         try {
+          RequestBody requestBody = RequestBody.fromBytes(PhotoOptimizer.getOptimizedImageBytes(image));
             s3Client.putObject(request, requestBody);
         } catch (S3Exception e) {
             throw new IOException("이미지 업로드 중 오류가 발생했습니다.", e);  // 예외 발생 시 IOException 처리
