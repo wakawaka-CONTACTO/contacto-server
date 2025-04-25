@@ -42,6 +42,8 @@ public class UserUpdateController {
       @RequestParam(required = false) List<String> existingPortfolioImageUrls,
       @RequestParam(required = false) List<Integer> existingImageKeys
   ) {
+    userService.validateUsername(userId, updatedUser.getUsername());
+
     if (updatedUser.getPortfolio() == null) {
       updatedUser.setPortfolio(new HashMap<>());
     }
