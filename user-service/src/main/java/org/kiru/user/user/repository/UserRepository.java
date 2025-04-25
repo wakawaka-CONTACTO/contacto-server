@@ -40,7 +40,7 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
 
     @Query("SELECT u.email " +
             "FROM UserJpaEntity u " +
-            "WHERE u.username = :username")
+            "WHERE LOWER(u.username) = LOWER(:username)")
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
