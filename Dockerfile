@@ -16,6 +16,7 @@ WORKDIR /app
 RUN echo ${SERVICE_NAME}
 COPY ${SERVICE_NAME}/build/libs/*.jar app.jar
 ENV SPRING_PROFILES_ACTIVE=dev
+
 # Stage 3: 최종 이미지 (최소화된 JRE와 애플리케이션 포함)
 FROM alpine:3.18.4
 ENV JAVA_HOME=/custom-jre
@@ -23,4 +24,8 @@ ENV PATH="$JAVA_HOME/bin:$PATH"
 WORKDIR /app
 COPY --from=builder-jre /custom-jre $JAVA_HOME
 COPY --from=builder /app/app.jar app.jar
-ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar", "-Dspring.profiles.active=dev", "app.jar"]
+
+# Datadog Java Agent 다운로드
+RUN wget -O dd-java-agent.jar https://dtdg.co/latest-java-tracer
+
+ENTRYPOINT ["java", "-javaagent:/app/dd-java-agent.jar", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=dev", "-jar", "app.jar"]
