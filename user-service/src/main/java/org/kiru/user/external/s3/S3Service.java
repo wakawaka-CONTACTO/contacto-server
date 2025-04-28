@@ -63,6 +63,7 @@ public class S3Service {
                         .key(imageKey)
                         .build()
         );
+        System.out.println("Delete Key: " + imageKey);
     }
 
     private String generateImageFileName(MultipartFile image) {
@@ -98,11 +99,16 @@ public class S3Service {
 
     private String extractImageKeyFromImageUrl(String url) {
         if (url.startsWith(this.basePath)) {
-            return url.substring(basePath.length());
+            String key = url.substring(basePath.length());
+            if (key.startsWith("/")) {
+                key = key.substring(1);
+            }
+            return key;
         } else {
             throw new BadRequestException(FailureCode.WRONG_IMAGE_URL);
         }
     }
+
 
     public List<String> getAllImageKeys(String prefix) {
         final S3Client s3Client = awsConfig.getS3Client();
