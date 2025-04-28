@@ -37,6 +37,8 @@ public class UserLikeService {
     private final Executor virtualThreadExecutor;
     private final RedisTemplate<String, String> redisTemplateForOne;
 
+    private static final int LIKE_DAILY_LIMIT = 30;
+
     public UserLikeService(
             @Qualifier("userLikeJpaAdapter") SendLikeOrDislikeUseCase sendLikeOrDislikeUseCase,
             GetMatchedUserPortfolioQuery getMatchedUserPortfolioQuery,
@@ -53,9 +55,8 @@ public class UserLikeService {
     }
 
     public LikeLimitResponse getLikeLimit(Long userId) {
-        int likeLimit = 50;
         int likeCount = getLikeCount(userId);
-        return LikeLimitResponse.of(likeLimit, likeCount);
+        return LikeLimitResponse.of(LIKE_DAILY_LIMIT, likeCount);
     }
 
     public LikeResponse sendLikeOrDislike(Long userId, Long likedUserId, LikeStatus status) {
@@ -110,27 +111,21 @@ public class UserLikeService {
     }
 
     private int increaseLikeCount(Long userId, LikeStatus status) {
-        String key = getRedisKey(userId);
-        String likeCountStr = redisTemplateForOne.opsForValue().get(key);
-        log.debug("{} = {}", key, likeCountStr);
+        if(status != LikeStatus.LIKE) { return getLikeCount(userId); }
 
-        int likeCount = (likeCountStr != null) ? Integer.parseInt(likeCountStr) : 0;
-        
-        if (status == LikeStatus.LIKE) {
-            if (likeCount >= 5) {
-                log.debug("좋아요 횟수 제한을 초과했음.");
-                throw new BadRequestException(FailureCode.LIKE_TOO_MANY_REQUESTS);
-            }
-            
-            if (likeCountStr == null) {
-                log.debug("저장된 데이터가 없으므로 새 데이터 생성");
-                setRedisExpiration(key);
-            }
-            
-            likeCount += 1;
-            redisTemplateForOne.opsForValue().set(key, String.valueOf(likeCount));
+        int currentLikeCount = getLikeCount(userId);
+        if (currentLikeCount >= LIKE_DAILY_LIMIT) {
+            throw new BadRequestException(FailureCode.LIKE_TOO_MANY_REQUESTS);
         }
-        return likeCount;
+
+        String key = getRedisKey(userId);
+        Long likeCount = redisTemplateForOne.opsForValue().increment(key);
+
+        if (likeCount != null && likeCount == 1) { // 신규 키인 경우에만 TTL 설정
+            setRedisExpiration(key);
+        }
+
+        return likeCount != null ? likeCount.intValue() : 0;
     }
 
     private String getRedisKey(Long userId) {
