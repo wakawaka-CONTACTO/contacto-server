@@ -28,4 +28,4 @@ COPY --from=builder /app/app.jar app.jar
 # Datadog Java Agent 다운로드
 RUN wget -O dd-java-agent.jar https://dtdg.co/latest-java-tracer
 
-ENTRYPOINT ["java", "-javaagent:/app/dd-java-agent.jar", "-Duser.timezone=Asia/Seoul", "-jar", "-Dspring.profiles.active=dev", "app.jar"]
+ENTRYPOINT ["java", "-javaagent:/app/dd-java-agent.jar", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=dev", "-jar", "app.jar"]
