@@ -38,9 +38,20 @@ public interface UserRepository extends JpaRepository<UserJpaEntity,Long> {
             "WHERE u.id IN :userIds")
     List<UserIdUsername> findUsernamesByIds(List<Long> userIds);
 
+    @QueryHints(value = {
+            @QueryHint(name = "org.hibernate.readOnly", value = "true"),
+            @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
+            @QueryHint(name = "jakarta.persistence.query.timeout", value = "5000")
+
+    })
+    @Query("SELECT u.username as username " +
+            "FROM UserJpaEntity u " +
+            "WHERE u.id = :userId")
+    Optional<String> findUsernameById(Long userId);
+
     @Query("SELECT u.email " +
             "FROM UserJpaEntity u " +
-            "WHERE u.username = :username")
+            "WHERE LOWER(u.username) = LOWER(:username)")
     @QueryHints(value = {
             @QueryHint(name = "org.hibernate.readOnly", value = "true"),
             @QueryHint(name = "org.hibernate.fetchSize", value = "150"),
