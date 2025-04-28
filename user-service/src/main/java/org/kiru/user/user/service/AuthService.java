@@ -3,6 +3,7 @@ package org.kiru.user.user.service;
 import java.util.Date;
 import java.util.List;
 
+import org.kiru.core.exception.ConflictException;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.InvalidValueException;
 import org.kiru.core.exception.UnauthorizedException;
@@ -57,6 +58,11 @@ public class AuthService {
   @Transactional
   public UserJwtInfoRes signUp(UserSignUpReq req, List<MultipartFile> images,
       List<UserPurposesReq> purposes, List<UserTalentsReq> talents) {
+
+    // 유저 이름 중복 체크
+    if (userRepository.findByUsername(req.name()).isPresent()) {
+      throw new ConflictException(FailureCode.DUPLICATE_NICKNAME);
+    }
 
     User newUser = userBuilder(req);
     UserJpaEntity userEntity = userRepository.save(UserJpaEntity.of(newUser));
