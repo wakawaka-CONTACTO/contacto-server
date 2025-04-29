@@ -305,6 +305,6 @@ redis.conf
 pg_hba.conf
 
 *.json
-
-newrelic/
+!newrelic/newrelic.jar
+!newrelic/newrelic-api.jar
 dummy/

@@ -13,8 +13,8 @@ RUN $JAVA_HOME/bin/jlink \
 FROM amazoncorretto:21-alpine-jdk AS builder
 ARG SERVICE_NAME
 WORKDIR /app
-RUN echo ${SERVICE_NAME}
 COPY ${SERVICE_NAME}/build/libs/*.jar app.jar
+COPY newrelic/ newrelic/
 ENV SPRING_PROFILES_ACTIVE=dev
 
 # Stage 3: 최종 이미지 (최소화된 JRE와 애플리케이션 포함)
@@ -24,8 +24,23 @@ ENV PATH="$JAVA_HOME/bin:$PATH"
 WORKDIR /app
 COPY --from=builder-jre /custom-jre $JAVA_HOME
 COPY --from=builder /app/app.jar app.jar
+COPY --from=builder /app/newrelic/ newrelic/
 
-# Datadog Java Agent 다운로드
-RUN wget -O dd-java-agent.jar https://dtdg.co/latest-java-tracer
+# 운영 여부를 구분할 플래그 추가
+ENV USE_NEW_RELIC=false
 
-ENTRYPOINT ["java", "-javaagent:/app/dd-java-agent.jar", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=dev", "-jar", "app.jar"]
+# 런타임에 선택적으로 New Relic Agent 활성화
+ENTRYPOINT ["/bin/sh", "-c", "\
+    if [ \"$USE_NEW_RELIC\" = \"true\" ]; then \
+      java -javaagent:/app/newrelic/newrelic.jar \
+        -Dnewrelic.config.app_name=$NEW_RELIC_APP_NAME \
+        -Dnewrelic.config.license_key=$NEW_RELIC_LICENSE_KEY \
+        -Duser.timezone=Asia/Seoul \
+        -Dspring.profiles.active=dev \
+        -jar app.jar; \
+    else \
+      java \
+        -Duser.timezone=Asia/Seoul \
+        -Dspring.profiles.active=dev \
+        -jar app.jar; \
+    fi"]
