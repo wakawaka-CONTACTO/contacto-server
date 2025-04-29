@@ -58,7 +58,6 @@ dependencies {
 
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-//    runtimeOnly 'io.micrometer:micrometer-registry-otlp'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'

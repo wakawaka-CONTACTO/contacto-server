@@ -2,14 +2,17 @@ package org.kiru.user.user.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.chat.chatroom.domain.ChatRoom;
 import org.kiru.core.chat.message.domain.Message;
 import org.kiru.core.common.PageableResponse;
+import org.kiru.core.exception.ConflictException;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.code.FailureCode;
 import org.kiru.core.user.talent.domain.Talent.TalentType;
@@ -28,7 +31,6 @@ import org.kiru.user.user.service.in.GetUserMainPageUseCase;
 import org.kiru.user.user.service.out.GetUserAdditionalInfoQuery;
 import org.kiru.user.user.service.out.UserQueryWithCache;
 import org.kiru.user.user.service.out.UserUpdatePort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
@@ -211,5 +213,12 @@ public class UserService implements GetUserMainPageUseCase {
         return userRepository.findById(userId)
             .map(UserJpaEntity::getUsername)
             .orElseThrow(() -> new EntityNotFoundException(FailureCode.USER_NOT_FOUND));
+    }
+
+    public void validateUsername(Long userId, String username) {
+        Optional<String> originUsername = userRepository.findUsernameById(userId);
+        if (userRepository.findByUsername(username).isPresent() && !Objects.equals(originUsername.orElse(null), username)) {
+            throw new ConflictException(FailureCode.DUPLICATE_NICKNAME);
+        }
     }
 }
