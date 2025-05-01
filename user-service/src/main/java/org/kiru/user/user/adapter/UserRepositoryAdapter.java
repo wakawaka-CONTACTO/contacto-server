@@ -1,6 +1,7 @@
 package org.kiru.user.user.adapter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,7 +87,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
         UserPortfolio userPortfolio = UserPortfolio.withUserId(userId);
 
         // 이전 포트폴리오 URL 수집
-        Set<String> beforeUpdatePortfolio = userPortfolioRepository.findAllByUserId(userId).stream()
+        Set<String> beforeUpdatePortfolioUrls = userPortfolioRepository.findAllByUserId(userId).stream()
             .map(UserPortfolioImg::getPortfolioImageUrl)
             .collect(Collectors.toSet());
 
@@ -94,12 +95,13 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
             userUpdateDto.getUsername());
 
         // 유지되는 이미지 URL 제거
+        Set<String> remainingUrlsToDelete = new HashSet<>(beforeUpdatePortfolioUrls);
         existingImages.stream()
             .map(UserPortfolioItem::getItemUrl)
-            .forEach(beforeUpdatePortfolio::remove);
+            .forEach(remainingUrlsToDelete::remove);
 
         // 남은 URL은 S3에서 삭제
-        beforeUpdatePortfolio.forEach(s3Service::deleteImage);
+        s3Service.deleteImages(remainingUrlsToDelete);
 
         List<UserPortfolioItem> newPortfolioItem = imageService.saveImagesS3WithSequence(changedPortfolioImages,
             userPortfolio, userUpdateDto.getUsername());

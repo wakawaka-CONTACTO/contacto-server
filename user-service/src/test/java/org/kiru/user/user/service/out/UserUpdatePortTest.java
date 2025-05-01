@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserTalentRepository;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -122,36 +124,36 @@ class UserUpdatePortTest {
     void updateUserPortfolioImages_MixedTypes() {
         // Given
         List<UserPortfolioItem> savedImages = Arrays.asList(
-                UserPortfolioImg.builder()
-                        .userId(1L)
-                        .portfolioId(1L)
-                        .portfolioImageUrl("new-image.jpg")
-                        .sequence(1)
-                        .build()
+            UserPortfolioImg.builder()
+                .userId(1L)
+                .portfolioId(1L)
+                .portfolioImageUrl("new-image.jpg")
+                .sequence(1)
+                .build()
         );
 
         List<UserPortfolioImg> existImagesEntity = Arrays.asList(
-                UserPortfolioImg.builder()
-                        .id(1L)
-                        .userId(1L)
-                        .portfolioId(1L)
-                        .portfolioImageUrl("exist-image.jpg")
-                        .sequence(1)
-                        .build(),
-                UserPortfolioImg.builder()
-                        .id(2L)
-                        .userId(1L)
-                        .portfolioId(1L)
-                        .portfolioImageUrl("exist-image2.jpg")
-                        .sequence(2)
-                        .build(),
-                UserPortfolioImg.builder()
-                        .id(3L)
-                        .userId(1L)
-                        .portfolioId(1L)
-                        .portfolioImageUrl("exist-image3.jpg")
-                        .sequence(3)
-                        .build()
+            UserPortfolioImg.builder()
+                .id(1L)
+                .userId(1L)
+                .portfolioId(1L)
+                .portfolioImageUrl("exist-image.jpg")
+                .sequence(1)
+                .build(),
+            UserPortfolioImg.builder()
+                .id(2L)
+                .userId(1L)
+                .portfolioId(1L)
+                .portfolioImageUrl("exist-image2.jpg")
+                .sequence(2)
+                .build(),
+            UserPortfolioImg.builder()
+                .id(3L)
+                .userId(1L)
+                .portfolioId(1L)
+                .portfolioImageUrl("exist-image3.jpg")
+                .sequence(3)
+                .build()
         );
 
         List<UserPortfolioImg> savedImagesEntity = Arrays.asList(
@@ -179,26 +181,26 @@ class UserUpdatePortTest {
         );
 
         when(userPortfolioRepository.findAllByUserId(1L))
-                .thenReturn(existImagesEntity);
+            .thenReturn(existImagesEntity);
         when(imageService.saveImagesS3WithSequence(anyMap(), any(),any()))
-                .thenReturn(savedImages);
+            .thenReturn(savedImages);
         when(imageService.verifyExistingImages(anyMap(), any(), anyString()))
-                .thenReturn(Arrays.asList(
-                    UserPortfolioImg.builder()
-                        .userId(1L)
-                        .portfolioId(1L)
-                        .portfolioImageUrl("exist-image2.jpg")
-                        .sequence(2)
-                        .build(),
-                    UserPortfolioImg.builder()
-                        .userId(1L)
-                        .portfolioId(1L)
-                        .portfolioImageUrl("exist-image3.jpg")
-                        .sequence(3)
-                        .build()
-                ));
+            .thenReturn(Arrays.asList(
+                UserPortfolioImg.builder()
+                    .userId(1L)
+                    .portfolioId(1L)
+                    .portfolioImageUrl("exist-image2.jpg")
+                    .sequence(2)
+                    .build(),
+                UserPortfolioImg.builder()
+                    .userId(1L)
+                    .portfolioId(1L)
+                    .portfolioImageUrl("exist-image3.jpg")
+                    .sequence(3)
+                    .build()
+            ));
         when(userPortfolioRepository.saveAll(any()))
-                .thenReturn(savedImagesEntity);
+            .thenReturn(savedImagesEntity);
 
         // When
         UserPortfolio result = userUpdatePort.updateUserPortfolioImages(1L, userUpdateDto);
@@ -206,15 +208,16 @@ class UserUpdatePortTest {
         // Then
         assertThat(result.getPortfolioItems()).hasSize(3);
         assertThat(result.getPortfolioItems()).isSortedAccordingTo(
-                java.util.Comparator.comparing(UserPortfolioItem::getSequence));
+            java.util.Comparator.comparing(UserPortfolioItem::getSequence));
         assertThat(result.getPortfolioItems().getFirst().getItemUrl()).isEqualTo("new-image.jpg");
-        
+
         // S3 이미지 삭제 검증
-        verify(s3Service).deleteImage("exist-image.jpg"); // 삭제되어야 할 이미지
-        verify(s3Service, never()).deleteImage("exist-image2.jpg"); // 유지되는 이미지
-        verify(s3Service, never()).deleteImage("exist-image3.jpg"); // 유지되는 이미지
-        verify(s3Service, never()).deleteImage("new-image.jpg"); // 새로 추가된 이미지
-        
+        ArgumentCaptor<Set<String>> deletedImageUrlsCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(s3Service).deleteImages(deletedImageUrlsCaptor.capture());
+        Set<String> deletedImageUrls = deletedImageUrlsCaptor.getValue();
+        assertThat(deletedImageUrls).containsExactlyInAnyOrder("exist-image.jpg");
+        assertThat(deletedImageUrls).doesNotContain("exist-image2.jpg", "exist-image3.jpg", "new-image.jpg");
+
         verify(imageService).saveImagesS3WithSequence(anyMap(), any(UserPortfolio.class), anyString());
         verify(imageService).verifyExistingImages(anyMap(), any(UserPortfolio.class), anyString());
     }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.repository.UserTalentRepository;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -227,11 +229,15 @@ public class UserRepositoryAdapterUniutTest {
     UserPortfolio portfolio = adapter.updateUserPortfolioImages(userId, dto);
 
     assertNotNull(portfolio);
-    
+
     // S3 이미지 삭제 검증
-    verify(s3Service).deleteImage("old-image1.jpg"); // 삭제되어야 할 이미지
-    verify(s3Service, never()).deleteImage("old-image2.jpg"); // 유지되는 이미지
-    verify(s3Service, never()).deleteImage("new-image.jpg"); // 새로 추가된 이미지
+    ArgumentCaptor<Set<String>> deletedImageUrlsCaptor = ArgumentCaptor.forClass(Set.class);
+    verify(s3Service).deleteImages(deletedImageUrlsCaptor.capture());
+    Set<String> deletedImageUrls = deletedImageUrlsCaptor.getValue();
+    assertEquals(1, deletedImageUrls.size());
+    assertTrue(deletedImageUrls.contains("old-image1.jpg"));
+    assertFalse(deletedImageUrls.contains("old-image2.jpg"));
+    assertFalse(deletedImageUrls.contains("new-image.jpg"));
   }
 
   @Test
