@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import org.kiru.core.exception.BadRequestException;
 import org.kiru.core.exception.InvalidValueException;
@@ -54,15 +55,21 @@ public class S3Service {
         return key;  // S3에 저장된 이미지 경로 반환
     }
 
-
-    public void deleteImage(String imageUrl) {
-        String imageKey = extractImageKeyFromImageUrl(imageUrl);
+    // S3Service.java
+    public void deleteImages(Set<String> imageUrls) {
         final S3Client s3Client = awsConfig.getS3Client();
-        s3Client.deleteObject((DeleteObjectRequest.Builder builder) ->
-                builder.bucket(bucketName)
+        imageUrls.forEach(imageUrl -> {
+            try {
+                String imageKey = extractImageKeyFromImageUrl(imageUrl);
+                s3Client.deleteObject((DeleteObjectRequest.Builder builder) ->
+                    builder.bucket(bucketName)
                         .key(imageKey)
                         .build()
-        );
+                );
+            } catch (BadRequestException e) {
+                System.err.println("잘못된 이미지 URL입니다: " + imageUrl + " - " + e.getMessage());
+            }
+        });
     }
 
     private String generateImageFileName(MultipartFile image) {
@@ -98,11 +105,16 @@ public class S3Service {
 
     private String extractImageKeyFromImageUrl(String url) {
         if (url.startsWith(this.basePath)) {
-            return url.substring(basePath.length());
+            String key = url.substring(basePath.length());
+            if (key.startsWith("/")) {
+                key = key.substring(1);
+            }
+            return key;
         } else {
             throw new BadRequestException(FailureCode.WRONG_IMAGE_URL);
         }
     }
+
 
     public List<String> getAllImageKeys(String prefix) {
         final S3Client s3Client = awsConfig.getS3Client();

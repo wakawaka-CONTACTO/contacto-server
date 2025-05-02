@@ -1,8 +1,11 @@
 package org.kiru.user.user.adapter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.kiru.core.exception.EntityNotFoundException;
 import org.kiru.core.exception.code.FailureCode;
@@ -16,6 +19,7 @@ import org.kiru.core.user.userPortfolioItem.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.external.s3.ImageService;
+import org.kiru.user.external.s3.S3Service;
 import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.dto.request.UserUpdatePwdDto;
@@ -40,6 +44,7 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
     private final UserPortfolioRepository userPortfolioRepository;
     private final ImageService imageService;
     private final PasswordEncoder passwordEncoder;
+    private final S3Service s3Service;
 
     @Override
     @Cacheable(value = "user", key = "#userId", unless = "#result == null")
@@ -81,10 +86,25 @@ public class UserRepositoryAdapter implements UserQueryWithCache, UserUpdatePort
         Map<Integer, Object> changedPortfolioImages = userUpdateDto.getPortfolio();
         UserPortfolio userPortfolio = UserPortfolio.withUserId(userId);
 
-        List<UserPortfolioItem> newPortfolioItem = imageService.saveImagesS3WithSequence(changedPortfolioImages,
-                userPortfolio, userUpdateDto.getUsername());
+        // 이전 포트폴리오 URL 수집
+        Set<String> beforeUpdatePortfolioUrls = userPortfolioRepository.findAllByUserId(userId).stream()
+            .map(UserPortfolioImg::getPortfolioImageUrl)
+            .collect(Collectors.toSet());
+
         List<UserPortfolioItem> existingImages = imageService.verifyExistingImages(changedPortfolioImages, userPortfolio,
             userUpdateDto.getUsername());
+
+        // 유지되는 이미지 URL 제거
+        Set<String> remainingUrlsToDelete = new HashSet<>(beforeUpdatePortfolioUrls);
+        existingImages.stream()
+            .map(UserPortfolioItem::getItemUrl)
+            .forEach(remainingUrlsToDelete::remove);
+
+        // 남은 URL은 S3에서 삭제
+        s3Service.deleteImages(remainingUrlsToDelete);
+
+        List<UserPortfolioItem> newPortfolioItem = imageService.saveImagesS3WithSequence(changedPortfolioImages,
+            userPortfolio, userUpdateDto.getUsername());
 
         List<UserPortfolioItem> updatePortfolioItems = new ArrayList<>();
         updatePortfolioItems.addAll(newPortfolioItem);

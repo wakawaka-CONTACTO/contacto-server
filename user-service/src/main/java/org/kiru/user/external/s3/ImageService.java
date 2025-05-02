@@ -101,6 +101,7 @@ public class ImageService {
     @Transactional
     public List<UserPortfolioItem> verifyExistingImages(final Map<Integer, Object> changedPortfolioImages, UserPortfolio userPortfolio, String username) {
         Map<Integer, String> existingImages = userPortfolio.findExistingItem(changedPortfolioImages);
+
         Long portfolioId = userPortfolio.getPortfolioId() == null ? portfolioIdGenerator.generatePortfolioId() : userPortfolio.getPortfolioId();
         List<UserPortfolioItem> savedImages = new ArrayList<>();
         existingImages.forEach((sequence, imageUrl) -> {
@@ -108,6 +109,7 @@ public class ImageService {
                 portfolioId, imageUrl, sequence, username);
             savedImages.add(item);
         });
+
         return savedImages;
     }
 
