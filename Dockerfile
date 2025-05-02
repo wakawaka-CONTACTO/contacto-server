@@ -28,4 +28,8 @@ COPY --from=builder /app/app.jar app.jar
 # Datadog Java Agent 다운로드
 RUN wget -O dd-java-agent.jar https://dtdg.co/latest-java-tracer
 
-ENTRYPOINT ["java", "-javaagent:/app/dd-java-agent.jar", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=dev", "-jar", "app.jar"]
+ENTRYPOINT sh -c 'if [ "$HOSTNAME" = "discovery" ]; then \
+  exec java -Duser.timezone=Asia/Seoul -Dspring.profiles.active=dev -jar app.jar; \
+else \
+  exec java -javaagent:/app/dd-java-agent.jar -Duser.timezone=Asia/Seoul -Dspring.profiles.active=dev -jar app.jar; \
+fi'
