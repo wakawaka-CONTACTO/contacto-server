@@ -4,12 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,11 +26,13 @@ import org.kiru.core.user.userPortfolioItem.entity.UserPortfolioImg;
 import org.kiru.core.user.userPurpose.domain.PurposeType;
 import org.kiru.core.user.userPurpose.entity.UserPurpose;
 import org.kiru.user.external.s3.ImageService;
+import org.kiru.user.external.s3.S3Service;
 import org.kiru.user.portfolio.repository.UserPortfolioRepository;
 import org.kiru.user.user.dto.request.UserUpdateDto;
 import org.kiru.user.user.repository.UserPurposeRepository;
 import org.kiru.user.user.repository.UserRepository;
 import org.kiru.user.user.repository.UserTalentRepository;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,6 +54,9 @@ public class UserRepositoryAdapterUniutTest {
 
   @Mock
   private ImageService imageService;
+
+  @Mock
+  private S3Service s3Service;
 
   @InjectMocks
   private UserRepositoryAdapter adapter;
@@ -176,16 +184,60 @@ public class UserRepositoryAdapterUniutTest {
         .username("testUser")
         .build();
 
-    UserPortfolioItem dummyItem = new UserPortfolioImg();
-    List<UserPortfolioItem> dummyItems = List.of(dummyItem);
+    // 기존 포트폴리오 이미지 설정
+    List<UserPortfolioImg> existingImages = List.of(
+        UserPortfolioImg.builder()
+            .userId(userId)
+            .portfolioId(1L)
+            .portfolioImageUrl("old-image1.jpg")
+            .sequence(1)
+            .build(),
+        UserPortfolioImg.builder()
+            .userId(userId)
+            .portfolioId(1L)
+            .portfolioImageUrl("old-image2.jpg")
+            .sequence(2)
+            .build()
+    );
+    when(userPortfolioRepository.findAllByUserId(userId)).thenReturn(existingImages);
+
+    // 새로운 포트폴리오 이미지 설정
+    UserPortfolioItem newItem = UserPortfolioImg.builder()
+        .userId(userId)
+        .portfolioId(1L)
+        .portfolioImageUrl("new-image.jpg")
+        .sequence(1)
+        .build();
+    List<UserPortfolioItem> newItems = List.of(newItem);
     when(imageService.saveImagesS3WithSequence(eq(portfolioMap), any(UserPortfolio.class), eq("testUser")))
-        .thenReturn(dummyItems);
+        .thenReturn(newItems);
+
+    // 유지되는 이미지 설정
+    List<UserPortfolioItem> existingItems = List.of(
+        UserPortfolioImg.builder()
+            .userId(userId)
+            .portfolioId(1L)
+            .portfolioImageUrl("old-image2.jpg")
+            .sequence(2)
+            .build()
+    );
+    when(imageService.verifyExistingImages(eq(portfolioMap), any(UserPortfolio.class), eq("testUser")))
+        .thenReturn(existingItems);
 
     when(userPortfolioRepository.saveAll(any())).thenReturn(Collections.emptyList());
 
     UserPortfolio portfolio = adapter.updateUserPortfolioImages(userId, dto);
 
     assertNotNull(portfolio);
+
+    // S3 이미지 삭제 검증
+    ArgumentCaptor<Set<String>> deletedImageUrlsCaptor = ArgumentCaptor.forClass(Set.class);
+    verify(s3Service).deleteImages(deletedImageUrlsCaptor.capture());
+    Set<String> deletedImageUrls = deletedImageUrlsCaptor.getValue();
+    assertEquals(1, deletedImageUrls.size());
+    assertTrue(deletedImageUrls.contains("old-image1.jpg"));
+    assertFalse(deletedImageUrls.contains("old-image2.jpg"));
+    assertFalse(deletedImageUrls.contains("new-image.jpg"));
   }
 
   @Test
