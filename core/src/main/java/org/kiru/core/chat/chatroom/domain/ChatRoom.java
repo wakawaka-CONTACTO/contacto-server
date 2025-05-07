@@ -99,6 +99,12 @@ public class ChatRoom {
     }
 
     @JsonIgnore
+    public void setThumbnailAndRoomTitle(String itemUrl, String username) {
+        this.chatRoomThumbnail = itemUrl;
+        this.title = username;
+    }
+
+    @JsonIgnore
     public static List<Long> getAllParticipantIds(List<ChatRoom> chatRooms) {
         return chatRooms.stream()
                 .flatMap(chatRoom -> Objects.requireNonNull(chatRoom.getParticipants()).stream())
