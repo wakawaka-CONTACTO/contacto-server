@@ -38,7 +38,7 @@ jobs:
 
       - name: Docker Image Build and Push
         run: |
-          docker build --build-arg SERVICE_NAME=discovery -f Dockerfile_discovery -t ${{ secrets.DOCKER_REPOSITORY }}/discovery-image .
+          docker build --build-arg SERVICE_NAME=discovery -f Dockerfile.discovery -t ${{ secrets.DOCKER_REPOSITORY }}/discovery-image .
           docker push ${{ secrets.DOCKER_REPOSITORY }}/discovery-image
 
       - name: Deploy Discovery Service via SSH

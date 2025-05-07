@@ -13,7 +13,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableFeignClients
 @EnableAsync
 public class ChatServiceApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(ChatServiceApplication.class, args);
     }
+
 }
