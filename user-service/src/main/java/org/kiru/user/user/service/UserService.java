@@ -87,7 +87,9 @@ public class UserService implements GetUserMainPageUseCase {
                     
                     chatRooms.getContent().forEach(chatRoom -> {
                         Optional<UserPortfolioItem> userPortfolioItem = chatRoom.getParticipants().stream()
-                                .filter(activeUsers::get).map(portfolioMap::get).filter(Objects::nonNull)
+                                .filter(id -> Boolean.TRUE.equals(activeUsers.getOrDefault(id, false)))
+                                .map(portfolioMap::get)
+                                .filter(Objects::nonNull)
                                 .min(Comparator.comparingInt(UserPortfolioItem::getSequence));
                         if (userPortfolioItem.isPresent()) {
                             chatRoom.setThumbnailAndRoomTitle(userPortfolioItem.get());
