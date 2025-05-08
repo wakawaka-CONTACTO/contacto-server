@@ -1,12 +1,9 @@
 package org.kiru.user.user.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,10 +68,37 @@ public class UserService implements GetUserMainPageUseCase {
         CompletableFuture<Map<Long, UserPortfolioItem>> userPortfolioImgMapFuture = allParticipantIdsFuture.thenApplyAsync(
                 UserPortfolio::getUserIdAndUserPortfolioItemMap, executor
         );
-        return chatRoomsFuture.thenCombineAsync(userPortfolioImgMapFuture, (chatRooms, userPortfolioImgMap) -> {
-            chatRooms.getContent().forEach(chatRoom -> chatRoom.setThumbnailAndRoomTitle(userPortfolioImgMap));
-            return chatRooms;
-            }, executor).join();
+
+        CompletableFuture<Map<Long, Boolean>> activeUsersFuture = chatRoomsFuture.thenApplyAsync(
+                chatRooms -> {
+                    Set<Long> participantIds = new HashSet<>(ChatRoom.getAllParticipantIds(chatRooms.getContent()));
+                    return participantIds.stream().collect(Collectors.toMap(id -> id, id -> userRepository.existsById(id)));
+                }, executor);
+
+        return chatRoomsFuture.thenCombineAsync(
+                CompletableFuture.allOf(userPortfolioImgMapFuture, activeUsersFuture)
+                        .thenApply(v -> Map.of(
+                                "portfolioMap", userPortfolioImgMapFuture.join(),
+                                "activeUsers", activeUsersFuture.join()
+                        )),
+                (chatRooms, maps) -> {
+                    Map<Long, UserPortfolioItem> portfolioMap = (Map<Long, UserPortfolioItem>) maps.get("portfolioMap");
+                    Map<Long, Boolean> activeUsers = (Map<Long, Boolean>) maps.get("activeUsers");
+                    
+                    chatRooms.getContent().forEach(chatRoom -> {
+                        Optional<UserPortfolioItem> userPortfolioItem = chatRoom.getParticipants().stream()
+                                .filter(id -> Boolean.TRUE.equals(activeUsers.getOrDefault(id, false)))
+                                .map(portfolioMap::get)
+                                .filter(Objects::nonNull)
+                                .min(Comparator.comparingInt(UserPortfolioItem::getSequence));
+                        if (userPortfolioItem.isPresent()) {
+                            chatRoom.setThumbnailAndRoomTitle(userPortfolioItem.get());
+                        } else {
+                            chatRoom.setThumbnailAndRoomTitle("", "No Name");
+                        }
+                    });
+                    return chatRooms;
+                }, executor).join();
         }
     }
 
