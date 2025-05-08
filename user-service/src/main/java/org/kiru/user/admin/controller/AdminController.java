@@ -16,11 +16,7 @@ import org.kiru.user.user.dto.response.ChatRoomResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users/admin")
@@ -45,6 +41,12 @@ public class AdminController {
     public ResponseEntity<User> getUserDetail(@PathVariable Long userId) {
         User user = userService.getUserFromIdToMainPage(userId);
         return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId){
+        userService.deleteUser(userId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/users/{userId}/matched")
