@@ -65,4 +65,13 @@ public interface UserJoinChatRoomRepository extends JpaRepository<UserJoinChatRo
             + ")"
             + "AND u.userId = :userId2")
     Optional<UserJoinChatRoom> findAlreadyRoomByUserIds(Long userId, Long userId2);
+
+    @Query("FROM UserJoinChatRoom u "
+        + "WHERE u.chatRoomId IN ( "
+        + "    SELECT uj.chatRoomId "
+        + "    FROM UserJoinChatRoom uj "
+        + "    WHERE uj.userId = :userId "
+        + ")"
+        + "AND u.userId = :userId2")
+    List<UserJoinChatRoom> findAllByUserIds(Long userId, Long userId2);
 }
