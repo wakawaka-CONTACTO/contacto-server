@@ -76,6 +76,18 @@ public class AdminController {
         return ResponseEntity.ok(adminLikeUserResponse);
     }
 
+    @GetMapping("/users/{userId}/likes/i-liked")
+    public ResponseEntity<List<AdminUserDto>> getUsersILiked(@PathVariable Long userId, Pageable pageable) {
+        List<AdminUserDto> likedUsers = adminService.getUsersILiked(userId, pageable);
+        return ResponseEntity.ok(likedUsers);
+    }
+
+    @GetMapping("/users/{userId}/likes/they-like")
+    public ResponseEntity<List<AdminUserDto>> getUsersWhoLikedMe(@PathVariable Long userId, Pageable pageable) {
+        List<AdminUserDto> usersWhoLikedMe = adminService.getUsersWhoLikedMe(userId, pageable);
+        return ResponseEntity.ok(usersWhoLikedMe);
+    }
+
     @GetMapping("/cs")
     public ResponseEntity<ChatRoomResponse> getUserLikes(@UserId Long adminId, @RequestParam Long userId) {
         ChatRoom chatRooms = adminService.getOrCreateCsChatRoom(userId,adminId);

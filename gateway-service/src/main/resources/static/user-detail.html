@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>User Details</title>
     <link rel="stylesheet" href="css/user-detail.css">
+    <link rel="stylesheet" href="css/user-detail-like.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </head>
@@ -45,8 +46,18 @@
                         <button id="likeMeSearchButton">Search</button>
                     </div>
                     <div class="like-list" id="likeMeList">
-                        <!-- They Like 목록이 여기에 표시됩니다 -->
-                    </div>
+                        <table class="like-table" id="likeMeTable">
+                            <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                            </tr>
+                            </thead>
+                            <tbody id="likeMeTableBody">
+                            <!-- JS 로 채워집니다 -->
+                            </tbody>
+                        </table>                    </div>
                     <button id="likeMeLoadMore" class="nav-button" onclick="loadMoreLikes('likeMe')">더보기</button>
                 </div>
                 <div class="like-section">
@@ -56,8 +67,18 @@
                         <button id="iLikeSearchButton">Search</button>
                     </div>
                     <div class="like-list" id="iLikeList">
-                        <!-- I Like 목록이 여기에 표시됩니다 -->
-                    </div>
+                        <table class="like-table" id="iLikeTable">
+                            <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                            </tr>
+                            </thead>
+                            <tbody id="iLikeTableBody">
+                            <!-- JS 로 채워집니다 -->
+                            </tbody>
+                        </table>                    </div>
                     <button id="iLikeLoadMore" class="nav-button" onclick="loadMoreLikes('iLike')">더보기</button>
                 </div>
             </div>

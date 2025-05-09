@@ -100,4 +100,34 @@ public class AdminService {
     public PageableResponse<Message> getMessages(Long roomId, Long userId, Boolean isAdmin, Pageable pageable) {
         return chatApiClient.getMessages(roomId, userId, isAdmin, pageable);
     }
+
+    public List<AdminUserDto> getUsersILiked(Long userId, Pageable pageable) {
+        List<AdminLikeUserDto> likedUsers = getUserLikesInternal(pageable, userId, null, true);
+        List<Long> connectedUserIds = chatApiClient.getConnectedUserIds();
+        return likedUsers.stream()
+                .map(likedUser -> {
+                    UserDto userDto = new UserDto(
+                        likedUser.userId(),
+                        likedUser.name(),
+                        likedUser.portfolioImageUrl()
+                    );
+                    return AdminUserDto.of(userDto, connectedUserIds.contains(likedUser.userId()));
+                })
+                .toList();
+    }
+
+    public List<AdminUserDto> getUsersWhoLikedMe(Long userId, Pageable pageable) {
+        List<AdminLikeUserDto> usersWhoLikedMe = getUserLikesInternal(pageable, userId, null, false);
+        List<Long> connectedUserIds = chatApiClient.getConnectedUserIds();
+        return usersWhoLikedMe.stream()
+                .map(likedUser -> {
+                    UserDto userDto = new UserDto(
+                        likedUser.userId(),
+                        likedUser.name(),
+                        likedUser.portfolioImageUrl()
+                    );
+                    return AdminUserDto.of(userDto, connectedUserIds.contains(likedUser.userId()));
+                })
+                .toList();
+    }
 }
