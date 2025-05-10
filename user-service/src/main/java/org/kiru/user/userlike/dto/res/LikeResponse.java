@@ -12,11 +12,14 @@ public class LikeResponse {
     boolean isMatched;
     List<UserPortfolioResDto> userPortfolios;
     Long chatRoomId;
+    int likeCount;
 
-    public static LikeResponse of(boolean isMatched, List<UserPortfolioResDto> userPortfolios, Long chatRoomId) {
+    public static LikeResponse of(boolean isMatched, List<UserPortfolioResDto> userPortfolios, Long chatRoomId, int likeCount) {
         return LikeResponse.builder()
                 .isMatched(isMatched)
                 .userPortfolios(userPortfolios)
-                .chatRoomId(chatRoomId).build();
+                .chatRoomId(chatRoomId)
+                .likeCount(likeCount)
+                .build();
     }
 }
