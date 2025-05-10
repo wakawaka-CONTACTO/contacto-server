@@ -8,15 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.kiru.core.user.user.domain.User;
 import org.kiru.user.auth.argumentresolve.UserId;
 import org.kiru.user.portfolio.dto.res.UserPortfolioResDto;
+import org.kiru.user.portfolio.dto.res.UserScrapeImagesResDto;
 import org.kiru.user.portfolio.service.PortfolioService;
+import org.kiru.user.portfolio.service.ScraperService;
 import org.kiru.user.user.dto.response.UserWithAdditionalInfoResponse;
 import org.kiru.user.user.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestController
@@ -26,6 +26,7 @@ public class PortfolioController {
 
     private final PortfolioService portfolioService;
     private final UserService userService;
+    private final ScraperService scraperService;
 
     @GetMapping
     public ResponseEntity<List<UserPortfolioResDto>> getPortfolios(@UserId Long userId, Pageable pageable) {
@@ -38,5 +39,10 @@ public class PortfolioController {
     public ResponseEntity<UserWithAdditionalInfoResponse> getOtherPortfolio(@PathVariable Long portfolioUserId) {
         User user = userService.getUserFromIdToMainPage(portfolioUserId);
         return ResponseEntity.ok(UserWithAdditionalInfoResponse.of(user));
+    }
+
+    @GetMapping("/instagram")
+    public ResponseEntity<UserScrapeImagesResDto> getImages(@RequestParam("username") String username) {
+        return ResponseEntity.ok(UserScrapeImagesResDto.from(scraperService.fetchImageUrls(username)));
     }
 }
